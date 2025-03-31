@@ -1,0 +1,6 @@
+[workspace]
+members = [
+  "ts_common",
+  "ts_gen",
+  "ts_validate",
+]

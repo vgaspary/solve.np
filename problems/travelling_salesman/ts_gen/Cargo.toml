@@ -1,0 +1,11 @@
+[package]
+name = "ts_gen"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.97"
+clap = "4.5.34"
+log = "0.4.27"
+rand = "0.9.0"
+ts_common = { path = "../ts_common" }
