@@ -3,7 +3,7 @@ use clap::Parser;
 use log::info;
 use rand::prelude::*;
 use std::collections::HashSet;
-use ts_common::{Edge, Vertex, Weight};
+use tsp_common::{Edge, Vertex, Weight};
 
 /// Generate input for the Travelling Salesman problem.
 #[derive(Parser, Debug)]

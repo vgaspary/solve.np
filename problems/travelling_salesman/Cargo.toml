@@ -1,6 +1,6 @@
 [workspace]
 members = [
-  "ts_common",
-  "ts_gen",
-  "ts_validate",
+  "tsp_common",
+  "tsp_gen",
+  "tsp_validate",
 ]
