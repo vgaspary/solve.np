@@ -1,8 +1,8 @@
 # Travelling Salesman
 
-The travelling salesman, located in a certain town, wants to visit all the other towns (and return back). Having a map of all the roads and their distances, he wants to make the trip as short as possible.
+The travelling salesman, starting from a certain city, wants to visit all the other cities exactly once and return. Given a map of the cities and the roads connecting them, he wants to make the trip as short as possible.
 
-Given an inderected weighted graph and a starting vertex, find the shortest path that traverses all the vertices (and get back to the start vertex?).
+Find the shortest path in the graph that starts and ends in a specific vertex and visits **all** other vertices **exactly once**. This kind of a path is also known as a Hamiltonian cycle.
 
 ## Input
 
@@ -20,11 +20,10 @@ The output is list of space (`' '`) separated integers denoting vertex IDs.
 
 The output must:
 
-- start with `0`
+- start and end with `0`
+- must be of length `V + 1`, where `V` is the number of vertices
 - contain only vertex IDs
-- contain all vertex IDs
-
-The travelling salesman may visit the same town twice, the output list may contain the same vertex ID multiple times.
+- contain all vertex IDs only once (except for `0`)
 
 ## Example
 
