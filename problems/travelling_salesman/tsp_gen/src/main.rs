@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::Parser;
+use itertools::Itertools;
 use log::debug;
 use rand::prelude::*;
 use std::collections::HashSet;
@@ -51,6 +52,7 @@ fn create_graph_base(args: &Args, rng: &mut impl Rng) -> Result<(Vec<Edge>, Grap
     vertices.shuffle(rng);
     let edges = (0..vertices.len())
         .map(|i| (vertices[i], vertices[(i + 1) % vertices.len()]))
+        .inspect(|(Vertex(v), Vertex(u))| debug!("{v}\t{u}"))
         .map(|(v, u)| {
             Ok(Edge(
                 v,
@@ -70,7 +72,7 @@ fn create_graph_base(args: &Args, rng: &mut impl Rng) -> Result<(Vec<Edge>, Grap
 
 fn complete_graph(mut graph: Graph, args: &Args, rng: &mut impl Rng) -> Result<Vec<Edge>> {
     let remaining_edges = (0..args.num_vertices)
-        .zip(0..args.num_vertices)
+        .cartesian_product(0..args.num_vertices)
         .filter(|(v, u)| v < u)
         .map(|(v, u)| {
             Ok(Edge(
@@ -105,6 +107,7 @@ fn reduce_edges(mut extra_edges: Vec<Edge>, args: &Args, rng: &mut impl Rng) -> 
 }
 
 fn main() -> Result<()> {
+    env_logger::init();
     let mut rng = rand::rng();
     let args = Args::parse();
     debug!("Generating a random graph with the following parameters:\n{args:?}.");
