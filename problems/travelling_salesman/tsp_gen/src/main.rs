@@ -1,9 +1,10 @@
+mod generate;
+
 use anyhow::Result;
-use clap::Parser;
-use itertools::Itertools;
 use log::debug;
+use clap::Parser;
+use generate::{complete_graph, create_graph_base, reduce_edges};
 use rand::prelude::*;
-use std::collections::HashSet;
 use tsp_common::{Edge, Vertex, Weight};
 
 /// Generate input for the Travelling Salesman problem.
@@ -27,94 +28,31 @@ struct Args {
     weight_sd: u16,
 }
 
-struct Graph {
-    adj_list: Vec<HashSet<u16>>,
-}
-
-impl Graph {
-    fn new(num_vertices: u16) -> Self {
-        Self {
-            adj_list: vec![HashSet::new(); num_vertices as usize],
-        }
-    }
-
-    fn add_edge(&mut self, edge: Edge) -> bool {
-        let Edge(Vertex(v), Vertex(u), _) = edge;
-        self.adj_list[v as usize].insert(u) && self.adj_list[u as usize].insert(v)
-    }
-}
-
-fn create_graph_base(args: &Args, rng: &mut impl Rng) -> Result<(Vec<Edge>, Graph)> {
-    debug!("Creating a random hamiltonian cycle to serve as the base graph.");
-    let mut vertices = (0..args.num_vertices)
-        .map(|v| Vertex(v))
-        .collect::<Vec<_>>();
-    vertices.shuffle(rng);
-    let edges = (0..vertices.len())
-        .map(|i| (vertices[i], vertices[(i + 1) % vertices.len()]))
-        .inspect(|(Vertex(v), Vertex(u))| debug!("{v}\t{u}"))
-        .map(|(v, u)| {
-            Ok(Edge(
-                v,
-                u,
-                Weight::random(rng, args.weight_mean, args.weight_sd)?,
-            ))
-        })
-        .collect::<Result<Vec<_>>>()?;
-    let graph = edges
-        .iter()
-        .fold(Graph::new(args.num_vertices), |mut graph, &edge| {
-            graph.add_edge(edge);
-            graph
-        });
-    Ok((edges, graph))
-}
-
-fn complete_graph(mut graph: Graph, args: &Args, rng: &mut impl Rng) -> Result<Vec<Edge>> {
-    let remaining_edges = (0..args.num_vertices)
-        .cartesian_product(0..args.num_vertices)
-        .filter(|(v, u)| v < u)
-        .map(|(v, u)| {
-            Ok(Edge(
-                Vertex(v),
-                Vertex(u),
-                Weight::random(rng, args.weight_mean, args.weight_sd)?,
-            ))
-        })
-        .filter(|edge| match edge {
-            &Ok(edge) => graph.add_edge(edge),
-            _ => true,
-        })
-        .collect::<Result<Vec<_>>>()?;
-    debug!(
-        "Graph base had {} edges, the remaining {} were initialized.",
-        args.num_vertices,
-        remaining_edges.len()
-    );
-    Ok(remaining_edges)
-}
-
-fn reduce_edges(mut extra_edges: Vec<Edge>, args: &Args, rng: &mut impl Rng) -> Vec<Edge> {
-    let num_extra_edges = (extra_edges.len() as f64 * args.graph_density) as usize;
-    debug!(
-        "Removing {} edges to meet the required density. {} edges will remain.",
-        extra_edges.len() - num_extra_edges,
-        num_extra_edges + args.num_vertices as usize
-    );
-    extra_edges.shuffle(rng);
-    extra_edges.truncate(num_extra_edges);
-    extra_edges
-}
-
 fn main() -> Result<()> {
     env_logger::init();
     let mut rng = rand::rng();
     let args = Args::parse();
     debug!("Generating a random graph with the following parameters:\n{args:?}.");
 
-    let (base_edges, graph) = create_graph_base(&args, &mut rng)?;
-    let remaining_edges = complete_graph(graph, &args, &mut rng)?;
-    let extra_edges = reduce_edges(remaining_edges, &args, &mut rng);
+    let (base_edges, graph) = create_graph_base(
+        args.num_vertices,
+        args.weight_mean,
+        args.weight_sd,
+        &mut rng,
+    )?;
+    let remaining_edges = complete_graph(
+        graph,
+        args.num_vertices,
+        args.weight_mean,
+        args.weight_sd,
+        &mut rng,
+    )?;
+    let extra_edges = reduce_edges(
+        remaining_edges,
+        args.num_vertices,
+        args.graph_density,
+        &mut rng,
+    );
     let mut edges = [base_edges, extra_edges].concat();
     edges.shuffle(&mut rng);
     edges
