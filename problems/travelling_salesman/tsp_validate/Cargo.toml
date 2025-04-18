@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.97"
+clap = { version = "4.5.36", features = ["derive"] }
 tsp_common = { path = "../tsp_common" }
