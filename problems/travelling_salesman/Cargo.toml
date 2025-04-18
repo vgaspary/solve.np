@@ -1,6 +1,0 @@
-[workspace]
-members = [
-  "tsp_common",
-  "tsp_gen",
-  "tsp_validate",
-]
