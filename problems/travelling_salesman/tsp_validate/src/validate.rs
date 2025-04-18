@@ -1,0 +1,80 @@
+use anyhow::{Context, anyhow};
+use std::collections::{HashMap, HashSet};
+
+pub(crate) struct Graph {
+    adj_list: HashMap<u16, HashMap<u16, u16>>,
+}
+
+impl TryFrom<String> for Graph {
+    type Error = anyhow::Error;
+    fn try_from(value: String) -> anyhow::Result<Self> {
+        let adj_list = value
+            .split("\n")
+            .filter(|line| !line.is_empty())
+            .map(|line| {
+                let edge = line
+                    .split_ascii_whitespace()
+                    .map(|n| n.parse::<u16>().context("parsing u16"))
+                    .collect::<anyhow::Result<Vec<_>>>()?;
+                match edge.as_slice() {
+                    &[v, u, w] => Ok((v, u, w)),
+                    _ => Err(anyhow!("Failed parsing line: {edge:?}")),
+                }
+            })
+            .try_fold(
+                HashMap::new(),
+                |mut adj_list: HashMap<u16, HashMap<u16, u16>>, edge| {
+                    edge.map(|(v, u, w)| {
+                        adj_list.entry(v).or_default().insert(u, w);
+                        adj_list.entry(u).or_default().insert(v, w);
+                        adj_list
+                    })
+                },
+            )?;
+        Ok(Graph { adj_list })
+    }
+}
+
+pub(crate) fn validate(output: &str, input: Graph) -> Result<u64, String> {
+    let num_vertices = input.adj_list.len() as u16;
+    let path = output
+        .split_ascii_whitespace()
+        .map(|v| {
+            v.parse::<u16>()
+                .map_err(|e| format!("Failed parsing to u16: {e}."))
+                .and_then(|v| match v {
+                    v if v < num_vertices => Ok(v),
+                    _ => Err(format!("{v} is not a valid vertex.")),
+                })
+        })
+        .collect::<Result<Vec<_>, String>>()?;
+    if path.first() != Some(&0) {
+        return Err("Path must start with 0.".into());
+    }
+    if path.last() != Some(&0) {
+        return Err("Path must end with 0.".into());
+    }
+    if path.len() != num_vertices as usize + 1 {
+        return Err(format!(
+            "Path must be of length {num_vertices} to visit all nodes."
+        ));
+    }
+
+    (1..path.len())
+        .map(|i| (path[i - 1], path[i]))
+        .try_fold((HashSet::new(), 0u64), |(mut visited, total), (v, u)| {
+            if !visited.insert(u) {
+                Err(format!("{u} was visited twice"))
+            } else {
+                match input
+                    .adj_list
+                    .get(&v)
+                    .and_then(|neighbors| neighbors.get(&u))
+                {
+                    Some(&w) => Ok((visited, total + w as u64)),
+                    None => Err(format!("No edge connecting {v} to {u}.")),
+                }
+            }
+        })
+        .map(|(_, total)| total)
+}
