@@ -2,7 +2,7 @@ use actix_web::{
     App, HttpResponse, HttpServer, Responder,
     body::BoxBody,
     error::Error,
-    get,
+    get, post,
     web::{self, Data},
 };
 use serde::Serialize;
@@ -12,7 +12,7 @@ struct State {
     start_time: SystemTime,
 }
 
-#[get("/echo")]
+#[post("/echo")]
 async fn echo(req: String) -> impl Responder {
     HttpResponse::Ok().body(req)
 }
