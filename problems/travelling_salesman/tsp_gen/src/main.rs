@@ -1,9 +1,9 @@
 mod generate;
 
 use anyhow::Result;
-use log::debug;
 use clap::Parser;
 use generate::{complete_graph, create_graph_base, reduce_edges};
+use log::debug;
 use rand::prelude::*;
 use tsp_common::{Edge, Vertex, Weight};
 

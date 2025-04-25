@@ -1,3 +1,4 @@
 **/target/*
 **/Cargo.lock
 solve_np_server/sample_calls.sh
+**/inputs/*.txt
