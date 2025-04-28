@@ -1,0 +1,57 @@
+{
+  "travelling_salesman": {
+    "name": "Travelling Salesman",
+    "description": "Find the shortest path in the graph that starts and ends in a specific vertex and visits **all** other vertices **exactly once**. This kind of a path is also known as a Hamiltonian cycle.",
+    "problem_statement": "problems/travelling_salesman/problem_statement.md",
+    "inputs": [
+      {
+        "path": "problems/travelling_salesman/inputs/sample.txt",
+        "cmd": "tsp_gen"
+      },
+      {
+        "path": "problems/travelling_salesman/inputs/small_sparse.txt",
+        "cmd": "tsp_gen -v 100 -d 0.3 -m 100 -s 20"
+      },
+      {
+        "path": "problems/travelling_salesman/inputs/small_dense.txt",
+        "cmd": "tsp_gen"
+      },
+      {
+        "path": "problems/travelling_salesman/inputs/small_full.txt",
+        "cmd": "tsp_gen"
+      },
+      {
+        "path": "problems/travelling_salesman/inputs/medium_sparse.txt",
+        "cmd": "tsp_gen"
+      },
+      {
+        "path": "problems/travelling_salesman/inputs/medium_dense.txt",
+        "cmd": "tsp_gen"
+      },
+      {
+        "path": "problems/travelling_salesman/inputs/medium_full.txt",
+        "cmd": "tsp_gen"
+      },
+      {
+        "path": "problems/travelling_salesman/inputs/large_sparse.txt",
+        "cmd": "tsp_gen"
+      },
+      {
+        "path": "problems/travelling_salesman/inputs/large_dense.txt",
+        "cmd": "tsp_gen"
+      },
+      {
+        "path": "problems/travelling_salesman/inputs/large_full.txt",
+        "cmd": "tsp_gen"
+      }
+    ]
+  },
+  "graph_coloring": {
+    "name": "Graph Coloring",
+    "description": "...",
+    "problem_statement": "problems/.../problem_statement.md",
+    "inputs": [
+
+    ]
+  }
+}
