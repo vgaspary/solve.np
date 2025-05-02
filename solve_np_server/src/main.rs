@@ -132,12 +132,14 @@ async fn main() -> std::io::Result<()> {
     let state = Data::new(State {
         start_time: SystemTime::now(),
     });
+    env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
     HttpServer::new(move || {
         App::new()
             .app_data(state.clone())
             .service(health_check)
             .service(list_problems)
             .service(get_problem_details)
+            .wrap(actix_web::middleware::Logger::default())
     })
     .bind(("localhost", 8080))?
     .run()
