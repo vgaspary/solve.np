@@ -6,10 +6,7 @@ use actix_web::{
     web::{self, Data},
 };
 use serde::Serialize;
-use std::{
-    collections::HashMap,
-    time::{Duration, SystemTime},
-};
+use std::{collections::HashMap, time::SystemTime};
 
 struct State {
     start_time: SystemTime,
@@ -25,13 +22,15 @@ struct InputId(pub String);
 async fn health_check(state: web::Data<State>) -> Result<impl Responder, HttpError> {
     #[derive(Serialize)]
     struct HealthCheckReport {
-        uptime: Duration,
+        uptime: String,
     }
 
     let uptime = SystemTime::now()
         .duration_since(state.start_time)
         .map_err(ErrorInternalServerError)?;
-    let response = HealthCheckReport { uptime };
+    let response = HealthCheckReport {
+        uptime: format!("{}s", uptime.as_secs()),
+    };
     Ok(HttpResponse::Ok().json(response))
 }
 
