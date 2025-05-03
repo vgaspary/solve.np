@@ -18,7 +18,7 @@ struct ProblemId(pub String);
 #[derive(Serialize, Clone, Debug)]
 struct InputId(pub String);
 
-#[get("/health_check")]
+#[get("/api/health_check")]
 async fn health_check(state: web::Data<State>) -> Result<impl Responder, HttpError> {
     #[derive(Serialize)]
     struct HealthCheckReport {
@@ -34,7 +34,7 @@ async fn health_check(state: web::Data<State>) -> Result<impl Responder, HttpErr
     Ok(HttpResponse::Ok().json(response))
 }
 
-#[get("/problems")]
+#[get("/api/problems")]
 async fn list_problems() -> impl Responder {
     #[derive(Serialize)]
     struct Problem {
@@ -70,7 +70,7 @@ async fn list_problems() -> impl Responder {
     HttpResponse::Ok().json(result)
 }
 
-#[get("/problem/{problem_id}")]
+#[get("/api/problem/{problem_id}")]
 async fn get_problem_details(path: web::Path<String>) -> Result<impl Responder, HttpError> {
     #[derive(Serialize)]
     struct ProblemDetails {
