@@ -14,35 +14,35 @@
       },
       {
         "path": "problems/travelling_salesman/inputs/small_dense.txt",
-        "cmd": "tsp_gen"
+        "cmd": "tsp_gen -v 100 -d 0.8 -m 100 -s 30"
       },
       {
         "path": "problems/travelling_salesman/inputs/small_full.txt",
-        "cmd": "tsp_gen"
+        "cmd": "tsp_gen -v 100 -d 1.0 -m 100 -s 10"
       },
       {
         "path": "problems/travelling_salesman/inputs/medium_sparse.txt",
-        "cmd": "tsp_gen"
+        "cmd": "tsp_gen -v 1000 -d 0.3 -m 100 -s 20"
       },
       {
         "path": "problems/travelling_salesman/inputs/medium_dense.txt",
-        "cmd": "tsp_gen"
+        "cmd": "tsp_gen -v 1000 -d 0.8 -m 100 -s 30"
       },
       {
         "path": "problems/travelling_salesman/inputs/medium_full.txt",
-        "cmd": "tsp_gen"
+        "cmd": "tsp_gen -v 1000 -d 1.0 -m 100 -s 10"
       },
       {
         "path": "problems/travelling_salesman/inputs/large_sparse.txt",
-        "cmd": "tsp_gen"
+        "cmd": "tsp_gen -v 10000 -d 0.3 -m 100 -s 20"
       },
       {
         "path": "problems/travelling_salesman/inputs/large_dense.txt",
-        "cmd": "tsp_gen"
+        "cmd": "tsp_gen -v 10000 -d 0.8 -m 100 -s 30"
       },
       {
         "path": "problems/travelling_salesman/inputs/large_full.txt",
-        "cmd": "tsp_gen"
+        "cmd": "tsp_gen -v 10000 -d 1.0 -m 100 -s 10"
       }
     ]
   },
