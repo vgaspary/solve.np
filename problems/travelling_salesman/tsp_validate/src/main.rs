@@ -1,8 +1,7 @@
 mod validate;
 
 use clap::Parser;
-use std::fs;
-use std::path::PathBuf;
+use std::{fs, path::PathBuf};
 use validate::{Graph, validate};
 
 /// Validate output for the Travelling Salesman problem.

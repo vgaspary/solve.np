@@ -5,17 +5,20 @@ use actix_web::{
     get,
     web::{self, Data},
 };
-use serde::Serialize;
-use std::{collections::HashMap, time::SystemTime};
+use clap::Parser;
+use serde::{Deserialize, Serialize};
+use serde_json;
+use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf, time::SystemTime};
 
 struct State {
     start_time: SystemTime,
+    static_data: StaticData,
 }
 
-#[derive(Serialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct ProblemId(pub String);
 
-#[derive(Serialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct InputId(pub String);
 
 #[get("/api/health_check")]
@@ -35,7 +38,7 @@ async fn health_check(state: web::Data<State>) -> Result<impl Responder, HttpErr
 }
 
 #[get("/api/problems")]
-async fn list_problems() -> impl Responder {
+async fn list_problems(state: web::Data<State>) -> impl Responder {
     #[derive(Serialize)]
     struct Problem {
         id: ProblemId,
@@ -43,93 +46,82 @@ async fn list_problems() -> impl Responder {
         description: String,
     }
 
-    #[derive(Serialize)]
-    struct ListProblemsResponse {
-        problems: Vec<Problem>,
-    }
-
-    let result = ListProblemsResponse {
-        problems: vec![
-            Problem {
-                id: ProblemId("travelling_salesman".into()),
-                name: String::from("Travelling Salesman"),
-                description: String::from(
-                    "Find the shortest path in the graph that starts and ends in a specific vertex and visits **all** other vertices **exactly once**. This kind of a path is also known as a Hamiltonian cycle.",
-                ),
-            },
-            Problem {
-                id: ProblemId("knapsack".into()),
-                name: String::from("Knapsack"),
-                description: String::from(
-                    "Given a set of items, each with a weight and a value, determine the number of each item to include in a collection so that the total weight is less than or equal to a given limit and the total value is as large as possible.",
-                ),
-            },
-        ],
-    };
+    let result = state
+        .static_data
+        .0
+        .iter()
+        .map(|(id, problem)| Problem {
+            id: id.clone(),
+            name: problem.name.clone(),
+            description: problem.description.clone(),
+        })
+        .collect::<Vec<_>>();
 
     HttpResponse::Ok().json(result)
 }
 
 #[get("/api/problem/{problem_id}")]
-async fn get_problem_details(path: web::Path<String>) -> Result<impl Responder, HttpError> {
+async fn get_problem_details(
+    path: web::Path<String>,
+    state: web::Data<State>,
+) -> Result<impl Responder, HttpError> {
     #[derive(Serialize)]
     struct ProblemDetails {
         id: ProblemId,
         name: String,
-        problem_statement: String,
+        problem_statement: PathBuf,
         inputs: Vec<InputId>,
     }
 
-    let problem_repository = HashMap::from([
-        (
-            ProblemId("travelling_salesman".into()),
-            ProblemDetails {
-                id: ProblemId("travelling_salesman".into()),
-                name: String::from("Travelling Salesman"),
-                problem_statement: String::from(
-                    "problems/travelling_salesman/problem_statement.md",
-                ),
-                inputs: vec![
-                    InputId("problems/travelling_salesman/inputs/sample.txt".into()),
-                    InputId("problems/travelling_salesman/inputs/small_sparse.txt".into()),
-                    InputId("problems/travelling_salesman/inputs/small_dense.txt".into()),
-                    InputId("problems/travelling_salesman/inputs/small_full.txt".into()),
-                    InputId("problems/travelling_salesman/inputs/medium_sparse.txt".into()),
-                    InputId("problems/travelling_salesman/inputs/medium_dense.txt".into()),
-                    InputId("problems/travelling_salesman/inputs/medium_full.txt".into()),
-                    InputId("problems/travelling_salesman/inputs/large_sparse.txt".into()),
-                    InputId("problems/travelling_salesman/inputs/large_dense.txt".into()),
-                    InputId("problems/travelling_salesman/inputs/large_full.txt".into()),
-                ],
-            },
-        ),
-        (
-            ProblemId("knapsack".into()),
-            ProblemDetails {
-                id: ProblemId("knapsack".into()),
-                name: String::from("Knapsack"),
-                problem_statement: String::from("problems/knapsack/problem_statement.md"),
-                inputs: vec![
-                    InputId("problems/knapsack/inputs/sample.txt".into()),
-                    InputId("problems/knapsack/inputs/small.txt".into()),
-                    InputId("problems/knapsack/inputs/medium.txt".into()),
-                    InputId("problems/knapsack/inputs/large.txt".into()),
-                ],
-            },
-        ),
-    ]);
-
     let problem_id = ProblemId(path.into_inner());
-    problem_repository
+    state
+        .static_data
+        .0
         .get(&problem_id)
+        .map(|problem| ProblemDetails {
+            id: problem_id,
+            name: problem.name.clone(),
+            problem_statement: problem.problem_statement.clone(),
+            inputs: problem.inputs.keys().cloned().collect(),
+        })
         .map(|problem_details| HttpResponse::Ok().json(problem_details))
         .ok_or_else(|| ErrorInternalServerError("No problem found with ID"))
 }
 
+#[derive(Parser)]
+struct Args {
+    /// Static data path.
+    #[arg(short, long)]
+    static_data_path: PathBuf,
+}
+
+#[derive(Deserialize)]
+struct Input {
+    #[serde(alias = "path")]
+    _path: PathBuf,
+    #[serde(alias = "cmd")]
+    _cmd: String,
+}
+
+#[derive(Deserialize)]
+struct Problem {
+    name: String,
+    description: String,
+    problem_statement: PathBuf,
+    inputs: HashMap<InputId, Input>,
+}
+
+#[derive(Deserialize)]
+struct StaticData(HashMap<ProblemId, Problem>);
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let args = Args::parse();
+    let static_data: StaticData =
+        serde_json::from_reader(BufReader::new(File::open(args.static_data_path)?))?;
     let state = Data::new(State {
         start_time: SystemTime::now(),
+        static_data,
     });
     env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
     HttpServer::new(move || {

@@ -3,55 +3,53 @@
     "name": "Travelling Salesman",
     "description": "Find the shortest path in the graph that starts and ends in a specific vertex and visits **all** other vertices **exactly once**. This kind of a path is also known as a Hamiltonian cycle.",
     "problem_statement": "problems/travelling_salesman/problem_statement.md",
-    "inputs": [
-      {
+    "inputs": {
+      "sample": {
         "path": "problems/travelling_salesman/inputs/sample.txt",
         "cmd": "tsp_gen"
       },
-      {
+      "small_sparse": {
         "path": "problems/travelling_salesman/inputs/small_sparse.txt",
         "cmd": "tsp_gen -v 100 -d 0.3 -m 100 -s 20"
       },
-      {
+      "small_dense": {
         "path": "problems/travelling_salesman/inputs/small_dense.txt",
         "cmd": "tsp_gen -v 100 -d 0.8 -m 100 -s 30"
       },
-      {
+      "small_full": {
         "path": "problems/travelling_salesman/inputs/small_full.txt",
         "cmd": "tsp_gen -v 100 -d 1.0 -m 100 -s 10"
       },
-      {
+      "medium_sparse": {
         "path": "problems/travelling_salesman/inputs/medium_sparse.txt",
         "cmd": "tsp_gen -v 1000 -d 0.3 -m 100 -s 20"
       },
-      {
+      "medium_dense": {
         "path": "problems/travelling_salesman/inputs/medium_dense.txt",
         "cmd": "tsp_gen -v 1000 -d 0.8 -m 100 -s 30"
       },
-      {
+      "medium_full": {
         "path": "problems/travelling_salesman/inputs/medium_full.txt",
         "cmd": "tsp_gen -v 1000 -d 1.0 -m 100 -s 10"
       },
-      {
+      "large_sparse": {
         "path": "problems/travelling_salesman/inputs/large_sparse.txt",
         "cmd": "tsp_gen -v 10000 -d 0.3 -m 100 -s 20"
       },
-      {
+      "large_dense": {
         "path": "problems/travelling_salesman/inputs/large_dense.txt",
         "cmd": "tsp_gen -v 10000 -d 0.8 -m 100 -s 30"
       },
-      {
+      "large_full": {
         "path": "problems/travelling_salesman/inputs/large_full.txt",
         "cmd": "tsp_gen -v 10000 -d 1.0 -m 100 -s 10"
       }
-    ]
+    }
   },
   "graph_coloring": {
     "name": "Graph Coloring",
     "description": "...",
     "problem_statement": "problems/.../problem_statement.md",
-    "inputs": [
-
-    ]
+    "inputs": {}
   }
 }
