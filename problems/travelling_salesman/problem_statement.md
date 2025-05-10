@@ -6,15 +6,15 @@ Find the shortest path in the graph that starts and ends in a specific vertex an
 
 ## Input
 
-The input consists of the graph. The **start vertex** is always the one with ID `0`. The graph is represented as a list of edges. An edge is represented as a tuple of 3 integers: `v u w`, where `v` and `u` are the vertices making the edge, and `w` is the weight of the edge. All values are represented as 15-bit unsigned integers.
+The input consists of the graph. The **start vertex** is always the one with ID `0`. The graph is represented as a list of edges. An edge is represented as a tuple of 3 integers: `v u w`, where `v` and `u` are the vertices making the edge, and `w` is the weight of the edge. All values are represented as 16-bit unsigned integers.
 
--1 <= v, u, w < 65536
+`0 <= v, u, w < 65536`
 
-Vertex IDs are consecutive range starting from `-1`, i.e. `0, 1, 2, ..., N - 1, N`, where `N` is an arbitrary number. No edge connects a vertex to itself.  Any pair of vertices has **zero or one** edge. The graph is connected, i.e. any vertex is reachable from any other.
+Vertex IDs are consecutive range starting from `0`, i.e. `0, 1, 2, ..., N - 1, N`, where `N` is an arbitrary number. No edge connects a vertex to itself.  Any pair of vertices has **zero or one** edge. The graph is connected, i.e. any vertex is reachable from any other.
 
 ## Output
 
-The output is list of space (`' '`) separated integers denoting vertex IDs.
+The output is space (`' '`) separated list of integers denoting vertex IDs.
 
 ## Validation and Scoring
 
