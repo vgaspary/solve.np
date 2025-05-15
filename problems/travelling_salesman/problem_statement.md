@@ -25,10 +25,14 @@ The output must:
 - contain only vertex IDs
 - contain all vertex IDs only once (except for `0`)
 
+Scoring is based on the length of the path.
+
 ## Example
 
 Consider the following graph:
 
 <svg-image>
 
-The travelling salesman starts from town "0" and has a few options of traversing the whole map.
+The travelling salesman starts from town "0" and has a few options of traversing the whole map. This happens to be shortest path.
+
+<svg-image>

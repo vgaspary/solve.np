@@ -24,7 +24,7 @@ The output must:
 - Contain only non-negative integers representing colors.
 - Satisfy the constraint that for every edge `(u, v)` in the input graph, the color assigned to vertex `u` must be different from the color assigned to vertex `v`.
 
-Scoring will be based on the number of colors used. Solutions using a smaller number of colors will receive a higher score. An invalid coloring (violating the adjacency constraint) will receive a score of zero.
+Scoring will be based on the number of colors used.
 
 ## Example
 
@@ -32,4 +32,7 @@ Consider the following graph:
 
 <svg-image>
 
-A valid coloring would assign colors to the vertices such that no adjacent vertices have the same color. The goal is to find a coloring that uses the fewest distinct colors.
+The trivial solution is to pick a unique color for each vertex. The fewest colors we can use to color the graph (chromatic number) is 3. Here are two ways to color the graph using 3 colors.
+
+<svg-image>
+<svg-image>
