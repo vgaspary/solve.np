@@ -31,7 +31,6 @@ fn main() {
         .filter(|edge| !base_edges.contains(edge))
         .collect();
     let target_extra_edges = (extra_edges.len() as f64 * args.graph_density) as usize;
-    println!("Target extra edges: {target_extra_edges}");
     extra_edges.shuffle(&mut rng);
     extra_edges.truncate(target_extra_edges);
     extra_edges.extend(base_edges.into_iter());
