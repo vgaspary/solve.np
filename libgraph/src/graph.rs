@@ -60,6 +60,10 @@ impl Graph {
             .flatten()
             .filter(|(u, v)| u < v)
     }
+
+    pub fn num_vertices(&self) -> usize {
+        self.adj_list.len()
+    }
 }
 
 #[cfg(test)]

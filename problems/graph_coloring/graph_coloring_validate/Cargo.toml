@@ -1,0 +1,8 @@
+[package]
+name = "graph_coloring_validate"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+libgraph = { path = "../../../libgraph" }
+thiserror = "2.0.12"

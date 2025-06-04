@@ -1,8 +1,9 @@
 [workspace]
 members = [
   "libgraph",
-  "solve_np_server",
+  "problems/graph_coloring/graph_coloring_gen",
+  "problems/graph_coloring/graph_coloring_validate",
   "problems/travelling_salesman/tsp_gen",
   "problems/travelling_salesman/tsp_validate",
-  "problems/graph_coloring/graph_coloring_gen",
+  "solve_np_server",
 ]
