@@ -1,7 +1,7 @@
 {
   "travelling_salesman": {
     "name": "Travelling Salesman",
-    "description": "Find the shortest path in the graph that starts and ends in a specific vertex and visits **all** other vertices **exactly once**. This kind of a path is also known as a Hamiltonian cycle.",
+    "description": "Find the shortest path in the graph that starts and ends in a specific node and visits **all** other nodes **exactly once**. This kind of a path is also known as a Hamiltonian cycle.",
     "problem_statement": "problems/travelling_salesman/problem_statement.md",
     "inputs": {
       "sample": {
@@ -48,8 +48,49 @@
   },
   "graph_coloring": {
     "name": "Graph Coloring",
-    "description": "...",
-    "problem_statement": "problems/.../problem_statement.md",
-    "inputs": {}
+    "description": "Color the nodes of a graph with as few colors as possible such that connected nodes don't have the same color.",
+    "problem_statement": "problems/graph_coloring/problem_statement.md",
+    "inputs": {
+      "sample": {
+        "path": "problems/graph_coloring/inputs/sample.txt",
+        "cmd": "graph_coloring_gen"
+      },
+      "small_ultra_sparse": {
+        "path": "problems/graph_coloring/inputs/small_ultra_sparse.txt",
+        "cmd": "graph_coloring_gen -v 100 -d 0.1"
+      },
+      "small_sparse": {
+        "path": "problems/graph_coloring/inputs/small_sparse.txt",
+        "cmd": "graph_coloring_gen -v 100 -d 0.3"
+      },
+      "small_dense": {
+        "path": "problems/graph_coloring/inputs/small_dense.txt",
+        "cmd": "graph_coloring_gen -v 100 -d 0.6"
+      },
+      "medium_ultra_sparse": {
+        "path": "problems/graph_coloring/inputs/medium_ultra_sparse.txt",
+        "cmd": "graph_coloring_gen -v 1000 -d 0.1"
+      },
+      "medium_sparse": {
+        "path": "problems/graph_coloring/inputs/medium_sparse.txt",
+        "cmd": "graph_coloring_gen -v 1000 -d 0.3"
+      },
+      "medium_dense": {
+        "path": "problems/graph_coloring/inputs/medium_dense.txt",
+        "cmd": "graph_coloring_gen -v 1000 -d 0.6"
+      },
+      "large_ultra_sparse": {
+        "path": "problems/graph_coloring/inputs/large_ultra_sparse.txt",
+        "cmd": "graph_coloring_gen -v 10000 -d 0.1"
+      },
+      "large_sparse": {
+        "path": "problems/graph_coloring/inputs/large_sparse.txt",
+        "cmd": "graph_coloring_gen -v 10000 -d 0.3"
+      },
+      "large_dense": {
+        "path": "problems/graph_coloring/inputs/large_dense.txt",
+        "cmd": "graph_coloring_gen -v 10000 -d 0.6"
+      }
+    }
   }
 }
