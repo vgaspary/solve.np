@@ -132,7 +132,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_problem_details)
             .wrap(actix_web::middleware::Logger::default())
     })
-    .bind(("localhost", 8080))?
+    .bind(("localhost", 6520))?
     .run()
     .await
 }
