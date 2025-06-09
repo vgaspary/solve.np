@@ -21,7 +21,8 @@ struct Args {
 async fn main() -> std::io::Result<()> {
     let args = Args::parse();
     let static_data: StaticData =
-        serde_json::from_reader(BufReader::new(File::open(args.static_data_path)?))?;
+        serde_yaml::from_reader(BufReader::new(File::open(args.static_data_path)?))
+            .map_err(std::io::Error::other)?;
     let start_time = SystemTime::now();
     let state = Data::new(State {
         start_time,
