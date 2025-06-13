@@ -40,7 +40,7 @@
     <div>
       <ul id="ul_problems"></ul>
       <script>
-        const url = 'http://127.0.0.1:6520/api/problems';
+        const url = 'http://{{ address }}:6520/api/problems';
         const problems = fetch(url)
           .then(response => response.json())
           .then(problems => {

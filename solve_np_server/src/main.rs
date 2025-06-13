@@ -8,13 +8,17 @@ use api::handlers::{get_problem_details, health_check, list_problems};
 use clap::Parser;
 use frontend::handlers::{home_page, problems};
 use state::{State, StaticData};
-use std::{fs::File, io::BufReader, path::PathBuf, time::SystemTime};
+use std::{fs::File, io::BufReader, net::Ipv4Addr, path::PathBuf, time::SystemTime};
 
 #[derive(Parser)]
 struct Args {
     /// Static data path.
     #[arg(short, long)]
     static_data_path: PathBuf,
+
+    /// Server address.
+    #[arg(short, long)]
+    address: Ipv4Addr,
 }
 
 #[actix_web::main]
@@ -26,6 +30,7 @@ async fn main() -> std::io::Result<()> {
     let start_time = SystemTime::now();
     let state = Data::new(State {
         start_time,
+        address: args.address,
         static_data,
     });
     env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
@@ -44,7 +49,7 @@ async fn main() -> std::io::Result<()> {
             /* ----------------- */
             .wrap(actix_web::middleware::Logger::default())
     })
-    .bind(("localhost", 6520))?
+    .bind(("0.0.0.0", 6520))?
     .run()
     .await
 }

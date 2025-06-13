@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use std::{collections::HashMap, path::PathBuf, time::SystemTime};
+use std::{collections::HashMap, net::Ipv4Addr, path::PathBuf, time::SystemTime};
 
 type ProblemId = String;
 type InputId = String;
@@ -7,6 +7,7 @@ pub type StaticData = HashMap<ProblemId, Problem>;
 
 pub struct State {
     pub start_time: SystemTime,
+    pub address: Ipv4Addr,
     pub static_data: StaticData,
 }
 

@@ -1,8 +1,10 @@
+use crate::state::State;
 use actix_web::{
     HttpResponse, Responder,
     error::{Error as HttpError, ErrorInternalServerError},
     get,
     http::header::ContentType,
+    web,
 };
 use askama::Template;
 
@@ -30,13 +32,17 @@ pub async fn home_page() -> Result<impl Responder, HttpError> {
 #[template(path = "problems.html")]
 struct ProblemsTemplate {
     logged_in: bool,
+    address: String,
 }
 
 #[get("/problems")]
-pub async fn problems() -> Result<impl Responder, HttpError> {
-    let body = ProblemsTemplate { logged_in: false }
-        .render()
-        .map_err(ErrorInternalServerError)?;
+pub async fn problems(state: web::Data<State>) -> Result<impl Responder, HttpError> {
+    let body = ProblemsTemplate {
+        logged_in: false,
+        address: state.address.to_string(),
+    }
+    .render()
+    .map_err(ErrorInternalServerError)?;
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(body))
