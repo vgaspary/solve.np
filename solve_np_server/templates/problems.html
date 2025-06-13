@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Problems - solve.NP</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script>
+      function md_to_html(md_text) {
+        return md_text.replace(/(\*\*|\*|__|_)(.*?)(\*\*|\*|__|_)/g, '<em>$2</em>');
+      }
+      function render_problem(problem) {
+        return `
+        <li>
+          <h1><a href="/problems#${problem.id}">${problem.name}</a></h1>
+          <article><p>${md_to_html(problem.description)}</p></article>
+        </li>
+          `;
+      }
+    </script>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1><a href="/">solve.NP</a></h1>
+        <nav>
+          <ul>
+            <li><a href="/problems">[Problems]</a></li>
+            <li><a href="/p_vs_np">[P vs NP]</a></li>
+          {% if logged_in %}
+            <li><a href="/my_attempts">[My Attempts]</a></li>
+            <li><a href="/my_profile">[My Profile]</a></li>
+            <li><a href="/log_out">[Log Out]</a></li>
+          {% else %}
+            <li><a href="/log_in">[Log In]</a></li>
+          {% endif %}
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <div>
+      <ul id="ul_problems"></ul>
+      <script>
+        const url = 'http://127.0.0.1:6520/api/problems';
+        const problems = fetch(url)
+          .then(response => response.json())
+          .then(problems => {
+            document.getElementById("ul_problems").innerHTML = problems.map(render_problem).join('');
+          })
+          .catch(err => console.log(err));
+      </script>
+    </div>
+  </body>
+</html>

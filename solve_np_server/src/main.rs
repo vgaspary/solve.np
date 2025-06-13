@@ -6,7 +6,7 @@ use actix_files::Files;
 use actix_web::{App, HttpServer, web::Data};
 use api::handlers::{get_problem_details, health_check, list_problems};
 use clap::Parser;
-use frontend::handlers::home_page;
+use frontend::handlers::{home_page, problems};
 use state::{State, StaticData};
 use std::{fs::File, io::BufReader, path::PathBuf, time::SystemTime};
 
@@ -35,6 +35,7 @@ async fn main() -> std::io::Result<()> {
             /* --- Frontend scope --- */
             .service(Files::new("/static", "./static").show_files_listing())
             .service(home_page)
+            .service(problems)
             /* ---------------------- */
             /* --- API scope --- */
             .service(health_check)
