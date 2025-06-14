@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Problems - solve.NP</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1><a href="/">solve.NP</a></h1>
+        <nav>
+          <ul>
+            <li><a href="/problems">[Problems]</a></li>
+            <li><a href="/p_vs_np">[P vs NP]</a></li>
+          {% if logged_in %}
+            <li><a href="/my_attempts">[My Attempts]</a></li>
+            <li><a href="/my_profile">[My Profile]</a></li>
+            <li><a href="/log_out">[Log Out]</a></li>
+          {% else %}
+            <li><a href="/log_in">[Log In]</a></li>
+          {% endif %}
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <div>
+      <article id="problem_statement">
+        <script src="/problems/assets/problem_utils.js"></script>
+        <script>
+          const url = 'http://{{ address }}:6520/api/problems/{{ problem_id }}';
+          const problems = fetch(url)
+            .then(response => response.json())
+            .then(problem_details => {
+              document.title = `${problem_details.name} - solve.NP`;
+              return `
+                <h2>${problem_details.name}</h2>
+                <p>${problem_details.problem_statement}</p>
+                `
+            })
+            .then(content => document.getElementById("problem_statement").innerHTML = content)
+            .catch(err => console.log(err));
+        </script>
+      </article>
+    </div>
+  </body>
+</html>

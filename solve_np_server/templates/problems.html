@@ -4,19 +4,6 @@
     <meta charset="utf-8">
     <title>Problems - solve.NP</title>
     <link rel="stylesheet" href="/static/style.css">
-    <script>
-      function md_to_html(md_text) {
-        return md_text.replace(/(\*\*|\*|__|_)(.*?)(\*\*|\*|__|_)/g, '<em>$2</em>');
-      }
-      function render_problem(problem) {
-        return `
-        <li>
-          <h1><a href="/problems#${problem.id}">${problem.name}</a></h1>
-          <article><p>${md_to_html(problem.description)}</p></article>
-        </li>
-          `;
-      }
-    </script>
   </head>
   <body>
     <header>
@@ -39,6 +26,7 @@
     </header>
     <div>
       <ul id="ul_problems"></ul>
+      <script src="/problems/assets/problem_utils.js"></script>
       <script>
         const url = 'http://{{ address }}:6520/api/problems';
         const problems = fetch(url)
@@ -48,7 +36,7 @@
             .map(render_problem)
             .join('')
           )
-          .then(ul_problems_inner => document.getElementById("ul_problems").innerHTML = ul_problems_inner)
+          .then(content => document.getElementById("ul_problems").innerHTML = content)
           .catch(err => console.log(err));
       </script>
     </div>

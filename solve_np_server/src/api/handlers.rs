@@ -1,11 +1,10 @@
 use crate::api::types::{HealthCheckReport, Input, Problem, ProblemDetails};
 use crate::state::State;
 use actix_web::{
-    HttpResponse, Responder, error::Error as HttpError, error::ErrorInternalServerError, get, web,
+    HttpResponse, Responder, error::Error as HttpError, error::ErrorInternalServerError, web,
 };
 use std::time::SystemTime;
 
-#[get("/api/health_check")]
 pub async fn health_check(state: web::Data<State>) -> Result<impl Responder, HttpError> {
     let uptime = SystemTime::now()
         .duration_since(state.start_time)
@@ -16,7 +15,6 @@ pub async fn health_check(state: web::Data<State>) -> Result<impl Responder, Htt
     Ok(HttpResponse::Ok().json(response))
 }
 
-#[get("/api/problems")]
 pub async fn list_problems(state: web::Data<State>) -> impl Responder {
     let result = state
         .static_data
@@ -31,7 +29,6 @@ pub async fn list_problems(state: web::Data<State>) -> impl Responder {
     HttpResponse::Ok().json(result)
 }
 
-#[get("/api/problem/{problem_id}")]
 pub async fn get_problem_details(
     path: web::Path<String>,
     state: web::Data<State>,
