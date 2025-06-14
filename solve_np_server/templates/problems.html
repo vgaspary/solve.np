@@ -43,9 +43,12 @@
         const url = 'http://{{ address }}:6520/api/problems';
         const problems = fetch(url)
           .then(response => response.json())
-          .then(problems => {
-            document.getElementById("ul_problems").innerHTML = problems.map(render_problem).join('');
-          })
+          .then(problems => problems
+            .sort((lhs, rhs) => lhs.id < rhs.id ? -1 : lhs.id > rhs.id ? 1 : 0)
+            .map(render_problem)
+            .join('')
+          )
+          .then(ul_problems_inner => document.getElementById("ul_problems").innerHTML = ul_problems_inner)
           .catch(err => console.log(err));
       </script>
     </div>
