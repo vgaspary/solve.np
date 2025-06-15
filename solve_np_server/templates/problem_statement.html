@@ -28,18 +28,14 @@
       <article id="problem_statement">
         <script src="/problems/assets/problem_utils.js"></script>
         <script>
-          const url = 'http://{{ address }}:6520/api/problems/{{ problem_id }}';
-          const problems = fetch(url)
+          fetch('http://{{ address }}:6520/api/problems/{{ problem_id }}')
             .then(response => response.json())
             .then(problem_details => {
               document.title = `${problem_details.name} - solve.NP`;
-              return `
-                <h2>${problem_details.name}</h2>
-                <p>${problem_details.problem_statement}</p>
-                `
+              return problem_details.problem_statement_html;
             })
             .then(content => document.getElementById("problem_statement").innerHTML = content)
-            .catch(err => console.log(err));
+            .catch(console.log);
         </script>
       </article>
     </div>

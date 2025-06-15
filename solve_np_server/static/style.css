@@ -272,6 +272,13 @@ article {
 article:first-of-type {
   margin-top: 0;
 }
+article h1 {
+  color: #ffffff;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  white-space: nowrap;
+  font-size: 1.2em;
+}
 article h2 {
   color: #ffffff;
   margin-top: 1em;

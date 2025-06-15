@@ -1,70 +1,70 @@
 travelling_salesman:
   name: "Travelling Salesman"
   description: "Find the shortest path in the graph that starts and ends in a specific node and visits **all** other nodes **exactly once**. This kind of a path is also known as a Hamiltonian cycle."
-  problem_statement: "problems/travelling_salesman/problem_statement.md"
+  problem_statement: "../problems/travelling_salesman/problem_statement.md"
   inputs:
     sample:
-      path: "problems/travelling_salesman/inputs/sample.txt"
+      path: "../problems/travelling_salesman/inputs/sample.txt"
       cmd: "tsp_gen"
     small_sparse:
-      path: "problems/travelling_salesman/inputs/small_sparse.txt"
+      path: "../problems/travelling_salesman/inputs/small_sparse.txt"
       cmd: "tsp_gen -v 100 -d 0.3 -m 100 -s 20"
     small_dense:
-      path: "problems/travelling_salesman/inputs/small_dense.txt"
+      path: "../problems/travelling_salesman/inputs/small_dense.txt"
       cmd: "tsp_gen -v 100 -d 0.8 -m 100 -s 30"
     small_full:
-      path: "problems/travelling_salesman/inputs/small_full.txt"
+      path: "../problems/travelling_salesman/inputs/small_full.txt"
       cmd: "tsp_gen -v 100 -d 1.0 -m 100 -s 10"
     medium_sparse:
-      path: "problems/travelling_salesman/inputs/medium_sparse.txt"
+      path: "../problems/travelling_salesman/inputs/medium_sparse.txt"
       cmd: "tsp_gen -v 1000 -d 0.3 -m 100 -s 20"
     medium_dense:
-      path: "problems/travelling_salesman/inputs/medium_dense.txt"
+      path: "../problems/travelling_salesman/inputs/medium_dense.txt"
       cmd: "tsp_gen -v 1000 -d 0.8 -m 100 -s 30"
     medium_full:
-      path: "problems/travelling_salesman/inputs/medium_full.txt"
+      path: "../problems/travelling_salesman/inputs/medium_full.txt"
       cmd: "tsp_gen -v 1000 -d 1.0 -m 100 -s 10"
     large_sparse:
-      path: "problems/travelling_salesman/inputs/large_sparse.txt"
+      path: "../problems/travelling_salesman/inputs/large_sparse.txt"
       cmd: "tsp_gen -v 10000 -d 0.3 -m 100 -s 20"
     large_dense:
-      path: "problems/travelling_salesman/inputs/large_dense.txt"
+      path: "../problems/travelling_salesman/inputs/large_dense.txt"
       cmd: "tsp_gen -v 10000 -d 0.8 -m 100 -s 30"
     large_full:
-      path: "problems/travelling_salesman/inputs/large_full.txt"
+      path: "../problems/travelling_salesman/inputs/large_full.txt"
       cmd: "tsp_gen -v 10000 -d 1.0 -m 100 -s 10"
 graph_coloring:
   name: "Graph Coloring"
   description: "Color the nodes of a graph with as few colors as possible such that connected nodes don't have the same color."
-  problem_statement: "problems/graph_coloring/problem_statement.md"
+  problem_statement: "../problems/graph_coloring/problem_statement.md"
   inputs:
     sample:
-      path: "problems/graph_coloring/inputs/sample.txt"
+      path: "../problems/graph_coloring/inputs/sample.txt"
       cmd: "graph_coloring_gen"
     small_ultra_sparse:
-      path: "problems/graph_coloring/inputs/small_ultra_sparse.txt"
+      path: "../problems/graph_coloring/inputs/small_ultra_sparse.txt"
       cmd: "graph_coloring_gen -v 100 -d 0.1"
     small_sparse:
-      path: "problems/graph_coloring/inputs/small_sparse.txt"
+      path: "../problems/graph_coloring/inputs/small_sparse.txt"
       cmd: "graph_coloring_gen -v 100 -d 0.3"
     small_dense:
-      path: "problems/graph_coloring/inputs/small_dense.txt"
+      path: "../problems/graph_coloring/inputs/small_dense.txt"
       cmd: "graph_coloring_gen -v 100 -d 0.6"
     medium_ultra_sparse:
-      path: "problems/graph_coloring/inputs/medium_ultra_sparse.txt"
+      path: "../problems/graph_coloring/inputs/medium_ultra_sparse.txt"
       cmd: "graph_coloring_gen -v 1000 -d 0.1"
     medium_sparse:
-      path: "problems/graph_coloring/inputs/medium_sparse.txt"
+      path: "../problems/graph_coloring/inputs/medium_sparse.txt"
       cmd: "graph_coloring_gen -v 1000 -d 0.3"
     medium_dense:
-      path: "problems/graph_coloring/inputs/medium_dense.txt"
+      path: "../problems/graph_coloring/inputs/medium_dense.txt"
       cmd: "graph_coloring_gen -v 1000 -d 0.6"
     large_ultra_sparse:
-      path: "problems/graph_coloring/inputs/large_ultra_sparse.txt"
+      path: "../problems/graph_coloring/inputs/large_ultra_sparse.txt"
       cmd: "graph_coloring_gen -v 10000 -d 0.1"
     large_sparse:
-      path: "problems/graph_coloring/inputs/large_sparse.txt"
+      path: "../problems/graph_coloring/inputs/large_sparse.txt"
       cmd: "graph_coloring_gen -v 10000 -d 0.3"
     large_dense:
-      path: "problems/graph_coloring/inputs/large_dense.txt"
+      path: "../problems/graph_coloring/inputs/large_dense.txt"
       cmd: "graph_coloring_gen -v 10000 -d 0.6"

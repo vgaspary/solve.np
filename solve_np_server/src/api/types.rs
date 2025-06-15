@@ -21,7 +21,7 @@ pub struct Input {
 pub struct ProblemDetails {
     pub id: ProblemId,
     pub name: String,
-    pub problem_statement: PathBuf,
+    pub problem_statement_html: String,
     pub inputs: Vec<Input>,
 }
 

@@ -3,6 +3,8 @@ use crate::state::State;
 use actix_web::{
     HttpResponse, Responder, error::Error as HttpError, error::ErrorInternalServerError, web,
 };
+use pulldown_cmark::Parser;
+use std::fs;
 use std::time::SystemTime;
 
 pub async fn health_check(state: web::Data<State>) -> Result<impl Responder, HttpError> {
@@ -37,19 +39,25 @@ pub async fn get_problem_details(
     state
         .static_data
         .get(&problem_id)
-        .map(|problem| ProblemDetails {
-            id: problem_id,
-            name: problem.name.clone(),
-            problem_statement: problem.problem_statement.clone(),
-            inputs: problem
-                .inputs
-                .iter()
-                .map(|(id, input)| Input {
-                    id: id.clone(),
-                    path: input.path.clone(),
-                })
-                .collect(),
+        .ok_or_else(|| ErrorInternalServerError("No problem found with ID"))
+        .and_then(|problem| {
+            let md_content = fs::read_to_string(&problem.problem_statement)?;
+            let parser = Parser::new(&md_content);
+            let mut problem_statement_html = String::new();
+            pulldown_cmark::html::push_html(&mut problem_statement_html, parser);
+            Ok(ProblemDetails {
+                id: problem_id,
+                name: problem.name.clone(),
+                problem_statement_html,
+                inputs: problem
+                    .inputs
+                    .iter()
+                    .map(|(id, input)| Input {
+                        id: id.clone(),
+                        path: input.path.clone(),
+                    })
+                    .collect(),
+            })
         })
         .map(|problem_details| HttpResponse::Ok().json(problem_details))
-        .ok_or_else(|| ErrorInternalServerError("No problem found with ID"))
 }

@@ -31,8 +31,8 @@ Scoring is based on the length of the path.
 
 Consider the following graph:
 
-<svg-image>
+IMAGE
 
 The travelling salesman starts from town "0" and has a few options of traversing the whole map. This happens to be shortest path.
 
-<svg-image>
+IMAGE

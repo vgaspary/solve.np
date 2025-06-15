@@ -30,9 +30,10 @@ Scoring will be based on the number of colors used.
 
 Consider the following graph:
 
-<svg-image>
+IMAGE
 
 The trivial solution is to pick a unique color for each vertex. The fewest colors we can use to color the graph (chromatic number) is 3. Here are two ways to color the graph using 3 colors.
 
-<svg-image>
-<svg-image>
+IMAGE
+
+IMAGE
