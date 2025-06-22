@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use std::path::PathBuf;
 
 pub type ProblemId = String;
@@ -28,4 +28,10 @@ pub struct ProblemDetails {
 #[derive(Serialize)]
 pub struct HealthCheckReport {
     pub uptime: String,
+}
+
+#[derive(Deserialize)]
+pub struct LogInForm {
+    pub username: String,
+    pub password: String,
 }

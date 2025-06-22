@@ -180,7 +180,7 @@ header nav a {
   outline: none;
 }
 
-input[type="text"], textarea {
+input[type="text"], input[type="password"], textarea {
   background: transparent;
   color: inherit;
   border: 1px solid #666666;

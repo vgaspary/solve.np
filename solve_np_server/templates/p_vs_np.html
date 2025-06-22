@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>P vs NP - solve.NP</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    {{ header | safe }}
+    <div>
+      <article>
+        <h1>P vs NP</h1>
+        <p>The P versus NP problem is a major unsolved problem in theoretical computer science. Informally, it asks whether every problem whose solution can be quickly verified can also be quickly solved.</p>
+        <p>Here, "quickly" means an algorithm exists that solves the task and runs in polynomial time (as opposed to, say, exponential time), meaning the task completion time is bounded above by a polynomial function on the size of the input to the algorithm. The general class of questions that some algorithm can answer in polynomial time is "P" or "class P". For some questions, there is no known way to find an answer quickly, but if provided with an answer, it can be verified quickly. The class of questions where an answer can be verified in polynomial time is "NP", standing for "nondeterministic polynomial time".</p>
+        <p>It is one of the seven <em>Millennium Prize Problems</em> selected by the Clay Mathematics Institute, each of which carries a <em>US$1,000,000 prize</em> for the first correct solution.</p>
+        <hr>
+        <h2><em>Vote</em></h2>
+        {% if logged_in %}
+          {% if voted %}
+            <ul>
+              <li id="p_eq_np">5 people think <em>P == NP</em></li>
+              <li id="p_neq_np">3 people think <em>P != NP</em></li>
+            </ul>
+            <script>
+              console.log("Do work here");
+            </script>
+          {% else %}
+            <a href="/p_vs_np" onclick="vote('eq')" >[P == NP]</a>
+            <a href="/p_vs_np" onclick="vote('neq')">[P != NP]</a>
+            <script>
+              function vote(choice) {
+                voted = true;
+              }
+            </script>
+          {% endif %}
+        {% else %}
+        <p><a href="/log_in">Log in</a> to vote.</p>
+        {% endif %}
+      </article>
+    </div>
+  </body>
+</html>

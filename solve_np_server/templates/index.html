@@ -6,24 +6,7 @@
     <link rel="stylesheet" href="/static/style.css">
   </head>
   <body>
-    <header>
-      <div>
-        <h1><a href="/">solve.NP</a></h1>
-        <nav>
-          <ul>
-            <li><a href="/problems">[Problems]</a></li>
-            <li><a href="/p_vs_np">[P vs NP]</a></li>
-          {% if logged_in %}
-            <li><a href="/my_attempts">[My Attempts]</a></li>
-            <li><a href="/my_profile">[My Profile]</a></li>
-            <li><a href="/log_out">[Log Out]</a></li>
-          {% else %}
-            <li><a href="/log_in">[Log In]</a></li>
-          {% endif %}
-          </ul>
-        </nav>
-      </div>
-    </header>
+    {{ header | safe }}
     <p>Hello, {{ user_name }}!</p>
   </body>
 </html>

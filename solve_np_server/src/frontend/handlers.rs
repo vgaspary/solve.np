@@ -1,4 +1,5 @@
 use crate::state::State;
+use actix_session::Session;
 use actix_web::{
     HttpResponse, Responder,
     error::{Error as HttpError, ErrorInternalServerError},
@@ -6,18 +7,37 @@ use actix_web::{
     web,
 };
 use askama::Template;
+use serde::Deserialize;
+
+#[derive(Template)]
+#[template(path = "header.html")]
+struct HeaderTemplate {
+    logged_in: bool,
+}
+
+impl TryFrom<&Session> for HeaderTemplate {
+    type Error = actix_session::SessionGetError;
+    fn try_from(session: &Session) -> Result<Self, Self::Error> {
+        Ok(Self {
+            logged_in: session.get::<String>("username")?.is_some(),
+        })
+    }
+}
 
 #[derive(Template)]
 #[template(path = "index.html")]
 struct IndexTemplate {
+    header: HeaderTemplate,
     user_name: String,
-    logged_in: bool,
 }
 
-pub async fn home_page() -> Result<impl Responder, HttpError> {
+pub async fn home_page(session: Session) -> Result<impl Responder, HttpError> {
+    let user_name = session
+        .get::<String>("username")?
+        .unwrap_or(String::from("Unknown user"));
     let body = IndexTemplate {
-        user_name: String::from("Vanand Gasparyan"),
-        logged_in: false,
+        header: HeaderTemplate::try_from(&session)?,
+        user_name,
     }
     .render()
     .map_err(ErrorInternalServerError)?;
@@ -29,13 +49,16 @@ pub async fn home_page() -> Result<impl Responder, HttpError> {
 #[derive(Template)]
 #[template(path = "problems.html")]
 struct ProblemsTemplate {
-    logged_in: bool,
+    header: HeaderTemplate,
     address: String,
 }
 
-pub async fn problems(state: web::Data<State>) -> Result<impl Responder, HttpError> {
+pub async fn problems(
+    session: Session,
+    state: web::Data<State>,
+) -> Result<impl Responder, HttpError> {
     let body = ProblemsTemplate {
-        logged_in: false,
+        header: HeaderTemplate::try_from(&session)?,
         address: state.address.to_string(),
     }
     .render()
@@ -48,19 +71,70 @@ pub async fn problems(state: web::Data<State>) -> Result<impl Responder, HttpErr
 #[derive(Template)]
 #[template(path = "problem_statement.html")]
 struct ProblemStatementTemplate {
-    logged_in: bool,
+    header: HeaderTemplate,
     address: String,
     problem_id: String,
 }
 
 pub async fn problem_statement(
+    session: Session,
     path: web::Path<String>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let body = ProblemStatementTemplate {
-        logged_in: false,
+        header: HeaderTemplate::try_from(&session)?,
         address: state.address.to_string(),
         problem_id: path.into_inner(),
+    }
+    .render()
+    .map_err(ErrorInternalServerError)?;
+    Ok(HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(body))
+}
+
+#[derive(Template)]
+#[template(path = "p_vs_np.html")]
+struct PvsNpTemplate {
+    header: HeaderTemplate,
+    logged_in: bool,
+    voted: bool,
+}
+
+pub async fn p_vs_np(session: Session) -> Result<impl Responder, HttpError> {
+    let header = HeaderTemplate::try_from(&session)?;
+    let logged_in = header.logged_in;
+    let body = PvsNpTemplate {
+        header,
+        logged_in,
+        voted: false,
+    }
+    .render()
+    .map_err(ErrorInternalServerError)?;
+    Ok(HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(body))
+}
+
+#[derive(Template)]
+#[template(path = "log_in.html")]
+struct LogInTemplate {
+    header: HeaderTemplate,
+    error_msg: String,
+}
+
+#[derive(Deserialize)]
+pub struct LogInQueryParams {
+    err: Option<String>,
+}
+
+pub async fn log_in(
+    params: web::Query<LogInQueryParams>,
+    session: Session,
+) -> Result<impl Responder, HttpError> {
+    let body = LogInTemplate {
+        header: HeaderTemplate::try_from(&session)?,
+        error_msg: params.err.clone().unwrap_or_default(),
     }
     .render()
     .map_err(ErrorInternalServerError)?;

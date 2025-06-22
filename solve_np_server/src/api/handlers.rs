@@ -1,5 +1,6 @@
-use crate::api::types::{HealthCheckReport, Input, Problem, ProblemDetails};
+use crate::api::types::{HealthCheckReport, Input, LogInForm, Problem, ProblemDetails};
 use crate::state::State;
+use actix_session::Session;
 use actix_web::{
     HttpResponse, Responder, error::Error as HttpError, error::ErrorInternalServerError, web,
 };
@@ -60,4 +61,23 @@ pub async fn get_problem_details(
             })
         })
         .map(|problem_details| HttpResponse::Ok().json(problem_details))
+}
+
+pub async fn log_in(
+    session: Session,
+    form: web::Form<LogInForm>,
+) -> Result<impl Responder, HttpError> {
+    let LogInForm { username, password } = form.into_inner();
+    Ok(if username == password {
+        web::Redirect::to("/log_in?err=Invalid%20credentials").see_other()
+    } else {
+        session.insert("user_id", sha256::digest(format!("{username}{password}")))?;
+        session.insert("username", username)?;
+        web::Redirect::to("/").see_other()
+    })
+}
+
+pub async fn log_out(session: Session) -> impl Responder {
+    session.clear();
+    web::Redirect::to("/").see_other()
 }
