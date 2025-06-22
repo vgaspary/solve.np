@@ -3,13 +3,13 @@ mod frontend;
 mod state;
 
 use actix_files::Files;
-use actix_session::{SessionMiddleware, storage::CookieSessionStore};
+use actix_session::{SessionMiddleware, config::PersistentSession, storage::CookieSessionStore};
 use actix_web::{
     App, HttpServer,
-    cookie::Key,
     web::{Data, get, post, scope},
 };
 use api::handlers::{get_problem_details, health_check, list_problems, log_in, log_out};
+use base64::prelude::*;
 use clap::Parser;
 use frontend::handlers::{home_page, log_in as log_in_page, p_vs_np, problem_statement, problems};
 use state::{State, StaticData};
@@ -24,6 +24,10 @@ struct Args {
     /// Server address.
     #[arg(short, long)]
     address: Ipv4Addr,
+
+    /// Session cookie key.
+    #[arg(short, long)]
+    key: String,
 }
 
 #[actix_web::main]
@@ -38,6 +42,11 @@ async fn main() -> std::io::Result<()> {
         address: args.address,
         static_data,
     });
+    let secret_key = actix_web::cookie::Key::from(
+        &BASE64_STANDARD
+            .decode(args.key)
+            .expect("Secret key must be base64 encoded."),
+    );
     env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
     HttpServer::new(move || {
         App::new()
@@ -65,10 +74,14 @@ async fn main() -> std::io::Result<()> {
             /* ----------------- */
             .route("/health_check", get().to(health_check))
             .wrap(actix_web::middleware::Logger::default())
-            .wrap(SessionMiddleware::new(
-                CookieSessionStore::default(),
-                Key::generate(),
-            ))
+            .wrap(
+                SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
+                    .session_lifecycle(
+                        PersistentSession::default()
+                            .session_ttl(actix_web::cookie::time::Duration::days(5)),
+                    )
+                    .build(),
+            )
     })
     .bind(("0.0.0.0", 6520))?
     .run()
