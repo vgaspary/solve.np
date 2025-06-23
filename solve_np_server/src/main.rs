@@ -76,6 +76,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(actix_web::middleware::Logger::default())
             .wrap(
                 SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
+                    .cookie_secure(false)
                     .session_lifecycle(
                         PersistentSession::default()
                             .session_ttl(actix_web::cookie::time::Duration::days(5)),
