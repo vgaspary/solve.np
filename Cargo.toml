@@ -7,3 +7,4 @@ members = [
   "problems/travelling_salesman/tsp_validate",
   "solve_np_server",
 ]
+resolver = "3"
