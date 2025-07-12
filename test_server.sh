@@ -12,7 +12,7 @@ SERVER_URL="http://${SERVER_ADDRESS}:${SERVER_PORT}"
 RANDOM_KEY=$(head /dev/urandom | tr -dc A-Za-z0-9_ | head -c 64 | base64 -w 0)
 
 echo "Building solve_np_server..."
-(cd "${SERVER_DIR}" && cargo build)
+cd "${SERVER_DIR}" && cargo build
 
 echo "Starting solve_np_server in the background..."
 # Start the server and redirect output to a log file
