@@ -1,20 +1,58 @@
 use itertools::Itertools;
 use rand::prelude::*;
-use std::collections::HashSet;
+use std::collections::HashMap;
 
 pub type Vertex = usize;
 pub type Edge = (Vertex, Vertex);
-pub struct Graph {
-    adj_list: Vec<HashSet<usize>>,
+pub struct Graph<Metadata = ()> {
+    pub adj_list: Vec<HashMap<usize, Metadata>>,
 }
 
-impl Graph {
+impl<Metadata> Graph<Metadata>
+where
+    Metadata: Clone,
+{
     pub fn new(num_vertices: usize) -> Self {
         Self {
-            adj_list: vec![HashSet::new(); num_vertices],
+            adj_list: vec![HashMap::new(); num_vertices],
         }
     }
 
+    pub fn add_edge_with_metadata(mut self, (u, v): Edge, metadata: Metadata) -> Self {
+        if u != v {
+            self.adj_list[u].insert(v, metadata.clone());
+            self.adj_list[v].insert(u, metadata);
+        }
+        self
+    }
+
+    pub fn edges(&self) -> impl Iterator<Item = Edge> {
+        self.adj_list
+            .iter()
+            .enumerate()
+            .map(|(u, vs)| vs.keys().map(move |&v| (u, v)))
+            .flatten()
+            .filter(|(u, v)| u < v)
+    }
+
+    pub fn num_vertices(&self) -> usize {
+        self.adj_list.len()
+    }
+
+    pub fn edges_with_metadata(&self) -> impl Iterator<Item = (Edge, Metadata)> {
+        self.adj_list
+            .iter()
+            .enumerate()
+            .map(|(u, vs)| {
+                vs.iter()
+                    .map(move |(&v, metadata)| ((u, v), metadata.clone()))
+            })
+            .flatten()
+            .filter(|((u, v), _)| u < v)
+    }
+}
+
+impl Graph<()> {
     pub fn hamiltonian_cycle(num_vertices: usize, rng: &mut impl Rng) -> Self {
         if num_vertices <= 1 {
             return Self::new(num_vertices);
@@ -46,23 +84,10 @@ impl Graph {
 
     pub fn add_edge(mut self, (u, v): Edge) -> Self {
         if u != v {
-            self.adj_list[u].insert(v);
-            self.adj_list[v].insert(u);
+            self.adj_list[u].insert(v, ());
+            self.adj_list[v].insert(u, ());
         }
         self
-    }
-
-    pub fn edges(&self) -> impl Iterator<Item = Edge> {
-        self.adj_list
-            .iter()
-            .enumerate()
-            .map(|(u, vs)| vs.iter().map(move |&v| (u, v)))
-            .flatten()
-            .filter(|(u, v)| u < v)
-    }
-
-    pub fn num_vertices(&self) -> usize {
-        self.adj_list.len()
     }
 }
 
@@ -92,21 +117,21 @@ mod tests {
     #[test]
     fn test_add_edge() {
         let graph = Graph::new(3).add_edge((0, 1));
-        assert!(graph.adj_list[0].contains(&1));
-        assert!(graph.adj_list[1].contains(&0));
+        assert!(graph.adj_list[0].contains_key(&1));
+        assert!(graph.adj_list[1].contains_key(&0));
         assert_eq!(get_sorted_edges(&graph), vec![(0, 1)]);
 
         let graph = Graph::new(3).add_edge((0, 1)).add_edge((0, 2));
-        assert!(graph.adj_list[0].contains(&2));
-        assert!(graph.adj_list[2].contains(&0));
+        assert!(graph.adj_list[0].contains_key(&2));
+        assert!(graph.adj_list[2].contains_key(&0));
         assert_eq!(get_sorted_edges(&graph), vec![(0, 1), (0, 2)]);
 
         let graph = Graph::new(3)
             .add_edge((0, 1))
             .add_edge((0, 2))
             .add_edge((1, 2));
-        assert!(graph.adj_list[1].contains(&2));
-        assert!(graph.adj_list[2].contains(&1));
+        assert!(graph.adj_list[1].contains_key(&2));
+        assert!(graph.adj_list[2].contains_key(&1));
         assert_eq!(get_sorted_edges(&graph), vec![(0, 1), (0, 2), (1, 2)]);
 
         // Add existing edge (should not change anything)
@@ -231,5 +256,38 @@ mod tests {
             3,
             "MST on 5 vertices (path) should have 3 degree-2 nodes"
         );
+    }
+
+    #[test]
+    fn test_add_edge_with_metadata() {
+        let graph = Graph::new(3).add_edge_with_metadata((0, 1), 10);
+        assert_eq!(graph.adj_list[0].get(&1), Some(&10));
+        assert_eq!(graph.adj_list[1].get(&0), Some(&10));
+
+        let mut edges = graph.edges_with_metadata().collect::<Vec<_>>();
+        edges.sort_by_key(|k| k.0);
+        assert_eq!(edges, vec![((0, 1), 10)]);
+
+        let graph = graph.add_edge_with_metadata((0, 2), 20);
+        assert_eq!(graph.adj_list[0].get(&2), Some(&20));
+        assert_eq!(graph.adj_list[2].get(&0), Some(&20));
+
+        let mut edges = graph.edges_with_metadata().collect::<Vec<_>>();
+        edges.sort_by_key(|k| k.0);
+        assert_eq!(edges, vec![((0, 1), 10), ((0, 2), 20)]);
+
+        // Test updating metadata
+        let graph = graph.add_edge_with_metadata((0, 1), 100);
+        assert_eq!(graph.adj_list[0].get(&1), Some(&100));
+        assert_eq!(graph.adj_list[1].get(&0), Some(&100));
+
+        let mut edges = graph.edges_with_metadata().collect::<Vec<_>>();
+        edges.sort_by_key(|k| k.0);
+        assert_eq!(edges, vec![((0, 1), 100), ((0, 2), 20)]);
+
+        // Self loop not supported.
+        let graph = Graph::new(1).add_edge_with_metadata((0, 0), 5);
+        assert!(graph.adj_list[0].is_empty());
+        assert!(graph.edges_with_metadata().next().is_none());
     }
 }
