@@ -12,6 +12,7 @@ pub enum Error {
         num_vertices: usize,
         num_colors: usize,
     },
+
     #[error("Nodes {u} and {v} are connected and have the same color: {color}")]
     SameColor { u: usize, v: usize, color: Color },
 }
