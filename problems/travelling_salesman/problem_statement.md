@@ -31,8 +31,12 @@ Scoring is based on the length of the path.
 
 Consider the following graph:
 
-IMAGE
+<img src="/static/TSP_no_path.svg" width="720">
 
-The travelling salesman starts from town "0" and has a few options of traversing the whole map. This happens to be shortest path.
+The travelling salesman starts from town "0" and has a few options of traversing the whole map. Having chosen this path the travelling salesman crosses a path of distance _70_.
 
-IMAGE
+<img src="/static/TSP_path_70.svg" width="720">
+
+There is however a shorter path of distance _64_.
+
+<img src="/static/TSP_path_64.svg" width="720">

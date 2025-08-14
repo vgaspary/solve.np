@@ -30,10 +30,10 @@ Scoring will be based on the number of colors used.
 
 Consider the following graph:
 
-IMAGE
+<img src="/static/GC_not_colored.svg" width="720">
 
-The trivial solution is to pick a unique color for each vertex. The fewest colors we can use to color the graph (chromatic number) is 3. Here are two ways to color the graph using 3 colors.
+The trivial solution is to pick a unique color for each vertex. The fewest colors we can use to color the graph (chromatic number) is _4_. Here are two ways to color the graph using 4 colors.
 
-IMAGE
+<img src="/static/GC_4_colored.svg" width="720">
 
-IMAGE
+<img src="/static/GC_4_colored_2.svg" width="720">
