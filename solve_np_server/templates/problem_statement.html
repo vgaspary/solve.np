@@ -4,22 +4,28 @@
     <meta charset="utf-8">
     <title>Problems - solve.NP</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="/problems/assets/problem_utils.js"></script>
   </head>
   <body>
     {{ header | safe }}
     <div>
       <article id="problem_statement">
-        <script src="/problems/assets/problem_utils.js"></script>
         <script>
           fetch('http://{{ address }}:6520/api/problems/{{ problem_id }}')
             .then(response => response.json())
             .then(problem_details => {
               document.title = `${problem_details.name} - solve.NP`;
-              return problem_details.problem_statement_html;
+              document.getElementById("problem_statement").innerHTML = problem_details.problem_statement_html;
             })
-            .then(content => document.getElementById("problem_statement").innerHTML = content)
             .catch(console.log);
         </script>
+      </article>
+      <article>
+        <hr>
+        <h2><em>Sample input</em></h2> 
+        <pre><code>{{ sample_input }}</code></pre>
+        <textarea id="sample_solution" placeholder="Try your solution..." oninput="check_solution()"></textarea>
+        <p id="sample_solution_result"></p>
       </article>
     </div>
   </body>

@@ -10,3 +10,16 @@ function render_problem(problem) {
         </li>
           `;
 }
+
+function check_solution() {
+  let soolution_textarea = document.getElementById("sample_solution");
+  let solution = soolution_textarea.value;
+  // TODO: request the server to validate the solution.
+  if (solution === "") {
+    soolution_textarea.classList = [""];
+  } else if (Math.random() < 0.5) {
+    soolution_textarea.classList = ["error"];
+  } else {
+    soolution_textarea.classList = ["success"];
+  }
+}

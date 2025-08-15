@@ -16,6 +16,7 @@ pub struct Problem {
     pub name: String,
     pub description: String,
     pub problem_statement: PathBuf,
+    pub sample_input: String,
     pub inputs: HashMap<InputId, Input>,
 }
 

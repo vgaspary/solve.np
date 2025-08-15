@@ -193,6 +193,22 @@ input[type="text"], input[type="password"], textarea {
 textarea {
   vertical-align: top;
 }
+textarea.error {
+  border-color: red;
+}
+textarea.success {
+  border-color: green;
+}
+textarea:focus {
+  border-color: white;
+  outline: none;
+}
+textarea.error:focus {
+  border-color: red;
+}
+textarea.success:focus {
+  border-color: green;
+}
 
 label img {
   vertical-align: bottom;

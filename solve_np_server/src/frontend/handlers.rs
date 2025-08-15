@@ -74,6 +74,7 @@ struct ProblemStatementTemplate {
     header: HeaderTemplate,
     address: String,
     problem_id: String,
+    sample_input: String,
 }
 
 pub async fn problem_statement(
@@ -81,10 +82,17 @@ pub async fn problem_statement(
     path: web::Path<String>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
+    let problem_id = path.into_inner();
+    let sample_input = state
+        .static_data
+        .get(&problem_id)
+        .map(|problem| problem.sample_input.clone())
+        .unwrap_or_default();
     let body = ProblemStatementTemplate {
         header: HeaderTemplate::try_from(&session)?,
         address: state.address.to_string(),
-        problem_id: path.into_inner(),
+        problem_id,
+        sample_input,
     }
     .render()
     .map_err(ErrorInternalServerError)?;
