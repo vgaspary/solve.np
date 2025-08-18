@@ -116,7 +116,10 @@ mod tests {
     fn test_visited_twice() {
         let graph = complete_graph(4);
         let solution = vec![0, 1, 2, 1, 0];
-        assert_eq!(validate(&graph, solution), Err(Error::VisitedTwice { v: 1 }));
+        assert_eq!(
+            validate(&graph, solution),
+            Err(Error::VisitedTwice { v: 1 })
+        );
     }
 
     #[test]
@@ -125,6 +128,10 @@ mod tests {
         graph = graph.add_edge_with_metadata((0, 1), 1);
         graph = graph.add_edge_with_metadata((0, 2), 1);
         let solution = vec![0, 1, 2, 0];
-        assert_eq!(validate(&graph, solution), Err(Error::NoEdge { u: 1, v: 2 }));
+        assert_eq!(
+            validate(&graph, solution),
+            Err(Error::NoEdge { u: 1, v: 2 })
+        );
     }
 }
+

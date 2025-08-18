@@ -1,4 +1,8 @@
-use crate::api::types::{HealthCheckReport, Input, LogInForm, Problem, ProblemDetails};
+use crate::api::types::{
+    HealthCheckReport, Input, LogInForm, Problem, ProblemDetails, SampleSolution,
+    ValidateSampleSolutionResult,
+};
+use crate::api::utils;
 use crate::state::State;
 use actix_session::Session;
 use actix_web::{
@@ -80,4 +84,54 @@ pub async fn log_in(
 pub async fn log_out(session: Session) -> impl Responder {
     session.clear();
     web::Redirect::to("/").see_other()
+}
+
+pub async fn validate_sample_solution(
+    solution: web::Json<SampleSolution>,
+    state: web::Data<State>,
+) -> Result<impl Responder, HttpError> {
+    match solution.0 {
+        SampleSolution::TspSolution(path) => {
+            let Some(graph) = state
+                .static_data
+                .get(&String::from("travelling_salesman"))
+                .map(|problem| problem.sample_input.clone())
+                .and_then(utils::parse_tsp_input)
+            else {
+                return Err(ErrorInternalServerError(
+                    "Server error: failed parsing TSP sample input.",
+                ));
+            };
+            match tsp_validate::validate(&graph, path) {
+                Ok(score) => {
+                    Ok(HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
+                }
+                Err(err) => {
+                    Ok(HttpResponse::Ok()
+                        .json(ValidateSampleSolutionResult::Invalid(err.to_string())))
+                }
+            }
+        }
+        SampleSolution::GraphColoringSolution(coloring) => {
+            let Some(graph) = state
+                .static_data
+                .get(&String::from("graph_coloring"))
+                .map(|problem| problem.sample_input.clone())
+                .and_then(utils::parse_graph_coloring_input)
+            else {
+                return Err(ErrorInternalServerError(
+                    "Server error: failed parsing Graph Coloring sample input.",
+                ));
+            };
+            match graph_coloring_validate::validate(&graph, coloring) {
+                Ok(score) => {
+                    Ok(HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
+                }
+                Err(err) => {
+                    Ok(HttpResponse::Ok()
+                        .json(ValidateSampleSolutionResult::Invalid(err.to_string())))
+                }
+            }
+        }
+    }
 }

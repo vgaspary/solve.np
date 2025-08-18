@@ -11,15 +11,41 @@ function render_problem(problem) {
           `;
 }
 
-function check_solution() {
-  let soolution_textarea = document.getElementById("sample_solution");
-  let solution = soolution_textarea.value;
-  // TODO: request the server to validate the solution.
-  if (solution === "") {
-    soolution_textarea.classList = [""];
-  } else if (Math.random() < 0.5) {
-    soolution_textarea.classList = ["error"];
-  } else {
-    soolution_textarea.classList = ["success"];
+function parse_solution(problem_id, input) {
+  if (problem_id == "travelling_salesman") {
+    return { TspSolution: input.trim().split(/\s+/).map(n => Number(n)) };
+  } else if (problem_id == "graph_coloring") {
+    return { GraphColoringSolution: input.trim().split(/\s+/).map(n => Number(n)) };
   }
+}
+
+function check_solution(address, problem_id) {
+  let solution_textarea = document.getElementById("sample_solution");
+  let solution = solution_textarea.value;
+  let sample_solution_result = document.getElementById('sample_solution_result');
+  if (solution === "") {
+    solution_textarea.classList = [""];
+    sample_solution_result.innerHTML = "";
+    return;
+  }
+
+  fetch('http://' + address + ':6520/api/validate_sample_solution',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(parse_solution(problem_id, solution))
+    })
+    .then(response => response.json())
+    .then(validation_result => {
+      if (validation_result.Valid) {
+        solution_textarea.classList = ["success"];
+        sample_solution_result.innerHTML = validation_result.Valid;
+      } else if (validation_result.Invalid) {
+        solution_textarea.classList = ["error"];
+        sample_solution_result.innerHTML = validation_result.Invalid;
+      }
+    })
+    .catch(console.log);
 }

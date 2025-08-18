@@ -3,6 +3,7 @@ use std::path::PathBuf;
 
 pub type ProblemId = String;
 pub type InputId = String;
+pub type Score = usize;
 
 #[derive(Serialize)]
 pub struct Problem {
@@ -34,4 +35,16 @@ pub struct HealthCheckReport {
 pub struct LogInForm {
     pub username: String,
     pub password: String,
+}
+
+#[derive(Deserialize)]
+pub enum SampleSolution {
+    TspSolution(Vec<usize>),
+    GraphColoringSolution(Vec<usize>),
+}
+
+#[derive(Serialize)]
+pub enum ValidateSampleSolutionResult {
+    Invalid(String),
+    Valid(Score),
 }
