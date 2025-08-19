@@ -14,8 +14,9 @@ use api::handlers::{
 use base64::prelude::*;
 use clap::Parser;
 use frontend::handlers::{home_page, log_in as log_in_page, p_vs_np, problem_statement, problems};
+use rusqlite::Connection;
 use state::{State, StaticData};
-use std::{fs::File, io::BufReader, net::Ipv4Addr, path::PathBuf, time::SystemTime};
+use std::{fs::File, io::BufReader, net::Ipv4Addr, path::PathBuf, sync::Mutex, time::SystemTime};
 
 #[derive(Parser)]
 struct Args {
@@ -30,19 +31,25 @@ struct Args {
     /// Session cookie key.
     #[arg(short, long)]
     key: String,
+
+    /// DB path.
+    db_path: PathBuf,
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let args = Args::parse();
+    let start_time = SystemTime::now();
+    let address = args.address;
     let static_data: StaticData =
         serde_yaml::from_reader(BufReader::new(File::open(args.static_data_path)?))
             .map_err(std::io::Error::other)?;
-    let start_time = SystemTime::now();
+    let db = Mutex::new(Connection::open(args.db_path).map_err(std::io::Error::other)?);
     let state = Data::new(State {
         start_time,
-        address: args.address,
+        address,
         static_data,
+        db,
     });
     let secret_key = actix_web::cookie::Key::from(
         &BASE64_STANDARD

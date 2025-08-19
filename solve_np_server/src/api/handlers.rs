@@ -135,3 +135,11 @@ pub async fn validate_sample_solution(
         }
     }
 }
+
+pub async fn vote(
+    session: Session,
+    path: web::Path<String>,
+    state: web::Data<State>,
+) -> Result<impl Responder, HttpError> {
+    todo!()
+}
