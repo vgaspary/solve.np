@@ -95,7 +95,7 @@ pub async fn validate_sample_solution(
             let Some(graph) = state
                 .static_data
                 .get(&String::from("travelling_salesman"))
-                .map(|problem| problem.sample_input.clone())
+                .map(|problem| problem.sample_input.as_ref())
                 .and_then(utils::parse_tsp_input)
             else {
                 return Err(ErrorInternalServerError(
@@ -116,7 +116,7 @@ pub async fn validate_sample_solution(
             let Some(graph) = state
                 .static_data
                 .get(&String::from("graph_coloring"))
-                .map(|problem| problem.sample_input.clone())
+                .map(|problem| problem.sample_input.as_ref())
                 .and_then(utils::parse_graph_coloring_input)
             else {
                 return Err(ErrorInternalServerError(

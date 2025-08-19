@@ -1,6 +1,6 @@
 use libgraph::Graph;
 
-pub(crate) fn parse_tsp_input(input: String) -> Option<Graph<usize>> {
+pub(crate) fn parse_tsp_input(input: &str) -> Option<Graph<usize>> {
     let edges = input
         .split("\n")
         .filter(|line| !line.is_empty())
@@ -26,7 +26,7 @@ pub(crate) fn parse_tsp_input(input: String) -> Option<Graph<usize>> {
     )
 }
 
-pub(crate) fn parse_graph_coloring_input(input: String) -> Option<Graph> {
+pub(crate) fn parse_graph_coloring_input(input: &str) -> Option<Graph> {
     let edges = input
         .split("\n")
         .filter(|line| !line.is_empty())
