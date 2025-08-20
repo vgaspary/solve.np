@@ -150,7 +150,7 @@ pub async fn vote(
         .lock()
         .unwrap()
         .execute(
-            "INSERT INTO vote (user_id, vote) VALUES (?1, ?2)",
+            "INSERT INTO votes (user_id, vote) VALUES (?1, ?2)",
             (user_id, vote),
         )
         .map_err(ErrorInternalServerError)?;

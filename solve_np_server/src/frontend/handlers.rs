@@ -50,16 +50,11 @@ pub async fn home_page(session: Session) -> Result<impl Responder, HttpError> {
 #[template(path = "problems.html")]
 struct ProblemsTemplate {
     header: HeaderTemplate,
-    address: String,
 }
 
-pub async fn problems(
-    session: Session,
-    state: web::Data<State>,
-) -> Result<impl Responder, HttpError> {
+pub async fn problems(session: Session) -> Result<impl Responder, HttpError> {
     let body = ProblemsTemplate {
         header: HeaderTemplate::try_from(&session)?,
-        address: state.address.to_string(),
     }
     .render()
     .map_err(ErrorInternalServerError)?;
@@ -72,7 +67,6 @@ pub async fn problems(
 #[template(path = "problem_statement.html")]
 struct ProblemStatementTemplate {
     header: HeaderTemplate,
-    address: String,
     problem_id: String,
     sample_input: String,
 }
@@ -90,7 +84,6 @@ pub async fn problem_statement(
         .unwrap_or_default();
     let body = ProblemStatementTemplate {
         header: HeaderTemplate::try_from(&session)?,
-        address: state.address.to_string(),
         problem_id,
         sample_input,
     }

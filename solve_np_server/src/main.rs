@@ -25,10 +25,6 @@ struct Args {
     #[arg(short, long)]
     static_data_path: PathBuf,
 
-    /// Server address.
-    #[arg(short, long)]
-    address: Ipv4Addr,
-
     /// Session cookie key.
     #[arg(short, long)]
     key: String,
@@ -42,14 +38,12 @@ struct Args {
 async fn main() -> std::io::Result<()> {
     let args = Args::parse();
     let start_time = SystemTime::now();
-    let address = args.address;
     let static_data: StaticData =
         serde_yaml::from_reader(BufReader::new(File::open(args.static_data_path)?))
             .map_err(std::io::Error::other)?;
     let db = Mutex::new(Connection::open(args.db_path).map_err(std::io::Error::other)?);
     let state = Data::new(State {
         start_time,
-        address,
         static_data,
         db,
     });

@@ -19,7 +19,7 @@ function parse_solution(problem_id, input) {
   }
 }
 
-function check_solution(address, problem_id) {
+function check_solution(problem_id) {
   let solution_textarea = document.getElementById("sample_solution");
   let solution = solution_textarea.value;
   let sample_solution_result = document.getElementById('sample_solution_result');
@@ -29,7 +29,7 @@ function check_solution(address, problem_id) {
     return;
   }
 
-  fetch('http://' + address + ':6520/api/validate_sample_solution',
+  fetch('/api/validate_sample_solution',
     {
       method: 'POST',
       headers: {

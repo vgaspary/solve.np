@@ -12,8 +12,7 @@
       <ul id="ul_problems"></ul>
       <script src="/problems/assets/problem_utils.js"></script>
       <script>
-        const url = 'http://{{ address }}:6520/api/problems';
-        const problems = fetch(url)
+        const problems = fetch('/api/problems')
           .then(response => response.json())
           .then(problems => problems
             .sort((lhs, rhs) => lhs.id < rhs.id ? -1 : lhs.id > rhs.id ? 1 : 0)
