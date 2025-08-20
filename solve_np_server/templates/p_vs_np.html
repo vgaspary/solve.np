@@ -26,11 +26,13 @@
               console.log("Do work here");
             </script>
           {% else %}
-            <a href="/p_vs_np" onclick="vote('eq')" >[P == NP]</a>
-            <a href="/p_vs_np" onclick="vote('neq')">[P != NP]</a>
+            <a onclick="vote('eq')" >[P == NP]</a>
+            <a onclick="vote('neq')">[P != NP]</a>
             <script>
               function vote(choice) {
-                voted = true;
+                fetch('/api/vote/' + choice, { method: 'POST' })
+                  .then(response => { voted = true; } )
+                  .catch(console.log);
               }
             </script>
           {% endif %}

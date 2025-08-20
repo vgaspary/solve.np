@@ -10,6 +10,7 @@ use actix_web::{
 };
 use api::handlers::{
     get_problem_details, health_check, list_problems, log_in, log_out, validate_sample_solution,
+    vote,
 };
 use base64::prelude::*;
 use clap::Parser;
@@ -33,6 +34,7 @@ struct Args {
     key: String,
 
     /// DB path.
+    #[arg(short, long)]
     db_path: PathBuf,
 }
 
@@ -81,6 +83,7 @@ async fn main() -> std::io::Result<()> {
                         "/validate_sample_solution",
                         post().to(validate_sample_solution),
                     )
+                    .route("/vote/{vote}", post().to(vote))
                     .route("/log_in", post().to(log_in))
                     .route("/log_out", get().to(log_out)),
             )

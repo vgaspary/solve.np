@@ -109,13 +109,29 @@ struct PvsNpTemplate {
     voted: bool,
 }
 
-pub async fn p_vs_np(session: Session) -> Result<impl Responder, HttpError> {
+pub async fn p_vs_np(
+    session: Session,
+    state: web::Data<State>,
+) -> Result<impl Responder, HttpError> {
     let header = HeaderTemplate::try_from(&session)?;
     let logged_in = header.logged_in;
+    let user_id = session
+        .get::<String>("user_id")?
+        .ok_or(ErrorInternalServerError("user_id not found"))?;
+    let voted = state
+        .db
+        .lock()
+        .unwrap()
+        .execute(
+            "SELECT EXISTS ( SELECT 1 FROM votes WHERE user_id = ?1 )",
+            [user_id],
+        )
+        .map(|result| result == 1)
+        .unwrap_or(false);
     let body = PvsNpTemplate {
         header,
         logged_in,
-        voted: false,
+        voted,
     }
     .render()
     .map_err(ErrorInternalServerError)?;

@@ -5,6 +5,7 @@ use crate::api::types::{
 use crate::api::utils;
 use crate::state::State;
 use actix_session::Session;
+use actix_web::error::ErrorBadRequest;
 use actix_web::{
     HttpResponse, Responder, error::Error as HttpError, error::ErrorInternalServerError, web,
 };
@@ -92,16 +93,14 @@ pub async fn validate_sample_solution(
 ) -> Result<impl Responder, HttpError> {
     match solution.0 {
         SampleSolution::TspSolution(path) => {
-            let Some(graph) = state
+            let graph = state
                 .static_data
                 .get(&String::from("travelling_salesman"))
                 .map(|problem| problem.sample_input.as_ref())
                 .and_then(utils::parse_tsp_input)
-            else {
-                return Err(ErrorInternalServerError(
+                .ok_or(ErrorInternalServerError(
                     "Server error: failed parsing TSP sample input.",
-                ));
-            };
+                ))?;
             match tsp_validate::validate(&graph, path) {
                 Ok(score) => {
                     Ok(HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
@@ -113,16 +112,14 @@ pub async fn validate_sample_solution(
             }
         }
         SampleSolution::GraphColoringSolution(coloring) => {
-            let Some(graph) = state
+            let graph = state
                 .static_data
                 .get(&String::from("graph_coloring"))
                 .map(|problem| problem.sample_input.as_ref())
                 .and_then(utils::parse_graph_coloring_input)
-            else {
-                return Err(ErrorInternalServerError(
+                .ok_or(ErrorInternalServerError(
                     "Server error: failed parsing Graph Coloring sample input.",
-                ));
-            };
+                ))?;
             match graph_coloring_validate::validate(&graph, coloring) {
                 Ok(score) => {
                     Ok(HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
@@ -141,5 +138,21 @@ pub async fn vote(
     path: web::Path<String>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    todo!()
+    let user_id = session
+        .get::<String>("user_id")?
+        .ok_or(ErrorInternalServerError("user_id not found"))?;
+    let vote = path.into_inner();
+    if vote != "eq" && vote != "neq" {
+        return Err(ErrorBadRequest("Vote may only be 'eq' or 'neq'."));
+    }
+    state
+        .db
+        .lock()
+        .unwrap()
+        .execute(
+            "INSERT INTO vote (user_id, vote) VALUES (?1, ?2)",
+            (user_id, vote),
+        )
+        .map_err(ErrorInternalServerError)?;
+    Ok(web::Redirect::to("/p_vs_np").see_other())
 }
