@@ -17,7 +17,7 @@ use clap::Parser;
 use frontend::handlers::{home_page, log_in as log_in_page, p_vs_np, problem_statement, problems};
 use rusqlite::Connection;
 use state::{State, StaticData};
-use std::{fs::File, io::BufReader, net::Ipv4Addr, path::PathBuf, sync::Mutex, time::SystemTime};
+use std::{fs::File, io::BufReader, path::PathBuf, sync::Mutex, time::SystemTime};
 
 #[derive(Parser)]
 struct Args {
