@@ -4,6 +4,7 @@ set -euo pipefail
 
 SERVER_DIR="/home/vanand/code/solve.np/solve_np_server"
 STATIC_DATA_PATH="${SERVER_DIR}/static_data.yaml"
+DB_PATH="${SERVER_DIR}/file.db3"
 SERVER_ADDRESS="127.0.0.1"
 SERVER_PORT="6520"
 SERVER_URL="http://${SERVER_ADDRESS}:${SERVER_PORT}"
@@ -18,7 +19,7 @@ echo "Starting solve_np_server in the background..."
 # Start the server and redirect output to a log file
 "${SERVER_DIR}/../target/debug/solve_np_server" \
   --static-data-path "${STATIC_DATA_PATH}" \
-  --address "${SERVER_ADDRESS}" \
+  --db-path "${DB_PATH}" \
   --key "${RANDOM_KEY}" > test.log 2>&1 &
 
 SERVER_PID=$!
