@@ -1,6 +1,6 @@
 travelling_salesman:
   name: "Travelling Salesman"
-  description: "Find the shortest path in the graph that starts and ends in a specific node and visits **all** other nodes **exactly once**. This kind of a path is also known as a Hamiltonian cycle."
+  description: "Find the shortest path in the graph that starts and ends in a specific node and visits all other nodes exactly once. This kind of a path is also known as a Hamiltonian cycle."
   problem_statement: "../problems/travelling_salesman/problem_statement.md"
   sample_input: |
     0 4 2

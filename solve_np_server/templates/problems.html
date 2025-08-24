@@ -9,19 +9,14 @@
   <body>
     {{ header | safe }}
     <div>
-      <ul id="ul_problems"></ul>
-      <script src="/problems/assets/problem_utils.js"></script>
-      <script>
-        const problems = fetch('/api/problems')
-          .then(response => response.json())
-          .then(problems => problems
-            .sort((lhs, rhs) => lhs.id < rhs.id ? -1 : lhs.id > rhs.id ? 1 : 0)
-            .map(render_problem)
-            .join('')
-          )
-          .then(content => document.getElementById("ul_problems").innerHTML = content)
-          .catch(err => console.log(err));
-      </script>
+      <ul>
+        {% for problem in problems %}
+        <li>
+          <h1><a href="/problems/{{problem.id}}">{{problem.name}}</a></h1>
+          <article><p>{{problem.description}}</p></article>
+        </li>
+        {% endfor %}
+      </ul>
     </div>
   </body>
 </html>

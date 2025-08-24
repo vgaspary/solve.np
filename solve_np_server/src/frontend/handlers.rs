@@ -50,11 +50,26 @@ pub async fn home_page(session: Session) -> Result<impl Responder, HttpError> {
 #[template(path = "problems.html")]
 struct ProblemsTemplate {
     header: HeaderTemplate,
+    problems: Vec<crate::api::types::Problem>,
 }
 
-pub async fn problems(session: Session) -> Result<impl Responder, HttpError> {
+pub async fn problems(
+    session: Session,
+    state: web::Data<State>,
+) -> Result<impl Responder, HttpError> {
+    let mut problems = state
+        .static_data
+        .iter()
+        .map(|(id, problem)| crate::api::types::Problem {
+            id: id.clone(),
+            name: problem.name.clone(),
+            description: problem.description.clone(),
+        })
+        .collect::<Vec<_>>();
+    problems.sort_by_key(|problem| problem.id.clone());
     let body = ProblemsTemplate {
         header: HeaderTemplate::try_from(&session)?,
+        problems,
     }
     .render()
     .map_err(ErrorInternalServerError)?;

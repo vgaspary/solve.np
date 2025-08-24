@@ -1,23 +1,4 @@
-interface Problem {
-  id: string;
-  name: string;
-  description: string;
-}
-
 type SampleSolution = { TspSolution: number[] } | { GraphColoringSolution: number[] };
-
-function md_to_html(md_text: string): string {
-  return md_text.replace(/(\*\*|\*|__|_)(.*?)(\*\*|\*|__|_)/g, '<em>$2</em>');
-}
-
-function render_problem(problem: Problem): string {
-  return `
-        <li>
-          <h1><a href="/problems/${problem.id}">${problem.name}</a></h1>
-          <article><p>${md_to_html(problem.description)}</p></article>
-        </li>
-          `;
-}
 
 function parse_solution(problem_id: string, input: string): SampleSolution | null {
   if (problem_id === "travelling_salesman") {

@@ -58,15 +58,12 @@ async fn main() -> std::io::Result<()> {
             .app_data(state.clone())
             /* --- Frontend scope --- */
             .service(Files::new("/static", "./static").show_files_listing())
+            .service(Files::new("/js_utils", "./js_utils").show_files_listing())
             .route("/", get().to(home_page))
             .route("/log_in", get().to(log_in_page))
             .route("/p_vs_np", get().to(p_vs_np))
-            .service(
-                scope("/problems")
-                    .service(Files::new("/assets", "./problems_assets").show_files_listing())
-                    .route("", get().to(problems))
-                    .route("/{problem_id}", get().to(problem_statement)),
-            )
+            .route("/problems", get().to(problems))
+            .route("/problems/{problem_id}", get().to(problem_statement))
             /* ---------------------- */
             /* --- API scope --- */
             .service(

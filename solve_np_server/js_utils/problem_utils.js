@@ -1,9 +1,3 @@
-function md_to_html(md_text) {
-    return md_text.replace(/(\*\*|\*|__|_)(.*?)(\*\*|\*|__|_)/g, '<em>$2</em>');
-}
-function render_problem(problem) {
-    return "\n        <li>\n          <h1><a href=\"/problems/".concat(problem.id, "\">").concat(problem.name, "</a></h1>\n          <article><p>").concat(md_to_html(problem.description), "</p></article>\n        </li>\n          ");
-}
 function parse_solution(problem_id, input) {
     if (problem_id === "travelling_salesman") {
         return { TspSolution: input.trim().split(/\s+/).map(function (n) { return Number(n); }) };
