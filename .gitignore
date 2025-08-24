@@ -3,4 +3,4 @@
 **/inputs/*.txt
 !**/inputs/sample.txt
 test.log
-solve_np_server/file.db3
+*.db3

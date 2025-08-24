@@ -52,7 +52,7 @@ async fn main() -> std::io::Result<()> {
             .decode(args.key)
             .expect("Secret key must be base64 encoded."),
     );
-    env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
+    env_logger::init_from_env(env_logger::Env::default().default_filter_or("debug"));
     HttpServer::new(move || {
         App::new()
             .app_data(state.clone())

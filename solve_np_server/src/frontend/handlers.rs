@@ -8,6 +8,7 @@ use actix_web::{
 };
 use askama::Template;
 use serde::Deserialize;
+use log::{debug};
 
 #[derive(Template)]
 #[template(path = "header.html")]
@@ -126,17 +127,20 @@ pub async fn p_vs_np(
     let voted = logged_in
         && session
             .get::<String>("user_id")
+            .inspect(|user_id| debug!("User ID is {user_id:?}"))
             .unwrap_or_default()
             .and_then(|user_id| {
                 state
                     .db
                     .lock()
                     .unwrap()
-                    .execute(
+                    .query_row(
                         "SELECT EXISTS ( SELECT 1 FROM votes WHERE user_id = ?1 )",
                         [user_id],
+                        |row| row.get(0),
                     )
-                    .map(|result| result == 1)
+                    .inspect(|result| debug!("Result is {result}"))
+                    .inspect_err(|err| debug!("Query failed {err}"))
                     .ok()
             })
             .unwrap_or(false);
