@@ -4,10 +4,14 @@ set -euo pipefail
 
 SERVER_DIR="/home/vanand/code/solve.np/solve_np_server"
 STATIC_DATA_PATH="${SERVER_DIR}/static_data.yaml"
-DB_PATH="${SERVER_DIR}/file.db3"
+DB_PATH="${SERVER_DIR}/test_file.db3"
 SERVER_ADDRESS="127.0.0.1"
 SERVER_PORT="6520"
 SERVER_URL="http://${SERVER_ADDRESS}:${SERVER_PORT}"
+
+# Create the database and the votes table
+rm -f "${DB_PATH}"
+sqlite3 "${DB_PATH}" "CREATE TABLE votes (user_id TEXT, vote TEXT);"
 
 # Generate a random base64 encoded key for the session middleware
 RANDOM_KEY=$(head /dev/urandom | tr -dc A-Za-z0-9_ | head -c 64 | base64 -w 0)
@@ -30,6 +34,7 @@ cleanup() {
   echo "Stopping server (PID: ${SERVER_PID})..."
   kill "${SERVER_PID}" || true # Use || true to prevent script from exiting if kill fails
   wait "${SERVER_PID}" 2>/dev/null || true # Wait for the process to terminate
+  rm -f "${DB_PATH}"
   echo "Server stopped."
 }
 
@@ -245,5 +250,99 @@ else
   exit 1
 fi
 rm -f test.log
+
+# Test 13: Validate Sample Solution (TSP) - Correct
+echo "Testing /api/validate_sample_solution (TSP) - correct solution..."
+TSP_SOLUTION='{"TspSolution":[0,1,4,2,6,5,3,7,0]}'
+VALIDATE_RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "${TSP_SOLUTION}" "${SERVER_URL}/api/validate_sample_solution")
+
+if echo "${VALIDATE_RESPONSE}" | jq -e '.Valid == 69' > /dev/null; then
+    echo -e "/api/validate_sample_solution (TSP) - correct \e[32mpassed\e[0m."
+else
+    echo -e "/api/validate_sample_solution (TSP) - correct \e[31mfailed\e[0m. Response: ${VALIDATE_RESPONSE}"
+    exit 1
+fi
+
+# Test 14: Validate Sample Solution (TSP) - Incorrect
+echo "Testing /api/validate_sample_solution (TSP) - incorrect solution..."
+TSP_SOLUTION='{"TspSolution":[0,1,2,3]}'
+VALIDATE_RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "${TSP_SOLUTION}" "${SERVER_URL}/api/validate_sample_solution")
+
+if echo "${VALIDATE_RESPONSE}" | jq -e '.Invalid' > /dev/null; then
+    echo -e "/api/validate_sample_solution (TSP) - incorrect \e[32mpassed\e[0m."
+else
+    echo -e "/api/validate_sample_solution (TSP) - incorrect \e[31mfailed\e[0m. Response: ${VALIDATE_RESPONSE}"
+    exit 1
+fi
+
+# Test 15: Validate Sample Solution (Graph Coloring) - Incorrect
+echo "Testing /api/validate_sample_solution (Graph Coloring) - incorrect solution..."
+GC_SOLUTION='{"GraphColoringSolution":[0,0,0,0,0,0,0,0]}'
+VALIDATE_RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "${GC_SOLUTION}" "${SERVER_URL}/api/validate_sample_solution")
+
+if echo "${VALIDATE_RESPONSE}" | jq -e '.Invalid' > /dev/null; then
+    echo -e "/api/validate_sample_solution (Graph Coloring) - incorrect \e[32mpassed\e[0m."
+else
+    echo -e "/api/validate_sample_solution (Graph Coloring) - incorrect \e[31mfailed\e[0m. Response: ${VALIDATE_RESPONSE}"
+    exit 1
+fi
+
+
+# Test 17: Vote endpoint - successful vote 'eq'
+echo "Testing /api/vote/eq - successful vote..."
+COOKIE_JAR_VOTE=$(mktemp)
+
+# Log in to get a session cookie
+curl -s -c "${COOKIE_JAR_VOTE}" -X POST -d "username=user&password=pass" "${SERVER_URL}/api/log_in" > /dev/null
+
+# Send the vote request
+VOTE_EQ_RESPONSE_HEADERS=$(curl -s -D - -X POST -b "${COOKIE_JAR_VOTE}" "${SERVER_URL}/api/vote/eq" -o /dev/null)
+
+if echo "${VOTE_EQ_RESPONSE_HEADERS}" | grep -q "HTTP/1.1 303 See Other"; then
+    echo -e "/api/vote/eq \e[32mpassed\e[0m."
+else
+    echo -e "/api/vote/eq \e[31mfailed\e[0m. Headers: ${VOTE_EQ_RESPONSE_HEADERS}"
+    rm "${COOKIE_JAR_VOTE}"
+    exit 1
+fi
+rm "${COOKIE_JAR_VOTE}"
+
+# Test 18: Vote endpoint - successful vote 'neq'
+echo "Testing /api/vote/neq - successful vote..."
+COOKIE_JAR_VOTE=$(mktemp)
+
+# Log in to get a session cookie
+curl -s -c "${COOKIE_JAR_VOTE}" -X POST -d "username=user&password=pass" "${SERVER_URL}/api/log_in" > /dev/null
+
+# Send the vote request
+VOTE_NEQ_RESPONSE_HEADERS=$(curl -s -D - -X POST -b "${COOKIE_JAR_VOTE}" "${SERVER_URL}/api/vote/neq" -o /dev/null)
+
+if echo "${VOTE_NEQ_RESPONSE_HEADERS}" | grep -q "HTTP/1.1 303 See Other"; then
+    echo -e "/api/vote/neq \e[32mpassed\e[0m."
+else
+    echo -e "/api/vote/neq \e[31mfailed\e[0m. Headers: ${VOTE_NEQ_RESPONSE_HEADERS}"
+    rm "${COOKIE_JAR_VOTE}"
+    exit 1
+fi
+rm "${COOKIE_JAR_VOTE}"
+
+# Test 19: Vote endpoint - invalid vote
+echo "Testing /api/vote/invalid - invalid vote..."
+COOKIE_JAR_VOTE=$(mktemp)
+
+# Log in to get a session cookie
+curl -s -c "${COOKIE_JAR_VOTE}" -X POST -d "username=user&password=pass" "${SERVER_URL}/api/log_in" > /dev/null
+
+# Send the vote request
+INVALID_VOTE_RESPONSE=$(curl -s -w "%{http_code}" -X POST -b "${COOKIE_JAR_VOTE}" "${SERVER_URL}/api/vote/invalid" -o /dev/null)
+
+if [ "${INVALID_VOTE_RESPONSE}" -eq 400 ]; then
+    echo -e "/api/vote/invalid \e[32mpassed\e[0m."
+else
+    echo -e "/api/vote/invalid \e[31mfailed\e[0m. HTTP status code: ${INVALID_VOTE_RESPONSE}"
+    rm "${COOKIE_JAR_VOTE}"
+    exit 1
+fi
+rm "${COOKIE_JAR_VOTE}"
 
 echo -e "\e[32mAll tests passed!\e[0m"
