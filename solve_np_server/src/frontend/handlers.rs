@@ -7,8 +7,8 @@ use actix_web::{
     web,
 };
 use askama::Template;
+use log::debug;
 use serde::Deserialize;
-use log::{debug};
 
 #[derive(Template)]
 #[template(path = "header.html")]
@@ -160,11 +160,13 @@ pub async fn p_vs_np(
 #[template(path = "log_in.html")]
 struct LogInTemplate {
     header: HeaderTemplate,
+    redirect: Option<String>,
     error_msg: String,
 }
 
 #[derive(Deserialize)]
 pub struct LogInQueryParams {
+    redirect: Option<String>,
     err: Option<String>,
 }
 
@@ -174,6 +176,7 @@ pub async fn log_in(
 ) -> Result<impl Responder, HttpError> {
     let body = LogInTemplate {
         header: HeaderTemplate::try_from(&session)?,
+        redirect: params.redirect.clone(),
         error_msg: params.err.clone().unwrap_or_default(),
     }
     .render()

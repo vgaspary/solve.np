@@ -9,7 +9,7 @@
   <body>
     {{ header | safe }}
     <div>
-      <form action="/api/log_in" method="post">
+      <form action="/api/log_in{% if let Some(url) = redirect %}?redirect={{ url }}{% endif %}" method="post">
         <label for="username">Username:</label><br>
         <input type="text" name="username" required><br>
         <br>
