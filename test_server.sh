@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-SERVER_DIR="/home/vanand/code/solve.np/solve_np_server"
+ROOT_DIR=$(pwd)
+SERVER_DIR="${ROOT_DIR}/solve_np_server"
 STATIC_DATA_PATH="${SERVER_DIR}/static_data.yaml"
 DB_PATH="${SERVER_DIR}/test_file.db3"
 SERVER_ADDRESS="127.0.0.1"
@@ -21,7 +22,7 @@ cd "${SERVER_DIR}" && cargo build
 
 echo "Starting solve_np_server in the background..."
 # Start the server and redirect output to a log file
-"${SERVER_DIR}/../target/debug/solve_np_server" \
+"${ROOT_DIR}/target/debug/solve_np_server" \
   --static-data-path "${STATIC_DATA_PATH}" \
   --db-path "${DB_PATH}" \
   --key "${RANDOM_KEY}" > test.log 2>&1 &
