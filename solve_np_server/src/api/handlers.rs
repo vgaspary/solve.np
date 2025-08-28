@@ -2,6 +2,7 @@ use crate::api::types::{
     HealthCheckReport, Input, LogInForm, Problem, ProblemDetails, SampleSolution,
     ValidateSampleSolutionResult,
 };
+use log::debug;
 use crate::api::utils;
 use crate::state::State;
 use actix_session::Session;
@@ -160,6 +161,7 @@ pub async fn vote(
             "INSERT INTO votes (user_id, vote) VALUES (?1, ?2)",
             (user_id, vote),
         )
-        .map_err(ErrorInternalServerError)?;
+        .inspect_err(|err| debug!("SQL query failed: {err}"))
+        .map_err(|_| ErrorInternalServerError("Unexpected error #1"))?;
     Ok(web::Redirect::to("/p_vs_np").see_other())
 }

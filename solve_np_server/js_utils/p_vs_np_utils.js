@@ -5,5 +5,6 @@ var PvsNp;
 })(PvsNp || (PvsNp = {}));
 function vote(choice) {
     fetch('/api/vote/' + choice, { method: 'POST' })
+        .then(function () { return window.location.reload(); })
         .catch(console.log);
 }
