@@ -2,7 +2,6 @@ use crate::api::types::{
     HealthCheckReport, Input, LogInForm, Problem, ProblemDetails, SampleSolution,
     ValidateSampleSolutionResult,
 };
-use log::debug;
 use crate::api::utils;
 use crate::state::State;
 use actix_session::Session;
@@ -10,7 +9,9 @@ use actix_web::error::ErrorBadRequest;
 use actix_web::{
     HttpResponse, Responder, error::Error as HttpError, error::ErrorInternalServerError, web,
 };
+use log::debug;
 use pulldown_cmark::Parser;
+use rusqlite::params;
 use serde::Deserialize;
 use std::fs;
 use std::time::SystemTime;
@@ -149,17 +150,19 @@ pub async fn vote(
     let user_id = session
         .get::<String>("user_id")?
         .ok_or(ErrorInternalServerError("user_id not found"))?;
-    let vote = path.into_inner();
-    if vote != "eq" && vote != "neq" {
-        return Err(ErrorBadRequest("Vote may only be 'eq' or 'neq'."));
-    }
+    let vote = match path.into_inner().as_str() {
+        "eq" => true,
+        "neq" => false,
+        _ => return Err(ErrorBadRequest("Vote may only be 'eq' or 'neq'.")),
+    };
+    debug!("user_id {user_id} voteed on P vs NP: {vote}");
     state
         .db
         .lock()
         .unwrap()
         .execute(
             "INSERT INTO votes (user_id, vote) VALUES (?1, ?2)",
-            (user_id, vote),
+            params![user_id, vote],
         )
         .inspect_err(|err| debug!("SQL query failed: {err}"))
         .map_err(|_| ErrorInternalServerError("Unexpected error #1"))?;

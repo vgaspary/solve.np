@@ -1,5 +1,6 @@
 #!/bin/bash
 if [ ! -f ../solve_np.db3 ]; then
+  echo "Creating and setting up the DB."
   sqlite3 ../solve_np.db3 "CREATE TABLE votes (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT UNIQUE, vote BOOLEAN);"
 fi
 

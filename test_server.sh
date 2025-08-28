@@ -12,7 +12,7 @@ SERVER_URL="http://${SERVER_ADDRESS}:${SERVER_PORT}"
 
 # Create the database and the votes table
 rm -f "${DB_PATH}"
-sqlite3 "${DB_PATH}" "CREATE TABLE votes (user_id TEXT, vote TEXT);"
+sqlite3 "${DB_PATH}" "CREATE TABLE votes (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT UNIQUE, vote BOOLEAN);"
 
 # Generate a random base64 encoded key for the session middleware
 RANDOM_KEY=$(head /dev/urandom | tr -dc A-Za-z0-9_ | head -c 64 | base64 -w 0)
@@ -33,7 +33,7 @@ echo "Server started with PID: ${SERVER_PID}"
 # Function to clean up server process on exit
 cleanup() {
   echo "Stopping server (PID: ${SERVER_PID})..."
-  kill "${SERVER_PID}" || true # Use || true to prevent script from exiting if kill fails
+  kill -9 "${SERVER_PID}" || true # Use || true to prevent script from exiting if kill fails
   wait "${SERVER_PID}" 2>/dev/null || true # Wait for the process to terminate
   rm -f "${DB_PATH}"
   echo "Server stopped."
@@ -250,7 +250,6 @@ else
   echo -e "Logout test \e[31mfailed\e[0m. Home page content: ${HOME_PAGE_AFTER_LOGOUT:0:200}... (Full response length: ${#HOME_PAGE_AFTER_LOGOUT}) "
   exit 1
 fi
-rm -f test.log
 
 # Test 13: Validate Sample Solution (TSP) - Correct
 echo "Testing /api/validate_sample_solution (TSP) - correct solution..."
@@ -313,7 +312,7 @@ echo "Testing /api/vote/neq - successful vote..."
 COOKIE_JAR_VOTE=$(mktemp)
 
 # Log in to get a session cookie
-curl -s -c "${COOKIE_JAR_VOTE}" -X POST -d "username=user&password=pass" "${SERVER_URL}/api/log_in" > /dev/null
+curl -s -c "${COOKIE_JAR_VOTE}" -X POST -d "username=another_user&password=pass" "${SERVER_URL}/api/log_in" > /dev/null
 
 # Send the vote request
 VOTE_NEQ_RESPONSE_HEADERS=$(curl -s -D - -X POST -b "${COOKIE_JAR_VOTE}" "${SERVER_URL}/api/vote/neq" -o /dev/null)
@@ -347,3 +346,4 @@ fi
 rm "${COOKIE_JAR_VOTE}"
 
 echo -e "\e[32mAll tests passed!\e[0m"
+rm -f test.log
