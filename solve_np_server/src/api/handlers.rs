@@ -96,7 +96,7 @@ pub async fn log_out(session: Session) -> impl Responder {
     web::Redirect::to("/").see_other()
 }
 
-pub async fn validate_sample_solution(
+pub async fn validate_sample(
     solution: web::Json<SampleSolution>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {

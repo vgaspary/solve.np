@@ -252,38 +252,38 @@ else
 fi
 
 # Test 13: Validate Sample Solution (TSP) - Correct
-echo "Testing /api/validate_sample_solution (TSP) - correct solution..."
+echo "Testing /api/validate_sample (TSP) - correct solution..."
 TSP_SOLUTION='{"TspSolution":[0,1,4,2,6,5,3,7,0]}'
-VALIDATE_RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "${TSP_SOLUTION}" "${SERVER_URL}/api/validate_sample_solution")
+VALIDATE_RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "${TSP_SOLUTION}" "${SERVER_URL}/api/validate_sample")
 
 if echo "${VALIDATE_RESPONSE}" | jq -e '.Valid == 69' > /dev/null; then
-    echo -e "/api/validate_sample_solution (TSP) - correct \e[32mpassed\e[0m."
+    echo -e "/api/validate_sample (TSP) - correct \e[32mpassed\e[0m."
 else
-    echo -e "/api/validate_sample_solution (TSP) - correct \e[31mfailed\e[0m. Response: ${VALIDATE_RESPONSE}"
+    echo -e "/api/validate_sample (TSP) - correct \e[31mfailed\e[0m. Response: ${VALIDATE_RESPONSE}"
     exit 1
 fi
 
 # Test 14: Validate Sample Solution (TSP) - Incorrect
-echo "Testing /api/validate_sample_solution (TSP) - incorrect solution..."
+echo "Testing /api/validate_sample (TSP) - incorrect solution..."
 TSP_SOLUTION='{"TspSolution":[0,1,2,3]}'
-VALIDATE_RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "${TSP_SOLUTION}" "${SERVER_URL}/api/validate_sample_solution")
+VALIDATE_RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "${TSP_SOLUTION}" "${SERVER_URL}/api/validate_sample")
 
 if echo "${VALIDATE_RESPONSE}" | jq -e '.Invalid' > /dev/null; then
-    echo -e "/api/validate_sample_solution (TSP) - incorrect \e[32mpassed\e[0m."
+    echo -e "/api/validate_sample (TSP) - incorrect \e[32mpassed\e[0m."
 else
-    echo -e "/api/validate_sample_solution (TSP) - incorrect \e[31mfailed\e[0m. Response: ${VALIDATE_RESPONSE}"
+    echo -e "/api/validate_sample (TSP) - incorrect \e[31mfailed\e[0m. Response: ${VALIDATE_RESPONSE}"
     exit 1
 fi
 
 # Test 15: Validate Sample Solution (Graph Coloring) - Incorrect
-echo "Testing /api/validate_sample_solution (Graph Coloring) - incorrect solution..."
+echo "Testing /api/validate_sample (Graph Coloring) - incorrect solution..."
 GC_SOLUTION='{"GraphColoringSolution":[0,0,0,0,0,0,0,0]}'
-VALIDATE_RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "${GC_SOLUTION}" "${SERVER_URL}/api/validate_sample_solution")
+VALIDATE_RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "${GC_SOLUTION}" "${SERVER_URL}/api/validate_sample")
 
 if echo "${VALIDATE_RESPONSE}" | jq -e '.Invalid' > /dev/null; then
-    echo -e "/api/validate_sample_solution (Graph Coloring) - incorrect \e[32mpassed\e[0m."
+    echo -e "/api/validate_sample (Graph Coloring) - incorrect \e[32mpassed\e[0m."
 else
-    echo -e "/api/validate_sample_solution (Graph Coloring) - incorrect \e[31mfailed\e[0m. Response: ${VALIDATE_RESPONSE}"
+    echo -e "/api/validate_sample (Graph Coloring) - incorrect \e[31mfailed\e[0m. Response: ${VALIDATE_RESPONSE}"
     exit 1
 fi
 

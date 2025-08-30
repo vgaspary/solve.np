@@ -9,8 +9,7 @@ use actix_web::{
     web::{Data, get, post, scope},
 };
 use api::handlers::{
-    get_problem_details, health_check, list_problems, log_in, log_out, validate_sample_solution,
-    vote,
+    get_problem_details, health_check, list_problems, log_in, log_out, validate_sample, vote,
 };
 use base64::prelude::*;
 use clap::Parser;
@@ -70,10 +69,7 @@ async fn main() -> std::io::Result<()> {
                 scope("/api")
                     .route("/problems", get().to(list_problems))
                     .route("/problems/{problem_id}", get().to(get_problem_details))
-                    .route(
-                        "/validate_sample_solution",
-                        post().to(validate_sample_solution),
-                    )
+                    .route("/validate_sample", post().to(validate_sample))
                     .route("/vote/{vote}", post().to(vote))
                     .route("/log_in", post().to(log_in))
                     .route("/log_out", get().to(log_out)),

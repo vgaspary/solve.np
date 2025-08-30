@@ -22,7 +22,7 @@ function check_solution(problem_id) {
         sample_solution_result.innerHTML = "";
         return;
     }
-    fetch('/api/validate_sample_solution', {
+    fetch('/api/validate_sample', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

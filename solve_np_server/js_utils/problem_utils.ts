@@ -25,7 +25,7 @@ function check_solution(problem_id: string): void {
     return;
   }
 
-  fetch('/api/validate_sample_solution',
+  fetch('/api/validate_sample',
     {
       method: 'POST',
       headers: {
