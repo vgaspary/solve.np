@@ -10,8 +10,8 @@
   <body>
     {{ header | safe }}
     <div>
-      {{ problem.problem_statement }}
       <article>
+        {{ problem.problem_statement | safe }}
         <hr>
         <h2><em>Sample input</em></h2> 
         <pre><code>{{ problem.sample_input }}</code></pre>
