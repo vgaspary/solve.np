@@ -67,26 +67,6 @@ else
   exit 1
 fi
 
-# Test 2: List Problems API
-echo "Testing /api/problems..."
-PROBLEMS_RESPONSE=$(curl -s "${SERVER_URL}/api/problems")
-if echo "${PROBLEMS_RESPONSE}" | jq -e '.[].id' | grep -q "graph_coloring" && echo "${PROBLEMS_RESPONSE}" | jq -e '.[].id' | grep -q "travelling_salesman"; then
-  echo -e "/api/problems \e[32mpassed\e[0m."
-else
-  echo -e "/api/problems \e[31mfailed\e[0m. Response: ${PROBLEMS_RESPONSE}"
-  exit 1
-fi
-
-# Test 3: Get Problem Details API
-echo "Testing /api/problems/graph_coloring..."
-PROBLEM_DETAILS_RESPONSE=$(curl -s "${SERVER_URL}/api/problems/graph_coloring")
-if echo "${PROBLEM_DETAILS_RESPONSE}" | jq -e '.id == "graph_coloring" and .name == "Graph Coloring" and .problem_statement_html' > /dev/null; then
-  echo -e "/api/problems/graph_coloring \e[32mpassed\e[0m."
-else
-  echo -e "/api/problems/graph_coloring \e[31mfailed\e[0m. Response: ${PROBLEM_DETAILS_RESPONSE}"
-  exit 1
-fi
-
 # Test 4: Home page
 echo "Testing / (home page)..."
 HOME_PAGE_RESPONSE=$(curl -s "${SERVER_URL}/")
@@ -201,7 +181,7 @@ fi
 echo "Testing /problems/graph_coloring..."
 PROBLEM_STATEMENT_PAGE_RESPONSE=$(curl -s "${SERVER_URL}/problems/graph_coloring")
 
-if echo "${PROBLEM_STATEMENT_PAGE_RESPONSE}" | grep -q "<article id=\"problem_statement\">"; then
+if echo "${PROBLEM_STATEMENT_PAGE_RESPONSE}" | grep -q "<title>Graph Coloring - solve.NP</title>"; then
   echo -e "/problems/graph_coloring \e[32mpassed\e[0m."
 else
   echo -e "/problems/graph_coloring \e[31mfailed\e[0m. Response: ${PROBLEM_STATEMENT_PAGE_RESPONSE}"

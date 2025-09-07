@@ -1,6 +1,5 @@
 use crate::api::types::{
-    HealthCheckReport, Input, LogInForm, Problem, ProblemDetails, SampleSolution,
-    ValidateSampleSolutionResult,
+    HealthCheckReport, LogInForm, SampleSolution, ValidateSampleSolutionResult,
 };
 use crate::api::utils;
 use crate::state::State;
@@ -10,10 +9,8 @@ use actix_web::{
     HttpResponse, Responder, error::Error as HttpError, error::ErrorInternalServerError, web,
 };
 use log::debug;
-use pulldown_cmark::Parser;
 use rusqlite::params;
 use serde::Deserialize;
-use std::fs;
 use std::time::SystemTime;
 
 pub async fn health_check(state: web::Data<State>) -> Result<impl Responder, HttpError> {
@@ -24,51 +21,6 @@ pub async fn health_check(state: web::Data<State>) -> Result<impl Responder, Htt
         uptime: format!("{}s", uptime.as_secs()),
     };
     Ok(HttpResponse::Ok().json(response))
-}
-
-pub async fn list_problems(state: web::Data<State>) -> impl Responder {
-    let result = state
-        .static_data
-        .iter()
-        .map(|(id, problem)| Problem {
-            id: id.clone(),
-            name: problem.name.clone(),
-            description: problem.description.clone(),
-        })
-        .collect::<Vec<_>>();
-
-    HttpResponse::Ok().json(result)
-}
-
-pub async fn get_problem_details(
-    path: web::Path<String>,
-    state: web::Data<State>,
-) -> Result<impl Responder, HttpError> {
-    let problem_id = path.into_inner();
-    state
-        .static_data
-        .get(&problem_id)
-        .ok_or_else(|| ErrorInternalServerError("No problem found with ID"))
-        .and_then(|problem| {
-            let md_content = fs::read_to_string(&problem.problem_statement)?;
-            let parser = Parser::new(&md_content);
-            let mut problem_statement_html = String::new();
-            pulldown_cmark::html::push_html(&mut problem_statement_html, parser);
-            Ok(ProblemDetails {
-                id: problem_id,
-                name: problem.name.clone(),
-                problem_statement_html,
-                inputs: problem
-                    .inputs
-                    .iter()
-                    .map(|(id, input)| Input {
-                        id: id.clone(),
-                        path: input.path.clone(),
-                    })
-                    .collect(),
-            })
-        })
-        .map(|problem_details| HttpResponse::Ok().json(problem_details))
 }
 
 #[derive(Deserialize)]
@@ -165,6 +117,6 @@ pub async fn vote(
             params![user_id, vote],
         )
         .inspect_err(|err| debug!("SQL query failed: {err}"))
-        .map_err(|_| ErrorInternalServerError("Unexpected error #1"))?;
+        .map_err(|_| ErrorInternalServerError("Internal error #1"))?;
     Ok(web::Redirect::to("/p_vs_np").see_other())
 }

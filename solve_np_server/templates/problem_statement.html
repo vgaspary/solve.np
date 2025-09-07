@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Problems - solve.NP</title>
+    <title>{{ problem.name }} - solve.NP</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="icon" href="/static/favicon.png">
     <script src="/js_utils/problem_utils.js"></script>
@@ -10,23 +10,18 @@
   <body>
     {{ header | safe }}
     <div>
-      <article id="problem_statement">
-        <script>
-          fetch('/api/problems/{{ problem_id }}')
-            .then(response => response.json())
-            .then(problem_details => {
-              document.title = `${problem_details.name} - solve.NP`;
-              document.getElementById("problem_statement").innerHTML = problem_details.problem_statement_html;
-            })
-            .catch(console.log);
-        </script>
-      </article>
+      {{ problem.problem_statement }}
       <article>
         <hr>
         <h2><em>Sample input</em></h2> 
-        <pre><code>{{ sample_input }}</code></pre>
-        <textarea id="sample_solution" placeholder="Try your solution..." oninput="check_solution('{{ problem_id }}')"></textarea>
+        <pre><code>{{ problem.sample_input }}</code></pre>
+        <textarea id="sample_solution" placeholder="Try your solution..." oninput="check_solution('{{ problem.id }}')"></textarea>
         <p id="sample_solution_result"></p>
+        <hr>
+        <h2><em>Inputs</em></h2>
+        {% for input in problem.inputs %}
+        <h2><a href="/api/problems/{{ problem.id }}/inputs/{{ input.filename }}">{{ input.filename }}</a> {{ input.size_h }}</h2>
+        {% endfor %}
       </article>
     </div>
   </body>

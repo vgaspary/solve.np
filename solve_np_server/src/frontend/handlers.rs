@@ -1,4 +1,7 @@
-use crate::state::State;
+use crate::{
+    frontend::utils::{bytes_to_string_h, get_file_metadata},
+    state::State,
+};
 use actix_session::Session;
 use actix_web::{
     HttpResponse, Responder,
@@ -7,9 +10,12 @@ use actix_web::{
     web,
 };
 use askama::Template;
+use itertools::Itertools;
 use log::debug;
+use pulldown_cmark::Parser;
 use rusqlite::params;
 use serde::Deserialize;
+use std::fs;
 
 #[derive(Template)]
 #[template(path = "header.html")]
@@ -59,7 +65,7 @@ pub async fn problems(
     session: Session,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let mut problems = state
+    let problems = state
         .static_data
         .iter()
         .map(|(id, problem)| crate::api::types::Problem {
@@ -67,8 +73,8 @@ pub async fn problems(
             name: problem.name.clone(),
             description: problem.description.clone(),
         })
+        .sorted_by_key(|problem| problem.id.clone())
         .collect::<Vec<_>>();
-    problems.sort_by_key(|problem| problem.id.clone());
     let body = ProblemsTemplate {
         header: HeaderTemplate::try_from(&session)?,
         problems,
@@ -84,8 +90,21 @@ pub async fn problems(
 #[template(path = "problem_statement.html")]
 struct ProblemStatementTemplate {
     header: HeaderTemplate,
-    problem_id: String,
+    problem: Problem,
+}
+
+struct Problem {
+    id: String,
+    name: String,
+    problem_statement: String,
     sample_input: String,
+    inputs: Vec<Input>,
+}
+
+struct Input {
+    filename: String,
+    size: u64,
+    size_h: String,
 }
 
 pub async fn problem_statement(
@@ -94,15 +113,45 @@ pub async fn problem_statement(
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let problem_id = path.into_inner();
-    let sample_input = state
+    let problem = state
         .static_data
         .get(&problem_id)
-        .map(|problem| problem.sample_input.clone())
-        .unwrap_or_default();
+        .ok_or_else(|| ErrorInternalServerError("No problem found with ID"))
+        .and_then(move |problem| {
+            let md_content = fs::read_to_string(&problem.problem_statement)?;
+            let parser = Parser::new(&md_content);
+            let mut problem_statement = String::new();
+            pulldown_cmark::html::push_html(&mut problem_statement, parser);
+            Ok(Problem {
+                id: problem_id,
+                name: problem.name.clone(),
+                problem_statement,
+                sample_input: problem.sample_input.clone(),
+                inputs: problem
+                    .inputs
+                    .iter()
+                    .map(|(_, input)| {
+                        get_file_metadata(&input.path)
+                            .inspect_err(|err| {
+                                debug!(
+                                    "Failed acquiring metadata from path {:?}: {err}",
+                                    input.path
+                                )
+                            })
+                            .expect("Unexpected error #3")
+                    })
+                    .map(|(filename, size)| Input {
+                        filename,
+                        size,
+                        size_h: bytes_to_string_h(size),
+                    })
+                    .sorted_by_key(|input| input.size)
+                    .collect(),
+            })
+        })?;
     let body = ProblemStatementTemplate {
         header: HeaderTemplate::try_from(&session)?,
-        problem_id,
-        sample_input,
+        problem,
     }
     .render()
     .map_err(ErrorInternalServerError)?;
@@ -159,7 +208,7 @@ pub async fn p_vs_np(
             )
             .inspect(|result| debug!("(num_eq, num_neq): {result:?}"))
             .inspect_err(|err| debug!("Query failed {err}"))
-            .map_err(|_| ErrorInternalServerError("Unexpected error #2"))?
+            .map_err(|_| ErrorInternalServerError("Internal error #2"))?
     } else {
         (0, 0)
     };

@@ -8,9 +8,7 @@ use actix_web::{
     App, HttpServer,
     web::{Data, get, post, scope},
 };
-use api::handlers::{
-    get_problem_details, health_check, list_problems, log_in, log_out, validate_sample, vote,
-};
+use api::handlers::{health_check, log_in, log_out, validate_sample, vote};
 use base64::prelude::*;
 use clap::Parser;
 use frontend::handlers::{home_page, log_in as log_in_page, p_vs_np, problem_statement, problems};
@@ -56,8 +54,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(state.clone())
             /* --- Frontend scope --- */
-            .service(Files::new("/static", "./static").show_files_listing())
-            .service(Files::new("/js_utils", "./js_utils").show_files_listing())
+            .service(Files::new("/static", "./static"))
+            .service(Files::new("/js_utils", "./js_utils"))
             .route("/", get().to(home_page))
             .route("/log_in", get().to(log_in_page))
             .route("/p_vs_np", get().to(p_vs_np))
@@ -67,8 +65,7 @@ async fn main() -> std::io::Result<()> {
             /* --- API scope --- */
             .service(
                 scope("/api")
-                    .route("/problems", get().to(list_problems))
-                    .route("/problems/{problem_id}", get().to(get_problem_details))
+                    .service(Files::new("/problems", "../problems"))
                     .route("/validate_sample", post().to(validate_sample))
                     .route("/vote/{vote}", post().to(vote))
                     .route("/log_in", post().to(log_in))

@@ -22,9 +22,6 @@ travelling_salesman:
     3 7 7
     3 4 9
   inputs:
-    sample:
-      path: "../problems/travelling_salesman/inputs/sample.txt"
-      cmd: "tsp_gen"
     small_sparse:
       path: "../problems/travelling_salesman/inputs/small_sparse.txt"
       cmd: "tsp_gen -v 100 -d 0.3 -m 100 -s 20"
@@ -75,9 +72,6 @@ graph_coloring:
     0 1
     0 5
   inputs:
-    sample:
-      path: "../problems/graph_coloring/inputs/sample.txt"
-      cmd: "graph_coloring_gen"
     small_ultra_sparse:
       path: "../problems/graph_coloring/inputs/small_ultra_sparse.txt"
       cmd: "graph_coloring_gen -v 100 -d 0.1"
