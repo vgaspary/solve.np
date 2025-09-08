@@ -6,6 +6,7 @@ use actix_files::Files;
 use actix_session::{SessionMiddleware, config::PersistentSession, storage::CookieSessionStore};
 use actix_web::{
     App, HttpServer,
+    http::header::DispositionType,
     web::{Data, get, post, scope},
 };
 use api::handlers::{health_check, log_in, log_out, validate_sample, vote};
@@ -65,7 +66,10 @@ async fn main() -> std::io::Result<()> {
             /* --- API scope --- */
             .service(
                 scope("/api")
-                    .service(Files::new("/problems", "../problems"))
+                    .service(
+                        Files::new("/problems", "../problems")
+                            .mime_override(|_| DispositionType::Attachment),
+                    )
                     .route("/validate_sample", post().to(validate_sample))
                     .route("/vote/{vote}", post().to(vote))
                     .route("/log_in", post().to(log_in))
