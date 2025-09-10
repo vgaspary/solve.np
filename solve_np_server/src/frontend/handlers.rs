@@ -102,6 +102,7 @@ struct Problem {
 }
 
 struct Input {
+    id: String,
     filename: String,
     size: u64,
     size_h: String,
@@ -130,23 +131,24 @@ pub async fn problem_statement(
                 inputs: problem
                     .inputs
                     .iter()
-                    .map(|(_, input)| {
-                        get_file_metadata(&input.path)
+                    .map(|(id, input)| {
+                        let (filename, size) = get_file_metadata(&input.path)
                             .inspect_err(|err| {
                                 debug!(
                                     "Failed acquiring metadata from path {:?}: {err}",
                                     input.path
                                 )
                             })
-                            .expect("Unexpected error #3")
+                            .map_err(|_| ErrorInternalServerError("Internal error #3"))?;
+                        Ok::<Input, HttpError>(Input {
+                            id: id.clone(),
+                            filename,
+                            size,
+                            size_h: bytes_to_string_h(size),
+                        })
                     })
-                    .map(|(filename, size)| Input {
-                        filename,
-                        size,
-                        size_h: bytes_to_string_h(size),
-                    })
-                    .sorted_by_key(|input| input.size)
-                    .collect(),
+                    .sorted_by_key(|input| input.as_ref().map_or(0, |input| input.size))
+                    .collect::<Result<Vec<_>, _>>()?,
             })
         })?;
     let body = ProblemStatementTemplate {
@@ -164,7 +166,6 @@ pub async fn problem_statement(
 #[template(path = "p_vs_np.html")]
 struct PvsNpTemplate {
     header: HeaderTemplate,
-    logged_in: bool,
     voted: bool,
     num_p_eq_np_votes: usize,
     num_p_neq_np_votes: usize,
@@ -175,8 +176,7 @@ pub async fn p_vs_np(
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let header = HeaderTemplate::try_from(&session)?;
-    let logged_in = header.logged_in;
-    let voted = logged_in
+    let voted = header.logged_in
         && session
             .get::<String>("user_id")
             .inspect(|user_id| debug!("User ID is {user_id:?}"))
@@ -196,7 +196,7 @@ pub async fn p_vs_np(
                     .ok()
             })
             .unwrap_or(false);
-    let (num_p_eq_np_votes, num_p_neq_np_votes) = if logged_in {
+    let (num_p_eq_np_votes, num_p_neq_np_votes) = if header.logged_in {
         state
             .db
             .lock()
@@ -214,7 +214,6 @@ pub async fn p_vs_np(
     };
     let body = PvsNpTemplate {
         header,
-        logged_in,
         voted,
         num_p_eq_np_votes,
         num_p_neq_np_votes,
@@ -248,6 +247,50 @@ pub async fn log_in(
         header: HeaderTemplate::try_from(&session)?,
         redirect: params.redirect.clone(),
         error_msg: params.err.clone().unwrap_or_default(),
+    }
+    .render()
+    .map_err(ErrorInternalServerError)?;
+    Ok(HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(body))
+}
+
+#[derive(Template)]
+#[template(path = "solutions.html")]
+struct SolutionsTemplate {
+    header: HeaderTemplate,
+    problems: Vec<ProblemWithSolutions>,
+}
+
+struct ProblemWithSolutions {
+    id: String,
+    name: String,
+    solutions: Vec<Solution>,
+}
+
+struct Solution {
+    title: String,
+    description: String,
+    status: i32,
+}
+
+pub async fn solutions(
+    session: Session,
+    state: web::Data<State>,
+) -> Result<impl Responder, HttpError> {
+    let problems = state
+        .static_data
+        .iter()
+        .map(|(id, problem)| ProblemWithSolutions {
+            id: id.clone(),
+            name: problem.name.clone(),
+            solutions: vec![],
+        })
+        .sorted_by_key(|problem| problem.id.clone())
+        .collect::<Vec<_>>();
+    let body = SolutionsTemplate {
+        header: HeaderTemplate::try_from(&session)?,
+        problems,
     }
     .render()
     .map_err(ErrorInternalServerError)?;

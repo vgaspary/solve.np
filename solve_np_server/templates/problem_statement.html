@@ -20,7 +20,7 @@
         <hr>
         <h2><em>Inputs</em></h2>
         {% for input in problem.inputs %}
-        <h2><a href="/api/problems/{{ problem.id }}/inputs/{{ input.filename }}" target="_ablank">{{ input.filename }}</a> {{ input.size_h }}</h2>
+        <h2><a href="/api/problems/{{ problem.id }}/inputs/{{ input.filename }}" target="_ablank">{{ input.filename }}</a> {{ input.size_h }}{% if header.logged_in %} <a href="/solutions/{{ problem.id }}/{{ input.id }}">[Submit solution]</a>{% endif %}</h2>
         {% endfor %}
       </article>
     </div>

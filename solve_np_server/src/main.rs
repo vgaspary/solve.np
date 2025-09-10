@@ -12,7 +12,9 @@ use actix_web::{
 use api::handlers::{health_check, log_in, log_out, validate_sample, vote};
 use base64::prelude::*;
 use clap::Parser;
-use frontend::handlers::{home_page, log_in as log_in_page, p_vs_np, problem_statement, problems};
+use frontend::handlers::{
+    home_page, log_in as log_in_page, p_vs_np, problem_statement, problems, solutions,
+};
 use rusqlite::Connection;
 use state::{State, StaticData};
 use std::{fs::File, io::BufReader, path::PathBuf, sync::Mutex, time::SystemTime};
@@ -62,6 +64,7 @@ async fn main() -> std::io::Result<()> {
             .route("/p_vs_np", get().to(p_vs_np))
             .route("/problems", get().to(problems))
             .route("/problems/{problem_id}", get().to(problem_statement))
+            .route("/solutions", get().to(solutions))
             /* ---------------------- */
             /* --- API scope --- */
             .service(
