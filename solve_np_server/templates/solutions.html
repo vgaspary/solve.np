@@ -13,6 +13,22 @@
         {% for problem in problems %}
         <ul>
           <h1><a href="/problems/{{ problem.id }}">{{ problem.name }}</a></h1>
+          {% for solution in problem.solutions %}
+          <ul>
+            <h2>{{ solution.title }} {% match solution.status %}
+              {% when Status::Untested %}
+              <span style="color: grey;">Untested</span>
+              {% when Status::Attempted %}
+              <span style="color: orange;">Attempted</span>
+              {% when Status::Solved(score) %}
+              <span style="color: green;">Solved</span>
+              {% endmatch %}</h2>
+            <p>{{ solution.description }}</p>
+          </ul>
+          {% endfor %}
+          <ul>
+            <h2><a><i>[New attempt]</i></a></h2>
+          </ul>
         </ul>
         {% endfor %}
       </ul>

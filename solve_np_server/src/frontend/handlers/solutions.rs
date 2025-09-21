@@ -9,23 +9,31 @@ use actix_web::{
 use askama::Template;
 use itertools::Itertools;
 
-#[derive(Template)]
-#[template(path = "solutions.html")]
-struct SolutionsTemplate {
-    header: HeaderTemplate,
-    problems: Vec<Problem>,
+type Score = usize;
+
+pub enum Status {
+    Untested,
+    Attempted,
+    Solved(Score),
 }
 
-struct Problem {
+pub struct Solution {
+    title: String,
+    description: String,
+    status: Status,
+}
+
+pub struct Problem {
     id: String,
     name: String,
     solutions: Vec<Solution>,
 }
 
-struct Solution {
-    title: String,
-    description: String,
-    status: i32,
+#[derive(Template)]
+#[template(path = "solutions.html")]
+struct SolutionsTemplate {
+    header: HeaderTemplate,
+    problems: Vec<Problem>,
 }
 
 pub async fn solutions(
@@ -38,7 +46,23 @@ pub async fn solutions(
         .map(|(id, problem)| Problem {
             id: id.clone(),
             name: problem.name.clone(),
-            solutions: vec![],
+            solutions: vec![
+                Solution {
+                    title: "Bruteforce".to_owned(),
+                    description: "A bruteforce solution simply checks all possible solutions and picks the one with the best score.".to_owned(),
+                    status: Status::Attempted,
+                },
+                Solution {
+                    title: "Greedy".to_owned(),
+                    description: "This greedy algorithm picks the shortest possible path forward that doesn't violate the path requirements. It's really fast but probably doesn't yield a good score.".to_owned(),
+                    status: Status::Solved(43),
+                },
+                Solution {
+                    title: "Clever solution".to_owned(),
+                    description: "Actual real solution.".to_owned(),
+                    status: Status::Untested,
+                },
+            ],
         })
         .sorted_by_key(|problem| problem.id.clone())
         .collect::<Vec<_>>();
