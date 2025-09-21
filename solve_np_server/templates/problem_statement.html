@@ -22,6 +22,10 @@
         {% for input in problem.inputs %}
         <h2><a href="/api/problems/{{ problem.id }}/inputs/{{ input.filename }}" target="_ablank">{{ input.filename }}</a> {{ input.size_h }}{% if header.logged_in %} <a href="/solutions/{{ problem.id }}/{{ input.id }}">[Submit solution]</a>{% endif %}</h2>
         {% endfor %}
+        {% if !header.logged_in %}
+        <br>
+        <p><i><a href="/log_in?redirect=/problems/{{ problem.id }}">[Log in]</a> to test and submit a solution.</i></p>
+        {% endif %}
       </article>
     </div>
   </body>
