@@ -1,20 +1,27 @@
 use crate::{frontend::handlers::header::HeaderTemplate, state::State};
 use actix_session::Session;
 use actix_web::{
+    HttpResponse, Responder,
     error::{Error as HttpError, ErrorInternalServerError},
     http::header::ContentType,
     web,
-    HttpResponse,
-    Responder,
 };
 use askama::Template;
 use itertools::Itertools;
+
+pub type ProblemId = String;
+
+pub struct Problem {
+    pub id: ProblemId,
+    pub name: String,
+    pub description: String,
+}
 
 #[derive(Template)]
 #[template(path = "problems.html")]
 struct ProblemsTemplate {
     header: HeaderTemplate,
-    problems: Vec<crate::api::types::Problem>,
+    problems: Vec<Problem>,
 }
 
 pub async fn problems(
@@ -24,7 +31,7 @@ pub async fn problems(
     let problems = state
         .static_data
         .iter()
-        .map(|(id, problem)| crate::api::types::Problem {
+        .map(|(id, problem)| Problem {
             id: id.clone(),
             name: problem.name.clone(),
             description: problem.description.clone(),

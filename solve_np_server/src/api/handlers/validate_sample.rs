@@ -1,9 +1,23 @@
-use crate::api::types::{SampleSolution, ValidateSampleSolutionResult};
 use crate::api::utils;
 use crate::state::State;
 use actix_web::{
-    error::Error as HttpError, error::ErrorInternalServerError, web, HttpResponse, Responder,
+    HttpResponse, Responder, error::Error as HttpError, error::ErrorInternalServerError, web,
 };
+use serde::{Deserialize, Serialize};
+
+pub type Score = usize;
+
+#[derive(Deserialize)]
+pub enum SampleSolution {
+    TspSolution(Vec<usize>),
+    GraphColoringSolution(Vec<usize>),
+}
+
+#[derive(Serialize)]
+pub enum ValidateSampleSolutionResult {
+    Invalid(String),
+    Valid(Score),
+}
 
 pub async fn validate_sample(
     solution: web::Json<SampleSolution>,

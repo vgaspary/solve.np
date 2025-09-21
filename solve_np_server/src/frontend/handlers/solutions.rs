@@ -1,11 +1,10 @@
 use crate::{frontend::handlers::header::HeaderTemplate, state::State};
 use actix_session::Session;
 use actix_web::{
+    HttpResponse, Responder,
     error::{Error as HttpError, ErrorInternalServerError},
     http::header::ContentType,
     web,
-    HttpResponse,
-    Responder,
 };
 use askama::Template;
 use itertools::Itertools;
@@ -14,10 +13,10 @@ use itertools::Itertools;
 #[template(path = "solutions.html")]
 struct SolutionsTemplate {
     header: HeaderTemplate,
-    problems: Vec<ProblemWithSolutions>,
+    problems: Vec<Problem>,
 }
 
-struct ProblemWithSolutions {
+struct Problem {
     id: String,
     name: String,
     solutions: Vec<Solution>,
@@ -36,7 +35,7 @@ pub async fn solutions(
     let problems = state
         .static_data
         .iter()
-        .map(|(id, problem)| ProblemWithSolutions {
+        .map(|(id, problem)| Problem {
             id: id.clone(),
             name: problem.name.clone(),
             solutions: vec![],
