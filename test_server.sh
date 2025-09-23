@@ -268,62 +268,76 @@ else
 fi
 
 
-# Test 17: Vote endpoint - successful vote 'eq'
-echo "Testing /api/vote/eq - successful vote..."
-COOKIE_JAR_VOTE=$(mktemp)
+# Test 17: Vote endpoint - successful first vote 'eq' for 'user'
+echo "Testing /api/vote/eq - successful first vote for 'user'..."
+COOKIE_JAR_VOTE_USER=$(mktemp)
 
-# Log in to get a session cookie
-curl -s -c "${COOKIE_JAR_VOTE}" -X POST -d "username=user&password=pass" "${SERVER_URL}/api/log_in" > /dev/null
+# Log in as 'user' to get a session cookie
+curl -s -c "${COOKIE_JAR_VOTE_USER}" -X POST -d "username=user&password=pass" "${SERVER_URL}/api/log_in" > /dev/null
 
-# Send the vote request
-VOTE_EQ_RESPONSE_HEADERS=$(curl -s -D - -X POST -b "${COOKIE_JAR_VOTE}" "${SERVER_URL}/api/vote/eq" -o /dev/null)
+# Send the first vote request for 'user'
+VOTE_EQ_RESPONSE_HEADERS=$(curl -s -D - -X POST -b "${COOKIE_JAR_VOTE_USER}" "${SERVER_URL}/api/vote/eq" -o /dev/null)
 
 if echo "${VOTE_EQ_RESPONSE_HEADERS}" | grep -q "HTTP/1.1 303 See Other"; then
-    echo -e "/api/vote/eq \e[32mpassed\e[0m."
+    echo -e "/api/vote/eq first vote for 'user' \e[32mpassed\e[0m."
 else
-    echo -e "/api/vote/eq \e[31mfailed\e[0m. Headers: ${VOTE_EQ_RESPONSE_HEADERS}"
-    rm "${COOKIE_JAR_VOTE}"
+    echo -e "/api/vote/eq first vote for 'user' \e[31mfailed\e[0m. Headers: ${VOTE_EQ_RESPONSE_HEADERS}"
+    rm "${COOKIE_JAR_VOTE_USER}"
     exit 1
 fi
-rm "${COOKIE_JAR_VOTE}"
 
-# Test 18: Vote endpoint - successful vote 'neq'
-echo "Testing /api/vote/neq - successful vote..."
-COOKIE_JAR_VOTE=$(mktemp)
+# Test 18: Vote endpoint - failed second vote for 'user'
+echo "Testing /api/vote/neq - failed second vote for 'user'..."
 
-# Log in to get a session cookie
-curl -s -c "${COOKIE_JAR_VOTE}" -X POST -d "username=another_user&password=pass" "${SERVER_URL}/api/log_in" > /dev/null
+# Send the second vote request for 'user'
+VOTE_NEQ_RESPONSE_CODE=$(curl -s -w "%{http_code}" -X POST -b "${COOKIE_JAR_VOTE_USER}" "${SERVER_URL}/api/vote/neq" -o /dev/null)
 
-# Send the vote request
-VOTE_NEQ_RESPONSE_HEADERS=$(curl -s -D - -X POST -b "${COOKIE_JAR_VOTE}" "${SERVER_URL}/api/vote/neq" -o /dev/null)
+if [ "${VOTE_NEQ_RESPONSE_CODE}" -eq 500 ]; then
+    echo -e "/api/vote/neq second vote for 'user' correctly \e[32mfailed\e[0m with status 500."
+else
+    echo -e "/api/vote/neq second vote for 'user' \e[31mfailed\e[0m. Expected 500, got ${VOTE_NEQ_RESPONSE_CODE}"
+    rm "${COOKIE_JAR_VOTE_USER}"
+    exit 1
+fi
+rm "${COOKIE_JAR_VOTE_USER}"
+
+# Test 19: Vote endpoint - successful vote 'neq' for 'another_user'
+echo "Testing /api/vote/neq - successful vote for 'another_user'..."
+COOKIE_JAR_VOTE_ANOTHER=$(mktemp)
+
+# Log in as 'another_user' to get a session cookie
+curl -s -c "${COOKIE_JAR_VOTE_ANOTHER}" -X POST -d "username=another_user&password=pass" "${SERVER_URL}/api/log_in" > /dev/null
+
+# Send the vote request for 'another_user'
+VOTE_NEQ_RESPONSE_HEADERS=$(curl -s -D - -X POST -b "${COOKIE_JAR_VOTE_ANOTHER}" "${SERVER_URL}/api/vote/neq" -o /dev/null)
 
 if echo "${VOTE_NEQ_RESPONSE_HEADERS}" | grep -q "HTTP/1.1 303 See Other"; then
-    echo -e "/api/vote/neq \e[32mpassed\e[0m."
+    echo -e "/api/vote/neq for 'another_user' \e[32mpassed\e[0m."
 else
-    echo -e "/api/vote/neq \e[31mfailed\e[0m. Headers: ${VOTE_NEQ_RESPONSE_HEADERS}"
-    rm "${COOKIE_JAR_VOTE}"
+    echo -e "/api/vote/neq for 'another_user' \e[31mfailed\e[0m. Headers: ${VOTE_NEQ_RESPONSE_HEADERS}"
+    rm "${COOKIE_JAR_VOTE_ANOTHER}"
     exit 1
 fi
-rm "${COOKIE_JAR_VOTE}"
+rm "${COOKIE_JAR_VOTE_ANOTHER}"
 
-# Test 19: Vote endpoint - invalid vote
+# Test 20: Vote endpoint - invalid vote
 echo "Testing /api/vote/invalid - invalid vote..."
-COOKIE_JAR_VOTE=$(mktemp)
+COOKIE_JAR_VOTE_INVALID=$(mktemp)
 
-# Log in to get a session cookie
-curl -s -c "${COOKIE_JAR_VOTE}" -X POST -d "username=user&password=pass" "${SERVER_URL}/api/log_in" > /dev/null
+# Log in to get a session cookie (user doesn't matter here)
+curl -s -c "${COOKIE_JAR_VOTE_INVALID}" -X POST -d "username=user&password=pass" "${SERVER_URL}/api/log_in" > /dev/null
 
-# Send the vote request
-INVALID_VOTE_RESPONSE=$(curl -s -w "%{http_code}" -X POST -b "${COOKIE_JAR_VOTE}" "${SERVER_URL}/api/vote/invalid" -o /dev/null)
+# Send the invalid vote request
+INVALID_VOTE_RESPONSE=$(curl -s -w "%{http_code}" -X POST -b "${COOKIE_JAR_VOTE_INVALID}" "${SERVER_URL}/api/vote/invalid" -o /dev/null)
 
 if [ "${INVALID_VOTE_RESPONSE}" -eq 400 ]; then
     echo -e "/api/vote/invalid \e[32mpassed\e[0m."
 else
     echo -e "/api/vote/invalid \e[31mfailed\e[0m. HTTP status code: ${INVALID_VOTE_RESPONSE}"
-    rm "${COOKIE_JAR_VOTE}"
+    rm "${COOKIE_JAR_VOTE_INVALID}"
     exit 1
 fi
-rm "${COOKIE_JAR_VOTE}"
+rm "${COOKIE_JAR_VOTE_INVALID}"
 
 echo -e "\e[32mAll tests passed!\e[0m"
 rm -f test.log
