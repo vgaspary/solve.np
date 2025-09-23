@@ -7,7 +7,7 @@ type Color = usize;
 
 #[derive(Error, Debug, PartialEq, Eq)]
 pub enum Error {
-    #[error("Input grpah has {num_vertices} nodes but {num_colors} colors are provided.")]
+    #[error("Input graph has {num_vertices} nodes but {num_colors} colors are provided.")]
     UnexpectedLength {
         num_vertices: usize,
         num_colors: usize,
