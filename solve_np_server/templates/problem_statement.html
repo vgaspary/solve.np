@@ -19,9 +19,15 @@
         <p id="sample_solution_result"></p>
         <hr>
         <h2><em>Inputs</em></h2>
-        {% for input in problem.inputs %}
-        <h2><a href="/api/problems/{{ problem.id }}/inputs/{{ input.filename }}" target="_ablank">{{ input.filename }}</a> {{ input.size_h }}{% if header.logged_in %} <a href="/solutions/{{ problem.id }}/{{ input.id }}">[Submit solution]</a>{% endif %}</h2>
-        {% endfor %}
+        <table>
+          {% for input in problem.inputs %}
+          <tr>
+            <td><a href="/api/problems/{{ problem.id }}/inputs/{{ input.filename }}" target="_ablank">{{ input.filename }}</a></td>
+            <td>{{ input.size_h }}</td>
+            <td>{% if header.logged_in %} <a href="/solutions/{{ problem.id }}/{{ input.id }}">[Submit solution]</a>{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </table>
         {% if !header.logged_in %}
         <br>
         <p><i><a href="/log_in?redirect=/problems/{{ problem.id }}">[Log in]</a> to test and submit a solution.</i></p>

@@ -1,37 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
 
 body {
-  background: #0f0f23; /*337 x 5*/
-  color: #cccccc;
-  font-family: "Source Code Pro", monospace;
-  font-weight: 300;
+  background: #1a1b26;
+  color: #a9b1d6;
+  font-family: 'Fira Code', monospace;
+  font-weight: 400;
   font-size: 14pt;
   min-width: 60em;
 }
 img { border:0; }
 a { outline:0; }
 main, figure, figcaption { display:block; }
-pre, code { font-family: "Source Code Pro", monospace; }
+pre, code { font-family: 'Fira Code', monospace; }
 header, main {
   -webkit-text-size-adjust: none;
 }
 
 a {
   text-decoration: none;
-  color: #009900;
+  color: #7aa2f7;
 }
 a:hover, a:focus {
-  color: #99ff99;
+  color: #c0caf5;
 }
 h1, h2 {
-  font-size: 1em;
-  font-weight: normal;
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #c0caf5;
 }
 code {
   position: relative;
   display: inline-block;
   margin: 0;
-  padding: 0;
+  padding: 0 2px;
 }
 code:before {
   z-index: -1;
@@ -42,8 +43,8 @@ code:before {
   right: -2px;
   top: 3px;
   bottom: 0px;
-  border: 1px solid #333340;
-  background: #10101a;
+  border: 1px solid #414868;
+  background: #24283b;
 }
 pre.wrap {
   max-width: 100%;
@@ -51,14 +52,14 @@ pre.wrap {
 }
 
 .quiet {
-  opacity: .5;
+  opacity: .6;
 }
 p.wrap {
   width: 45em;
 }
 
 .hidden-until-hover {
-  border: 1px dotted gray;
+  border: 1px dashed #414868;
   overflow: hidden;
   position: relative;
   padding: 0 .5em;
@@ -97,28 +98,28 @@ p.wrap {
   transition: color 1s, opacity 1s;
 }
 .warning-active {
-  color: #ff0000;
+  color: #f7768e;
   opacity: 1;
 }
 
 .star-count {
-  color: #ffff66;
+  color: #e0af68;
 }
 .supporter-badge {
-  color: #ffff66;
+  color: #e0af68;
 }
 a.supporter-badge:hover, a.supporter-badge:focus {
   text-decoration: none;
-  color: #ffffcc;
-  text-shadow: 0 0 5px #ffff66;
+  color: #ffce9e;
+  text-shadow: 0 0 5px #e0af68;
 }
 .sponsor-badge {
-  color: #79a2d8;
+  color: #bb9af7;
 }
 a.sponsor-badge:hover, a.sponsor-badge:focus {
   text-decoration: none;
-  color: #ccdbed;
-  text-shadow: 0 0 5px #79a2d8;
+  color: #e1d5f7;
+  text-shadow: 0 0 5px #bb9af7;
 }
 
 #sidebar {
@@ -137,6 +138,8 @@ header {
   cursor: default;
   z-index: 100;
   margin-bottom: 2em;
+  border-bottom: 1px solid #414868;
+  padding-bottom: 1em;
 }
 header h1 {
   display: inline-block;
@@ -146,12 +149,12 @@ header h1 {
 header h1 a, header h1 span {
   display: inline-block;
   text-decoration: none;
-  color: #00cc00;
-  text-shadow: 0 0 2px #00cc00, 0 0 5px #00cc00;
+  color: #9ece6a;
+  text-shadow: 0 0 2px #9ece6a, 0 0 5px #9ece6a;
 }
 header h1 a:hover, header h1 a:focus {
-  color: #99ff99;
-  text-shadow: 0 0 2px #99ff99, 0 0 5px #99ff99;
+  color: #c8e6a9;
+  text-shadow: 0 0 2px #c8e6a9, 0 0 5px #c8e6a9;
 }
 header h1.title-event .title-event-wrap {
   opacity: .33;
@@ -181,33 +184,33 @@ header nav a {
 }
 
 input[type="text"], input[type="password"], textarea {
-  background: transparent;
+  background: #24283b;
   color: inherit;
-  border: 1px solid #666666;
-  background: #10101a;
-  padding: 0 2px;
+  border: 1px solid #414868;
+  padding: 5px;
   font-family: inherit;
   font-size: inherit;
   margin: 0;
+  border-radius: 4px;
 }
 textarea {
   vertical-align: top;
 }
 textarea.error {
-  border-color: red;
+  border-color: #f7768e;
 }
 textarea.success {
-  border-color: green;
+  border-color: #9ece6a;
 }
 textarea:focus {
-  border-color: white;
+  border-color: #7aa2f7;
   outline: none;
 }
 textarea.error:focus {
-  border-color: red;
+  border-color: #f7768e;
 }
 textarea.success:focus {
-  border-color: green;
+  border-color: #9ece6a;
 }
 
 label img {
@@ -223,15 +226,17 @@ input[type="radio"] ~ span {
 }
 input[type="radio"] ~ span:before {
   content: "( ) ";
+  color: #7aa2f7;
 }
 input[type="radio"] ~ span:hover, input[type="radio"] ~ span:focus {
-  background-color: #19193b;
+  background-color: #24283b;
 }
 input[type="radio"]:checked ~ span {
-  color: #ffffff;
+  color: #c0caf5;
 }
 input[type="radio"]:checked ~ span:before {
   content: "(O) ";
+  color: #7aa2f7;
 }
 input[type="checkbox"] { display: none; }
 input[type="checkbox"] ~ span {
@@ -240,15 +245,17 @@ input[type="checkbox"] ~ span {
 }
 input[type="checkbox"] ~ span:before {
   content: "[ ] ";
+  color: #7aa2f7;
 }
 input[type="checkbox"] ~ span:hover, input[type="checkbox"] ~ span:focus {
-  background-color: #19193b;
+  background-color: #24283b;
 }
 input[type="checkbox"]:checked ~ span {
-  color: #ffffff;
+  color: #c0caf5;
 }
 input[type="checkbox"]:checked ~ span:before {
   content: "[X] ";
+  color: #7aa2f7;
 }
 input[type="checkbox"]:disabled ~ span {
   opacity: .3;
@@ -263,17 +270,19 @@ input[type="checkbox"]:disabled ~ span:hover {
 
 
 input[type="submit"] {
-  background: transparent;
-  border: 0;
+  background: #24283b;
+  border: 1px solid #7aa2f7;
   font-family: inherit;
   font-size: inherit;
   margin: 0;
-  padding: 0;
-  color: #009900;
+  padding: 5px 10px;
+  color: #7aa2f7;
   cursor: pointer;
+  border-radius: 4px;
 }
 input[type="submit"]:hover, input[type="submit"]:focus {
-  color: #99ff99;
+  background: #7aa2f7;
+  color: #1a1b26;
 }
 *::-moz-focus-inner {
   padding: 0;
@@ -289,14 +298,14 @@ article:first-of-type {
   margin-top: 0;
 }
 article h1 {
-  color: #ffffff;
+  color: #c0caf5;
   margin-top: 1em;
   margin-bottom: 1em;
   white-space: nowrap;
-  font-size: 1.2em;
+  font-size: 1.4em;
 }
 article h2 {
-  color: #ffffff;
+  color: #c0caf5;
   margin-top: 1em;
   margin-bottom: 1em;
   white-space: nowrap;
@@ -305,14 +314,14 @@ article h2 + * {
   margin-top: 0;
 }
 article em {
-  color: #ffffff;
+  color: #c0caf5;
   font-style: normal;
-  text-shadow: 0 0 5px #ffffff;
+  text-shadow: 0 0 5px #c0caf5;
 }
 article em.star {
-  color: #ffff66;
+  color: #e0af68;
   font-style: normal;
-  text-shadow: 0 0 5px #ffff66;
+  text-shadow: 0 0 5px #e0af68;
 }
 article a {
   white-space: nowrap;
@@ -329,14 +338,15 @@ article li {
   position: relative;
 }
 article li:before {
-  content: "\00a0\00a0-\00a0";
+  content: "» ";
   position: absolute;
   left: 0;
   top: 0;
+  color: #7aa2f7;
 }
 .day-success {
-  color: #ffff66;
-  text-shadow: 0 0 5px #ffff66;
+  color: #e0af68;
+  text-shadow: 0 0 5px #e0af68;
 }
 
 form#settings input[type="radio"] ~ span {
@@ -347,17 +357,15 @@ form#settings input[type="checkbox"] ~ span {
 }
 
 .share {
-  color: #009900;
+  color: #7aa2f7;
   cursor: default;
   transition: color .2s 1s;
-  /*position: relative;*/
 }
 .share:hover, .share:focus-within {
-  color: #aaffaa;
+  color: #c0caf5;
   transition: color .2s 0s;
 }
 .share .share-content {
-  /*position: absolute; background: #0f0f23;*/
   display: inline-block;
   vertical-align: text-bottom;
   white-space: nowrap;
@@ -367,9 +375,6 @@ form#settings input[type="checkbox"] ~ span {
 }
 .share .share-content:before {
   content: "\00a0";
-}
-.share .share-content:after {
-  /*content: "]";*/
 }
 .share:hover .share-content, .share:focus-within .share-content {
   max-width: 45em;
@@ -392,42 +397,41 @@ form#settings input[type="checkbox"] ~ span {
   user-select: none;
 }
 .calendar > span {
-  color: #333333;
+  color: #414868;
 }
 .calendar > a {
   text-decoration: none;
-  color: #666666;
+  color: #565f89;
   outline: none;
   cursor: default;
 }
 .calendar a:hover, .calendar a:focus {
-  background-color: #1e1e46;
-  background-color: rgba(119,119,165,.2);
+  background-color: #24283b;
   cursor: pointer;
 }
 #calendar-countdown {
   padding-left: .5em;
-  color: #cccccc;
+  color: #a9b1d6;
 }
-.calendar .calendar-day { color: #666666; }
-.calendar a .calendar-day { color: #cccccc; }
+.calendar .calendar-day { color: #565f89; }
+.calendar a .calendar-day { color: #a9b1d6; }
 .calendar a .calendar-mark-complete,
 .calendar a .calendar-mark-verycomplete { visibility: hidden; }
 .calendar a.calendar-complete     .calendar-mark-complete,
-.calendar a.calendar-verycomplete .calendar-mark-complete { visibility: visible; color: #ffff66; }
-.calendar a.calendar-verycomplete .calendar-mark-verycomplete { visibility: visible; color: #ffff66; }
+.calendar a.calendar-verycomplete .calendar-mark-complete { visibility: visible; color: #e0af68; }
+.calendar a.calendar-verycomplete .calendar-mark-verycomplete { visibility: visible; color: #e0af68; }
 
 .calendar .calendar-day-new               { animation: anim-day-new 5s; }
 .calendar .calendar-day-new .calendar-day { animation: anim-day-new-day 5s; }
 @keyframes anim-day-new {
-  0%   { color: #333333; text-shadow: 0 0 5px transparent; }
-  25%  { color: #ffffff; text-shadow: 0 0 5px #ffffff; }
-  100% { color: #666666; text-shadow: 0 0 5px transparent; }
+  0%   { color: #414868; text-shadow: 0 0 5px transparent; }
+  25%  { color: #c0caf5; text-shadow: 0 0 5px #c0caf5; }
+  100% { color: #565f89; text-shadow: 0 0 5px transparent; }
 }
 @keyframes anim-day-new-day {
-  0%   { color: #666666; text-shadow: 0 0 5px transparent; }
-  25%  { color: #ffffff; text-shadow: 0 0 5px #ffffff; }
-  100% { color: #cccccc; text-shadow: 0 0 5px transparent; }
+  0%   { color: #565f89; text-shadow: 0 0 5px transparent; }
+  25%  { color: #c0caf5; text-shadow: 0 0 5px #c0caf5; }
+  100% { color: #a9b1d6; text-shadow: 0 0 5px transparent; }
 }
 
 .eventlist-event {
@@ -435,41 +439,41 @@ form#settings input[type="checkbox"] ~ span {
 }
 
 .stats > span, .stats > span .stats-firstonly, .stats > span .stats-both {
-  color: #666666;
+  color: #565f89;
 }
 .stats > a {
-  color: #cccccc;
+  color: #a9b1d6;
   min-width: 35em;
   display: inline-block;
 }
 .stats > a:hover, .stats > a:focus {
-  background-color: #1e1e46;
+  background-color: #24283b;
 }
 .stats-firstonly {
-  color: #9999cc;
+  color: #bb9af7;
 }
 .stats-both {
-  color: #ffff66;
+  color: #e0af68;
 }
 
 .leaderboard-daylinks {
   cursor: default;
 }
 .leaderboard-daylinks-selected {
-  color: #ffffff;
-  text-shadow: 0 0 5px #ffffff;
+  color: #c0caf5;
+  text-shadow: 0 0 5px #c0caf5;
 }
 .leaderboard-daydesc-first {
-  color: #9999cc;
+  color: #bb9af7;
 }
 .leaderboard-daydesc-both {
-  color: #ffff66;
+  color: #e0af68;
 }
 .leaderboard-entry {
   white-space: pre;
 }
 .leaderboard-entry .leaderboard-totalscore {
-  color: #ffffff;
+  color: #c0caf5;
 }
 .leaderboard-anon {
   opacity: .6;
@@ -487,6 +491,7 @@ form#settings input[type="checkbox"] ~ span {
   vertical-align: middle;
   position: relative;
   top: -2px;
+  border-radius: 4px;
 }
 .leaderboard-time {
   opacity: .5;
@@ -498,18 +503,22 @@ form#settings input[type="checkbox"] ~ span {
 .privboard-name {
   vertical-align: text-bottom;
 }
-.privboard-days > span    { display: inline-block; color: #333333; }
+.privboard-days > span    { display: inline-block; color: #414868; }
 .privboard-days > a       { display: inline-block; }
 .privboard-star-locked    { visibility: hidden; }
-.privboard-star-unlocked  { color: #333333; }
-.privboard-star-firstonly { color: #9999cc; }
-.privboard-star-both      { color: #ffff66; }
+.privboard-star-unlocked  { color: #414868; }
+.privboard-star-firstonly { color: #bb9af7; }
+.privboard-star-both      { color: #e0af68; }
 .privboard-delbtn { opacity:.33; }
 .privboard-row:hover .privboard-delbtn { opacity:1; }
 
 .sponsors {
-  width: 46em; /*76 characters*/
+  width: 46em;
 }
 .sponsor {
   margin: 1em 0;
+}
+table {
+  border-collapse: separate;
+  border-spacing: 20px 5px;
 }
