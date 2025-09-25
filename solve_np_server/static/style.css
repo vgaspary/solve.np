@@ -522,3 +522,41 @@ table {
   border-collapse: separate;
   border-spacing: 20px 5px;
 }
+
+.confirm-dialog-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-dialog {
+  background: #1a1b26;
+  border: 1px solid #414868;
+  padding: 20px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.confirm-dialog button {
+  background: #24283b;
+  border: 1px solid #7aa2f7;
+  font-family: inherit;
+  font-size: inherit;
+  margin: 0 10px;
+  padding: 5px 10px;
+  color: #7aa2f7;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.confirm-dialog button:hover, .confirm-dialog button:focus {
+  background: #7aa2f7;
+  color: #1a1b26;
+}
+

@@ -1,6 +1,6 @@
 use crate::state::State;
 use actix_session::Session;
-use actix_web::{Responder, error::Error as HttpError, web};
+use actix_web::{Responder, error::Error as HttpError, web, HttpResponse};
 use log::debug;
 
 pub async fn delete_solution(
@@ -11,5 +11,5 @@ pub async fn delete_solution(
     let solution_id = path.into_inner();
     debug!("Deleting solution: {solution_id}");
     // TODO! remove solution with this ID from this user from the DB.
-    Ok(web::Redirect::to("/solutions").see_other())
+    Ok(HttpResponse::NoContent().finish())
 }
