@@ -24,13 +24,20 @@
               <li>{{ num_p_neq_np_votes }} users think <em>P != NP</em></li>
             </ul>
           {% else %}
-            <a onclick="vote('eq')" >[P == NP]</a>
-            <a onclick="vote('neq')">[P != NP]</a>
+            <a onclick="maybe_vote('eq')" >[P == NP]</a>
+            <a onclick="maybe_vote('neq')">[P != NP]</a>
           {% endif %}
         {% else %}
         <p><a href="/log_in?redirect=/p_vs_np">Log in</a> to vote.</p>
         {% endif %}
       </article>
+    </div>
+  <div id="confirm-dialog" class="confirm-dialog-container" style="display: none;">
+      <div class="confirm-dialog">
+        <div id="confirm-dialog-message"></div>
+        <button id="confirm-dialog-button">Confirm</button>
+        <button id="cancel-dialog-button">Cancel</button>
+      </div>
     </div>
   </body>
 </html>
