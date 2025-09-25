@@ -7,7 +7,7 @@ use actix_session::{SessionMiddleware, config::PersistentSession, storage::Cooki
 use actix_web::{
     App, HttpServer,
     http::header::DispositionType,
-    web::{Data, get, post, scope},
+    web::{Data, delete, get, post, scope},
 };
 use api::handlers as api_handlers;
 use base64::prelude::*;
@@ -61,7 +61,10 @@ async fn main() -> std::io::Result<()> {
             .route("/log_in", get().to(frontend_handlers::log_in))
             .route("/p_vs_np", get().to(frontend_handlers::p_vs_np))
             .route("/problems", get().to(frontend_handlers::problems))
-            .route("/problems/{problem_id}", get().to(frontend_handlers::problem_statement))
+            .route(
+                "/problems/{problem_id}",
+                get().to(frontend_handlers::problem_statement),
+            )
             .route("/solutions", get().to(frontend_handlers::solutions))
             /* ---------------------- */
             /* --- API scope --- */
@@ -74,7 +77,11 @@ async fn main() -> std::io::Result<()> {
                     .route("/validate_sample", post().to(api_handlers::validate_sample))
                     .route("/vote/{vote}", post().to(api_handlers::vote))
                     .route("/log_in", post().to(api_handlers::log_in))
-                    .route("/log_out", get().to(api_handlers::log_out)),
+                    .route("/log_out", get().to(api_handlers::log_out))
+                    .route(
+                        "/solutions/{solution_id}",
+                        delete().to(api_handlers::delete_solution),
+                    ),
             )
             /* ----------------- */
             .route("/health_check", get().to(api_handlers::health_check))

@@ -18,6 +18,7 @@ pub enum Status {
 }
 
 pub struct Solution {
+    id: String,
     title: String,
     description: String,
     status: Status,
@@ -47,17 +48,21 @@ pub async fn solutions(
             id: id.clone(),
             name: problem.name.clone(),
             solutions: vec![
+                // TODO! Read solutions from DB
                 Solution {
+                    id: format!("{id}:bruteforce"),
                     title: "Bruteforce".to_owned(),
                     description: "A bruteforce solution simply checks all possible solutions and picks the one with the best score.".to_owned(),
                     status: Status::Attempted,
                 },
                 Solution {
+                    id: format!("{id}:greedy"),
                     title: "Greedy".to_owned(),
                     description: "This greedy algorithm picks the shortest possible path forward that doesn't violate the path requirements. It's really fast but probably doesn't yield a good score.".to_owned(),
                     status: Status::Solved(43),
                 },
                 Solution {
+                    id: format!("{id}:clever"),
                     title: "Clever solution".to_owned(),
                     description: "Actual real solution.".to_owned(),
                     status: Status::Untested,
