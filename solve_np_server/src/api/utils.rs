@@ -49,3 +49,78 @@ pub(crate) fn parse_graph_coloring_input(input: &str) -> Option<Graph> {
             .fold(Graph::new(num_vertices), |graph, edge| graph.add_edge(edge)),
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_tsp_input_valid() {
+        let input = "0 1 10\n1 2 20\n";
+        let graph = parse_tsp_input(input).unwrap();
+        assert_eq!(graph.num_vertices(), 3);
+        assert_eq!(graph.edges().count(), 2);
+        assert_eq!(
+            graph
+                .edges_with_metadata()
+                .find(|((u, v), _)| *u == 0 && *v == 1)
+                .map(|(_, metadata)| metadata),
+            Some(10)
+        );
+        assert_eq!(
+            graph
+                .edges_with_metadata()
+                .find(|((u, v), _)| *u == 1 && *v == 2)
+                .map(|(_, metadata)| metadata),
+            Some(20)
+        );
+    }
+
+    #[test]
+    fn test_parse_tsp_input_empty_line() {
+        let input = "0 1 10\n\n1 2 20\n";
+        let graph = parse_tsp_input(input).unwrap();
+        assert_eq!(graph.num_vertices(), 3);
+        assert_eq!(graph.edges().count(), 2);
+    }
+
+    #[test]
+    fn test_parse_tsp_input_malformed() {
+        let input = "0 1 10\n1 2\n";
+        assert!(parse_tsp_input(input).is_none());
+    }
+
+    #[test]
+    fn test_parse_tsp_input_empty() {
+        let input = "";
+        assert!(parse_tsp_input(input).is_none());
+    }
+
+    #[test]
+    fn test_parse_graph_coloring_input_valid() {
+        let input = "0 1\n1 2\n";
+        let graph = parse_graph_coloring_input(input).unwrap();
+        assert_eq!(graph.num_vertices(), 3);
+        assert_eq!(graph.edges().count(), 2);
+    }
+
+    #[test]
+    fn test_parse_graph_coloring_input_empty_line() {
+        let input = "0 1\n\n1 2\n";
+        let graph = parse_graph_coloring_input(input).unwrap();
+        assert_eq!(graph.num_vertices(), 3);
+        assert_eq!(graph.edges().count(), 2);
+    }
+
+    #[test]
+    fn test_parse_graph_coloring_input_malformed() {
+        let input = "0 1\n1 2 3\n";
+        assert!(parse_graph_coloring_input(input).is_none());
+    }
+
+    #[test]
+    fn test_parse_graph_coloring_input_empty() {
+        let input = "";
+        assert!(parse_graph_coloring_input(input).is_none());
+    }
+}

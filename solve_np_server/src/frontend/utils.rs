@@ -13,13 +13,43 @@ pub(crate) fn get_file_metadata(path: &PathBuf) -> std::io::Result<(String, u64)
 }
 
 pub(crate) fn bytes_to_string_h(bytes: u64) -> String {
+    let round = |num: f64| (num * 100.0).floor() / 100.0;
+
     match bytes {
         0..1_000 => format!("{bytes}B"),
-        1_000..10_000 => format!("{:.2}KB", bytes as f64 / 1e3),
+        1_000..10_000 => format!("{:.2}KB", round(bytes as f64 / 1e3)),
         10_000..1_000_000 => format!("{}KB", bytes / 1000),
-        1_000_000..10_000_000 => format!("{:.2}MB", bytes as f64 / 1e6),
+        1_000_000..10_000_000 => format!("{:.2}MB", round(bytes as f64 / 1e6)),
         10_000_000..1_000_000_000 => format!("{}MB", bytes / 1_000_000),
-        1_000_000_000..10_000_000_000 => format!("{:.2}GB", bytes as f64 / 1e9),
+        1_000_000_000..10_000_000_000 => format!("{:.2}GB", round(bytes as f64 / 1e9)),
         10_000_000_000.. => format!("{}GB", bytes / 1_000_000_000),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_bytes_to_string_h() {
+        assert_eq!(bytes_to_string_h(0), "0B");
+        assert_eq!(bytes_to_string_h(100), "100B");
+        assert_eq!(bytes_to_string_h(999), "999B");
+        assert_eq!(bytes_to_string_h(1_000), "1.00KB");
+        assert_eq!(bytes_to_string_h(1_500), "1.50KB");
+        assert_eq!(bytes_to_string_h(9_999), "9.99KB");
+        assert_eq!(bytes_to_string_h(10_000), "10KB");
+        assert_eq!(bytes_to_string_h(15_000), "15KB");
+        assert_eq!(bytes_to_string_h(999_999), "999KB");
+        assert_eq!(bytes_to_string_h(1_000_000), "1.00MB");
+        assert_eq!(bytes_to_string_h(1_500_000), "1.50MB");
+        assert_eq!(bytes_to_string_h(9_999_999), "9.99MB");
+        assert_eq!(bytes_to_string_h(10_000_000), "10MB");
+        assert_eq!(bytes_to_string_h(15_000_000), "15MB");
+        assert_eq!(bytes_to_string_h(999_999_999), "999MB");
+        assert_eq!(bytes_to_string_h(1_000_000_000), "1.00GB");
+        assert_eq!(bytes_to_string_h(1_500_000_000), "1.50GB");
+        assert_eq!(bytes_to_string_h(9_999_999_999), "9.99GB");
+        assert_eq!(bytes_to_string_h(10_000_000_000), "10GB");
     }
 }
