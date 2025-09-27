@@ -15,3 +15,6 @@ pub use vote::vote;
 
 pub mod delete_solution;
 pub use delete_solution::delete_solution;
+
+pub mod create_solution;
+pub use create_solution::create_solution;

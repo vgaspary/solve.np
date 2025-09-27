@@ -560,3 +560,8 @@ table {
   color: #1a1b26;
 }
 
+.error-message {
+  color: #f7768e;
+  font-size: 0.8em;
+}
+
