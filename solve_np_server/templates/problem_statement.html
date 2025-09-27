@@ -24,7 +24,7 @@
           <tr>
             <td><a href="/api/problems/{{ problem.id }}/inputs/{{ input.filename }}" target="_ablank">{{ input.filename }}</a></td>
             <td>{{ input.size_h }}</td>
-            <td>{% if header.logged_in %} <a href="/solutions/{{ problem.id }}/{{ input.id }}">[Submit solution]</a>{% endif %}</td>
+            <td>{% if header.logged_in %} <a href="/solutions?problem_id={{ problem.id }}&input_id={{ input.id }}">[Submit solution]</a>{% endif %}</td>
           </tr>
           {% endfor %}
         </table>

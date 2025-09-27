@@ -37,13 +37,23 @@ struct SolutionsTemplate {
     problems: Vec<Problem>,
 }
 
+#[derive(serde::Deserialize)]
+pub struct SolutionsQueryParams {
+    problem_id: Option<String>,
+}
+
 pub async fn solutions(
     session: Session,
+    params: web::Query<SolutionsQueryParams>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let problems = state
         .static_data
         .iter()
+        .filter(|&(id, _)| match &params.problem_id {
+            Some(problem_id) => problem_id == id,
+            None => true,
+        })
         .map(|(id, problem)| Problem {
             id: id.clone(),
             name: problem.name.clone(),
