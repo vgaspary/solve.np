@@ -30,6 +30,10 @@ struct Args {
     /// DB path.
     #[arg(short, long)]
     db_path: PathBuf,
+
+    /// Port
+    #[arg(short, long)]
+    port: u16,
 }
 
 #[actix_web::main]
@@ -96,7 +100,7 @@ async fn main() -> std::io::Result<()> {
                     .build(),
             )
     })
-    .bind(("0.0.0.0", 6520))?
+    .bind(("0.0.0.0", args.port))?
     .run()
     .await
 }

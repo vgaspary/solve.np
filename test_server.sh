@@ -7,7 +7,7 @@ SERVER_DIR="${ROOT_DIR}/solve_np_server"
 STATIC_DATA_PATH="${SERVER_DIR}/static_data.yaml"
 DB_PATH="${SERVER_DIR}/test_file.db3"
 SERVER_ADDRESS="127.0.0.1"
-SERVER_PORT="6520"
+SERVER_PORT=2345
 SERVER_URL="http://${SERVER_ADDRESS}:${SERVER_PORT}"
 
 # Create the database and the votes table
@@ -25,7 +25,8 @@ echo "Starting solve_np_server in the background..."
 "${ROOT_DIR}/target/debug/solve_np_server" \
   --static-data-path "${STATIC_DATA_PATH}" \
   --db-path "${DB_PATH}" \
-  --key "${RANDOM_KEY}" > test.log 2>&1 &
+  --key "${RANDOM_KEY}" \
+  --port ${SERVER_PORT} > test.log 2>&1 &
 
 SERVER_PID=$!
 echo "Server started with PID: ${SERVER_PID}"
