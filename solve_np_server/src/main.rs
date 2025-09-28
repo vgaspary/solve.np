@@ -83,7 +83,7 @@ async fn main() -> std::io::Result<()> {
                     .route("/log_in", post().to(api_handlers::log_in))
                     .route("/log_out", get().to(api_handlers::log_out))
                     .route(
-                        "/solutions/{solution_id}",
+                        "/solutions/{problem_id}/{solution_id}",
                         delete().to(api_handlers::delete_solution),
                     )
                     .route("/solutions", post().to(api_handlers::create_solution)),

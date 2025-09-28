@@ -11,14 +11,29 @@ use itertools::Itertools;
 
 type Score = usize;
 
+#[derive(Clone, Copy)]
 pub enum Status {
     Untested,
     Attempted,
     Solved(Score),
 }
 
+impl TryFrom<i64> for Status {
+    type Error = ();
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Status::Untested),
+            1 => Ok(Status::Attempted),
+            2 => Ok(Status::Solved(0)),
+            _ => Err(()),
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct Solution {
     id: String,
+    problem_id: String,
     title: String,
     description: String,
     status: Status,
@@ -47,6 +62,27 @@ pub async fn solutions(
     params: web::Query<SolutionsQueryParams>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
+    let user_id = session
+        .get::<String>("user_id")?
+        .ok_or(ErrorInternalServerError("Internal error #4"))?;
+    let solutions = state
+        .db
+        .lock()
+        .unwrap()
+        .prepare("SELECT solution_id, problem_id, title, description, status FROM attempts WHERE user_id = ?1")
+        .map_err(|_| ErrorInternalServerError("Internal error #7"))?
+        .query_map(
+            [user_id],
+            |row| Ok(Solution {
+                id: row.get(0)?,
+                problem_id: row.get(1)?,
+                title: row.get(2)?,
+                description: row.get(3)?,
+                status: Status::try_from(row.get::<usize, i64>(4)?).expect("Status value must be 0 || 1 || 2."),
+            }))
+        .map_err(|_| ErrorInternalServerError("Internal error #8"))?
+        .filter_map(Result::ok)
+        .collect_vec();
     let problems = state
         .static_data
         .iter()
@@ -57,27 +93,11 @@ pub async fn solutions(
         .map(|(id, problem)| Problem {
             id: id.clone(),
             name: problem.name.clone(),
-            solutions: vec![
-                // TODO! Read solutions from DB
-                Solution {
-                    id: format!("{id}:bruteforce"),
-                    title: "Bruteforce".to_owned(),
-                    description: "A bruteforce solution simply checks all possible solutions and picks the one with the best score.".to_owned(),
-                    status: Status::Attempted,
-                },
-                Solution {
-                    id: format!("{id}:greedy"),
-                    title: "Greedy".to_owned(),
-                    description: "This greedy algorithm picks the shortest possible path forward that doesn't violate the path requirements. It's really fast but probably doesn't yield a good score.".to_owned(),
-                    status: Status::Solved(43),
-                },
-                Solution {
-                    id: format!("{id}:clever"),
-                    title: "Clever solution".to_owned(),
-                    description: "Actual real solution.".to_owned(),
-                    status: Status::Untested,
-                },
-            ],
+            solutions: solutions
+                .iter()
+                .filter(|solution| &solution.problem_id == id)
+                .cloned()
+                .collect(),
         })
         .sorted_by_key(|problem| problem.id.clone())
         .collect::<Vec<_>>();

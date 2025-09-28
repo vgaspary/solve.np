@@ -1,4 +1,4 @@
-function maybe_delete(solution_id: string, solution_title: string): void {
+function maybe_delete(problem_id: string, solution_id: string, solution_title: string): void {
   const dialog = document.getElementById('confirm-dialog') as HTMLElement;
   const message = document.getElementById('confirm-dialog-message') as HTMLElement;
   const confirmButton = document.getElementById('confirm-dialog-button') as HTMLElement;
@@ -9,7 +9,7 @@ function maybe_delete(solution_id: string, solution_title: string): void {
     dialog.style.display = 'flex';
 
     confirmButton.onclick = () => {
-      delete_solution(solution_id);
+      delete_solution(problem_id, solution_id);
       dialog.style.display = 'none';
     };
 
@@ -19,8 +19,8 @@ function maybe_delete(solution_id: string, solution_title: string): void {
   }
 }
 
-function delete_solution(solution_id: string): void {
-  fetch(`/api/solutions/${solution_id}`, { method: 'DELETE' })
+function delete_solution(problem_id: string, solution_id: string): void {
+  fetch(`/api/solutions/${problem_id}/${solution_id}`, { method: 'DELETE' })
     .then(() => {
       location.reload();
     })
@@ -31,8 +31,9 @@ function new_attempt(button: HTMLElement): void {
   const table = button.closest('table')!;
   const new_attempt_row = table.querySelector('#new_attempt_row') as HTMLElement;
   const create_cancel_row = table.querySelector('#create_cancel_row') as HTMLElement;
+  const new_row = table.insertRow(table.rows.length - 2);
 
-  new_attempt_row.innerHTML = `
+  new_row.innerHTML = `
     <td></td>
     <td></td>
     <td><input type="text" autocomplete="off" placeholder="Title" id="new_title"/></td>
@@ -66,12 +67,11 @@ function create_solution(button: HTMLElement, problemId: string): void {
       'Content-Type': 'application/json',
     },
   })
-    .then(async (response) => {
+    .then((response) => {
       if (response.ok) {
         location.reload();
       } else {
-        const error = await response.text();
-        throw error;
+        throw response.body;
       }
     })
     .catch((error) => {

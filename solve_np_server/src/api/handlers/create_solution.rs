@@ -3,6 +3,8 @@ use actix_session::Session;
 use actix_web::{
     HttpResponse, Responder, error::Error as HttpError, error::ErrorInternalServerError, web,
 };
+use log::error;
+use rusqlite::params;
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -17,21 +19,23 @@ pub async fn create_solution(
     body: web::Json<CreateSolutionBody>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let solution_id = format!(
-        "{}.{}",
-        body.problem_id,
-        body.title.to_lowercase().replace(' ', "_")
-    );
+    let user_id = session
+        .get::<String>("user_id")?
+        .ok_or(ErrorInternalServerError("Internal error #5"))?;
+    let problem_id = &body.problem_id;
+    let solution_id = body.title.to_lowercase().replace(' ', "_");
+    let title = &body.title;
+    let description = &body.description;
 
-    // TODO: Check if solution with the same title already exists
-
-    // TODO: Save the new solution to the database
-
-    if solution_id == "whatever" {
-        Ok(HttpResponse::Ok())
-    } else {
-        Err(ErrorInternalServerError(format!(
-            "There is already an attempt with this name: {solution_id}"
-        )))
-    }
+    state
+        .db
+        .lock()
+        .unwrap()
+        .execute(
+            "INSERT INTO attempts (user_id, problem_id, solution_id, title, description, status) VALUES (?1, ?2, ?3, ?4, ?5, 0)", 
+            params![user_id, problem_id, solution_id, title, description],
+        )
+        .inspect_err(|err| error!("SQL query failed: {err}"))
+        .map_err(|_| ErrorInternalServerError("Internal error #6"))?;
+    Ok(HttpResponse::Ok())
 }

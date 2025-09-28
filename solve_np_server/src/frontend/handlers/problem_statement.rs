@@ -1,15 +1,14 @@
 use crate::{
-    frontend::utils::{bytes_to_string_h, get_file_metadata},
     frontend::handlers::header::HeaderTemplate,
+    frontend::utils::{bytes_to_string_h, get_file_metadata},
     state::State,
 };
 use actix_session::Session;
 use actix_web::{
+    HttpResponse, Responder,
     error::{Error as HttpError, ErrorInternalServerError},
     http::header::ContentType,
     web,
-    HttpResponse,
-    Responder,
 };
 use askama::Template;
 use itertools::Itertools;

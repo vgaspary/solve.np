@@ -1,15 +1,30 @@
 use crate::state::State;
 use actix_session::Session;
-use actix_web::{Responder, error::Error as HttpError, web, HttpResponse};
-use log::debug;
+use actix_web::{
+    HttpResponse, Responder, error::Error as HttpError, error::ErrorInternalServerError, web,
+};
+use log::error;
+use rusqlite::params;
 
 pub async fn delete_solution(
-    _session: Session,
-    path: web::Path<String>,
-    _state: web::Data<State>,
+    session: Session,
+    path: web::Path<(String, String)>,
+    state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let solution_id = path.into_inner();
-    debug!("Deleting solution: {solution_id}");
-    // TODO! remove solution with this ID from this user from the DB.
+    let user_id = session
+        .get::<String>("user_id")?
+        .ok_or(ErrorInternalServerError("Internal error #6"))?;
+    let (problem_id, solution_id) = path.into_inner();
+
+    state
+        .db
+        .lock()
+        .unwrap()
+        .execute(
+            "DELETE FROM attempts WHERE user_id = ?1 AND problem_id = ?2 AND solution_id = ?3",
+            params![user_id, problem_id, solution_id],
+        )
+        .inspect_err(|err| error!("SQL query failed: {err}"))
+        .map_err(|_| ErrorInternalServerError("Internal error #7"))?;
     Ok(HttpResponse::NoContent().finish())
 }

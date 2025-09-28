@@ -14,7 +14,7 @@
     <table id="{{ problem.id }}_tbl">
       {% for solution in problem.solutions %}
       <tr>
-        <td><a href="#" onclick="maybe_delete('{{ solution.id }}', '{{ solution.title }}')">[🗑]</a></td>
+        <td><a href="#" onclick="maybe_delete('{{ problem.id }}', '{{ solution.id }}', '{{ solution.title }}')">[🗑]</a></td>
         <td>{% match solution.status %}
           {% when Status::Untested %}
           <span style="color: grey;">Untested</span>

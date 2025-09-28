@@ -1,5 +1,5 @@
 use actix_session::Session;
-use actix_web::{error::Error as HttpError, web, Responder};
+use actix_web::{Responder, error::Error as HttpError, web};
 
 #[derive(serde::Deserialize)]
 pub struct LogInQueryParams {

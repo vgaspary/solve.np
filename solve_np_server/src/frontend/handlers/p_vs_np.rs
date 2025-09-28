@@ -1,11 +1,10 @@
 use crate::{frontend::handlers::header::HeaderTemplate, state::State};
 use actix_session::Session;
 use actix_web::{
+    HttpResponse, Responder,
     error::{Error as HttpError, ErrorInternalServerError},
     http::header::ContentType,
     web,
-    HttpResponse,
-    Responder,
 };
 use askama::Template;
 use log::debug;

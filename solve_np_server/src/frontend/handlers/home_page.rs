@@ -1,10 +1,9 @@
 use crate::frontend::handlers::header::HeaderTemplate;
 use actix_session::Session;
 use actix_web::{
+    HttpResponse, Responder,
     error::{Error as HttpError, ErrorInternalServerError},
     http::header::ContentType,
-    HttpResponse,
-    Responder,
 };
 use askama::Template;
 
@@ -29,4 +28,3 @@ pub async fn home_page(session: Session) -> Result<impl Responder, HttpError> {
         .content_type(ContentType::html())
         .body(body))
 }
-
