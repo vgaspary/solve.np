@@ -59,6 +59,12 @@ function create_solution(button: HTMLElement, problemId: string): void {
   const table = button.closest('table')!;
   const title = table.querySelector('#new_title') as HTMLInputElement;
   const description = table.querySelector('#new_description') as HTMLInputElement;
+  const error_msg = table.querySelector('#create_attempt_error_message') as HTMLElement;
+
+  if (title.value.trim() === '') {
+    error_msg.innerHTML = '\'Title\' field is mandatory.';
+    return;
+  }
 
   fetch('/api/solutions', {
     method: 'POST',
@@ -67,16 +73,15 @@ function create_solution(button: HTMLElement, problemId: string): void {
       'Content-Type': 'application/json',
     },
   })
-    .then((response) => {
-      if (response.ok) {
-        location.reload();
-      } else {
-        throw response.body;
-      }
-    })
-    .catch((error) => {
-      const error_msg = table.querySelector('#create_attempt_error_message') as HTMLElement;
-      error_msg.innerHTML = `${error}`;
-    });
+  .then(async response => {
+    if (response.ok) {
+      location.reload();
+    } else {
+      throw await response.text();
+    }
+  })
+  .catch((error) => {
+    error_msg.innerHTML = `${error}`;
+  });
 }
 

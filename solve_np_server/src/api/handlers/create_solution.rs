@@ -36,6 +36,6 @@ pub async fn create_solution(
             params![user_id, problem_id, solution_id, title, description],
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
-        .map_err(|_| ErrorInternalServerError("Internal error #6"))?;
+        .map_err(|_| ErrorInternalServerError("Pick a different title. Another attempts exists with the same title."))?;
     Ok(HttpResponse::Ok())
 }
