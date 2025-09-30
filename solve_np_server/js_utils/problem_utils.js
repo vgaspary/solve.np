@@ -1,19 +1,20 @@
+"use strict";
 function parse_solution(problem_id, input) {
     if (problem_id === "travelling_salesman") {
-        return { TspSolution: input.trim().split(/\s+/).map(function (n) { return Number(n); }) };
+        return { TspSolution: input.trim().split(/\s+/).map(n => Number(n)) };
     }
     else if (problem_id === "graph_coloring") {
-        return { GraphColoringSolution: input.trim().split(/\s+/).map(function (n) { return Number(n); }) };
+        return { GraphColoringSolution: input.trim().split(/\s+/).map(n => Number(n)) };
     }
     return null;
 }
 function check_solution(problem_id) {
-    var solution_textarea = document.getElementById("sample_solution");
+    const solution_textarea = document.getElementById("sample_solution");
     if (!solution_textarea) {
         throw new Error("'sample_solution' textarea not found.");
     }
-    var solution = solution_textarea.value;
-    var sample_solution_result = document.getElementById('sample_solution_result');
+    const solution = solution_textarea.value;
+    const sample_solution_result = document.getElementById('sample_solution_result');
     if (!sample_solution_result) {
         throw new Error("'sample_solution' textarea not found.");
     }
@@ -29,8 +30,8 @@ function check_solution(problem_id) {
         },
         body: JSON.stringify(parse_solution(problem_id, solution))
     })
-        .then(function (response) { return response.json(); })
-        .then(function (validation_result) {
+        .then(response => response.json())
+        .then(validation_result => {
         if (validation_result.Valid) {
             solution_textarea.classList = "success";
             sample_solution_result.innerHTML = validation_result.Valid;
@@ -40,7 +41,7 @@ function check_solution(problem_id) {
             sample_solution_result.innerHTML = validation_result.Invalid;
         }
     })
-        .catch(function (err) {
+        .catch(err => {
         solution_textarea.classList = "";
         sample_solution_result.innerHTML = "";
         console.log(err);

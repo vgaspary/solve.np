@@ -1,11 +1,15 @@
 use crate::state::State;
 use actix_session::Session;
 use actix_web::{
-    HttpResponse, Responder, error::Error as HttpError, error::ErrorInternalServerError, web,
+    HttpResponse, Responder,
+    error::Error as HttpError,
+    error::{ErrorConflict, ErrorInternalServerError},
+    web,
 };
 use log::error;
 use rusqlite::params;
 use serde::Deserialize;
+use uuid::Uuid;
 
 #[derive(Deserialize)]
 pub struct CreateSolutionBody {
@@ -23,7 +27,7 @@ pub async fn create_solution(
         .get::<String>("user_id")?
         .ok_or(ErrorInternalServerError("Internal error #5"))?;
     let problem_id = &body.problem_id;
-    let solution_id = body.title.to_lowercase().replace(' ', "_");
+    let solution_id = Uuid::new_v4().as_simple().to_string();
     let title = &body.title;
     let description = &body.description;
 
@@ -32,10 +36,10 @@ pub async fn create_solution(
         .lock()
         .unwrap()
         .execute(
-            "INSERT INTO attempts (user_id, problem_id, solution_id, title, description, status) VALUES (?1, ?2, ?3, ?4, ?5, 0)", 
-            params![user_id, problem_id, solution_id, title, description],
+            "INSERT INTO attempts (solution_id, user_id, problem_id, title, description, status) VALUES (?1, ?2, ?3, ?4, ?5, 0)", 
+            params![solution_id, user_id, problem_id, title, description],
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
-        .map_err(|_| ErrorInternalServerError("Pick a different title. Another attempts exists with the same title."))?;
+        .map_err(|_| ErrorConflict("Pick a different title. Another attempt exists with the same title."))?;
     Ok(HttpResponse::Ok())
 }

@@ -8,6 +8,7 @@ use actix_web::{
 };
 use askama::Template;
 use itertools::Itertools;
+use log::error;
 
 type Score = usize;
 
@@ -70,6 +71,7 @@ pub async fn solutions(
         .lock()
         .unwrap()
         .prepare("SELECT solution_id, problem_id, title, description, status FROM attempts WHERE user_id = ?1")
+        .inspect_err(|err| error!("{err}"))
         .map_err(|_| ErrorInternalServerError("Internal error #7"))?
         .query_map(
             [user_id],

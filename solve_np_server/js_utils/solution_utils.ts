@@ -1,4 +1,4 @@
-function maybe_delete(problem_id: string, solution_id: string, solution_title: string): void {
+function maybe_delete(solution_id: string, solution_title: string): void {
   const dialog = document.getElementById('confirm-dialog') as HTMLElement;
   const message = document.getElementById('confirm-dialog-message') as HTMLElement;
   const confirmButton = document.getElementById('confirm-dialog-button') as HTMLElement;
@@ -9,7 +9,7 @@ function maybe_delete(problem_id: string, solution_id: string, solution_title: s
     dialog.style.display = 'flex';
 
     confirmButton.onclick = () => {
-      delete_solution(problem_id, solution_id);
+      delete_solution(solution_id);
       dialog.style.display = 'none';
     };
 
@@ -19,8 +19,8 @@ function maybe_delete(problem_id: string, solution_id: string, solution_title: s
   }
 }
 
-function delete_solution(problem_id: string, solution_id: string): void {
-  fetch(`/api/solutions/${problem_id}/${solution_id}`, { method: 'DELETE' })
+function delete_solution(solution_id: string): void {
+  fetch(`/api/solutions/${solution_id}`, { method: 'DELETE' })
     .then(() => {
       location.reload();
     })
@@ -66,18 +66,19 @@ function create_solution(button: HTMLElement, problemId: string): void {
     return;
   }
 
-  fetch('/api/solutions', {
-    method: 'POST',
-    body: JSON.stringify({ problem_id: problemId, title: title.value, description: description.value }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
+  fetch('/api/solutions',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ problem_id: problemId, title: title.value, description: description.value }),
   })
-  .then(async response => {
+  .then(response => {
     if (response.ok) {
       location.reload();
     } else {
-      throw await response.text();
+      return response.text().then(error => Promise.reject(error));
     }
   })
   .catch((error) => {

@@ -8,21 +8,21 @@ use rusqlite::params;
 
 pub async fn delete_solution(
     session: Session,
-    path: web::Path<(String, String)>,
+    path: web::Path<String>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let user_id = session
         .get::<String>("user_id")?
         .ok_or(ErrorInternalServerError("Internal error #6"))?;
-    let (problem_id, solution_id) = path.into_inner();
+    let solution_id = path.into_inner();
 
     state
         .db
         .lock()
         .unwrap()
         .execute(
-            "DELETE FROM attempts WHERE user_id = ?1 AND problem_id = ?2 AND solution_id = ?3",
-            params![user_id, problem_id, solution_id],
+            "DELETE FROM attempts WHERE solution_id = ?1 AND user_id = ?2",
+            params![solution_id, user_id],
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
         .map_err(|_| ErrorInternalServerError("Internal error #7"))?;
