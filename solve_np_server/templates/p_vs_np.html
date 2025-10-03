@@ -18,14 +18,16 @@
         <hr>
         <h2><em>Vote</em></h2>
         {% if header.logged_in %}
-          {% if voted %}
+          {% if let Some((eq_text, neq_text)) = eq_neq_text %}
             <ul>
-              <li>{{ num_p_eq_np_votes }} users think <em>P == NP</em></li>
-              <li>{{ num_p_neq_np_votes }} users think <em>P != NP</em></li>
+              <li>{{ eq_text | safe }}</li>
+              <li>{{ neq_text | safe }}</li>
             </ul>
           {% else %}
-            <a onclick="maybe_vote('eq')" >[P == NP]</a>
-            <a onclick="maybe_vote('neq')">[P != NP]</a>
+            <ul>
+              <li><a onclick="maybe_vote('eq')" >[P == NP]</a></li>
+              <li><a onclick="maybe_vote('neq')">[P != NP]</a></li>
+            </ul>
           {% endif %}
         {% else %}
         <p><a href="/log_in?redirect=/p_vs_np">Log in</a> to vote.</p>
