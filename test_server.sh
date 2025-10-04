@@ -13,6 +13,7 @@ SERVER_URL="http://${SERVER_ADDRESS}:${SERVER_PORT}"
 # Create the database and the votes table
 rm -f "${DB_PATH}"
 sqlite3 "${DB_PATH}" "CREATE TABLE votes (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT UNIQUE, vote BOOLEAN);"
+sqlite3 "${DB_PATH}" "CREATE TABLE attempts (solution_id TEXT PRIMARY KEY, user_id TEXT, problem_id TEXT, title TEXT UNIQUE, description TEXT, status INTEGER);"
 
 # Generate a random base64 encoded key for the session middleware
 RANDOM_KEY=$(head /dev/urandom | tr -dc A-Za-z0-9_ | head -c 64 | base64 -w 0)
@@ -339,6 +340,44 @@ else
     exit 1
 fi
 rm "${COOKIE_JAR_VOTE_INVALID}"
+
+
+# Test 21: Create Solution
+echo "Testing /api/solutions (POST)..."
+COOKIE_JAR_SOLUTION=$(mktemp)
+
+# Log in as 'user'
+curl -s -c "${COOKIE_JAR_SOLUTION}" -X POST -d "username=user&password=pass" "${SERVER_URL}/api/log_in" > /dev/null
+
+# Create a solution
+CREATE_SOLUTION_RESPONSE=$(curl -s -X POST -b "${COOKIE_JAR_SOLUTION}" -H "Content-Type: application/json" -d '{"problem_id":"graph_coloring","title":"My first solution","description":"A description"}' "${SERVER_URL}/api/solutions")
+
+# After creating the solution, get the solution_id from the /solutions page
+SOLUTIONS_PAGE_HTML=$(curl -s -b "${COOKIE_JAR_SOLUTION}" "${SERVER_URL}/solutions")
+SOLUTION_ID=$(echo "${SOLUTIONS_PAGE_HTML}" | grep -oP "[0-9a-f]{32}" | head -n 1)
+
+if [ -n "${SOLUTION_ID}" ] && [ "${SOLUTION_ID}" != "null" ]; then
+    echo -e "/api/solutions (POST) \e[32mpassed\e[0m. Solution ID: ${SOLUTION_ID}"
+else
+    echo -e "/api/solutions (POST) \e[31mfailed\e[0m. Could not retrieve Solution ID from /solutions page. Response: ${SOLUTIONS_PAGE_HTML}"
+    rm "${COOKIE_JAR_SOLUTION}"
+    exit 1
+fi
+
+# Test 22: Delete Solution
+echo "Testing /api/solutions/{solution_id} (DELETE)..."
+DELETE_SOLUTION_RESPONSE_HEADERS=$(curl -s -D - -X DELETE -b "${COOKIE_JAR_SOLUTION}" "${SERVER_URL}/api/solutions/${SOLUTION_ID}" -o /dev/null)
+
+
+if echo "${DELETE_SOLUTION_RESPONSE_HEADERS}" | grep -q "HTTP/1.1 204 No Content"; then
+    echo -e "/api/solutions/{solution_id} (DELETE) \e[32mpassed\e[0m."
+else
+    echo -e "/api/solutions/{solution_id} (DELETE) \e[31mfailed\e[0m. Headers: ${DELETE_SOLUTION_RESPONSE_HEADERS}"
+    rm "${COOKIE_JAR_SOLUTION}"
+    exit 1
+fi
+rm "${COOKIE_JAR_SOLUTION}"
+
 
 echo -e "\e[32mAll tests passed!\e[0m"
 rm -f test.log
