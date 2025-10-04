@@ -1,9 +1,10 @@
 use crate::state::State;
 use actix_session::Session;
-use actix_web::{
-    Responder, error::Error as HttpError, error::ErrorBadRequest, error::ErrorInternalServerError,
-    web,
-};
+use actix_web::Responder;
+use actix_web::error::Error as HttpError;
+use actix_web::error::ErrorBadRequest;
+use actix_web::error::ErrorInternalServerError;
+use actix_web::web;
 use log::debug;
 use rusqlite::params;
 

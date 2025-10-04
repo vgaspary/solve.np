@@ -1,5 +1,7 @@
+use std::fs::metadata;
 use std::io::Error;
-use std::{fs::metadata, os::unix::fs::MetadataExt, path::PathBuf};
+use std::os::unix::fs::MetadataExt;
+use std::path::PathBuf;
 
 pub(crate) fn get_file_metadata(path: &PathBuf) -> std::io::Result<(String, u64)> {
     let file_name: String = path

@@ -3,19 +3,29 @@ mod frontend;
 mod state;
 
 use actix_files::Files;
-use actix_session::{SessionMiddleware, config::PersistentSession, storage::CookieSessionStore};
-use actix_web::{
-    App, HttpServer,
-    http::header::DispositionType,
-    web::{Data, delete, get, post, scope},
-};
+use actix_session::SessionMiddleware;
+use actix_session::config::PersistentSession;
+use actix_session::storage::CookieSessionStore;
+use actix_web::App;
+use actix_web::HttpServer;
+use actix_web::http::header::DispositionType;
+use actix_web::web::Data;
+use actix_web::web::delete;
+use actix_web::web::get;
+use actix_web::web::post;
+use actix_web::web::scope;
 use api::handlers as api_handlers;
 use base64::prelude::*;
 use clap::Parser;
 use frontend::handlers as frontend_handlers;
 use rusqlite::Connection;
-use state::{State, StaticData};
-use std::{fs::File, io::BufReader, path::PathBuf, sync::Mutex, time::SystemTime};
+use state::State;
+use state::StaticData;
+use std::fs::File;
+use std::io::BufReader;
+use std::path::PathBuf;
+use std::sync::Mutex;
+use std::time::SystemTime;
 
 #[derive(Parser)]
 struct Args {

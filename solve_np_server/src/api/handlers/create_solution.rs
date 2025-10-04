@@ -1,11 +1,11 @@
 use crate::state::State;
 use actix_session::Session;
-use actix_web::{
-    HttpResponse, Responder,
-    error::Error as HttpError,
-    error::{ErrorConflict, ErrorInternalServerError},
-    web,
-};
+use actix_web::HttpResponse;
+use actix_web::Responder;
+use actix_web::error::Error as HttpError;
+use actix_web::error::ErrorConflict;
+use actix_web::error::ErrorInternalServerError;
+use actix_web::web;
 use log::error;
 use rusqlite::params;
 use serde::Deserialize;

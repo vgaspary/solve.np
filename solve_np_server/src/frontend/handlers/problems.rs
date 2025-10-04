@@ -1,11 +1,12 @@
-use crate::{frontend::handlers::header::HeaderTemplate, state::State};
+use crate::frontend::handlers::header::HeaderTemplate;
+use crate::state::State;
 use actix_session::Session;
-use actix_web::{
-    HttpResponse, Responder,
-    error::{Error as HttpError, ErrorInternalServerError},
-    http::header::ContentType,
-    web,
-};
+use actix_web::HttpResponse;
+use actix_web::Responder;
+use actix_web::error::Error as HttpError;
+use actix_web::error::ErrorInternalServerError;
+use actix_web::http::header::ContentType;
+use actix_web::web;
 use askama::Template;
 use itertools::Itertools;
 
