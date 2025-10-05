@@ -80,6 +80,10 @@ async fn main() -> std::io::Result<()> {
                 get().to(frontend_handlers::problem_statement),
             )
             .route("/solutions", get().to(frontend_handlers::solutions))
+            .route(
+                "/solutions/{solution_id}",
+                get().to(frontend_handlers::solution),
+            )
             /* ---------------------- */
             /* --- API scope --- */
             .service(

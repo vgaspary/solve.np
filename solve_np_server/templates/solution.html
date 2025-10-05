@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>My Solutions - solve.NP</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" href="/static/favicon.png">
+    <script src="/js_utils/problem_utils.js"></script>
+  </head>
+  <body>
+    {{ header | safe }}
+    <div>
+      <h1><a href="/problems/{{ problem.id }}">{{ problem.name }}</a></h1>
+      <article><p>{{ problem.description }}</p></article>
+    </div>
+    <div>
+      <h2>Sample input</h2> 
+      <pre><code>{{ sample_input }}</code></pre>
+      <textarea id="sample_solution" placeholder="Try your solution..." oninput="check_solution('{{ problem.id }}')"></textarea>
+      <p id="sample_solution_result"></p>
+    </div>
+    {% for input in inputs %}
+    <div>
+      <details>
+        <summary>{{ input.filename }}</summary>
+        <p>This is the content</p>
+        <textarea placeholder="solution goes here"></textarea>
+        <a href="#">[Submit]</a>
+      </details>
+    </div>
+    {% endfor %}
+  </body>
+</html>

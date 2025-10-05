@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Solutions - solve.NP</title>
+    <title>My Solutions - solve.NP</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="icon" href="/static/favicon.png">
     <script src="/js_utils/solution_utils.js"></script>
@@ -23,7 +23,7 @@
           {% when Status::Solved(score) %}
           <span style="color: green;">Solved</span>
           {% endmatch %}</td>
-        <td>{{ solution.title }}</td>
+        <td><a href="/solutions/{{ solution.id }}">{{ solution.title }}</a></td>
         <td colspan="2"><i>{{ solution.description }}</i></td>
       </tr>
       {% endfor %}

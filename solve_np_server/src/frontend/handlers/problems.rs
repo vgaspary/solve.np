@@ -10,12 +10,12 @@ use actix_web::web;
 use askama::Template;
 use itertools::Itertools;
 
-pub type ProblemId = String;
+type ProblemId = String;
 
-pub struct Problem {
-    pub id: ProblemId,
-    pub name: String,
-    pub description: String,
+struct Problem {
+    id: ProblemId,
+    name: String,
+    description: String,
 }
 
 #[derive(Template)]
