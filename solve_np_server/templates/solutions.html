@@ -31,8 +31,8 @@
         <td colspan="2"><a href="#" onclick="new_attempt(this)"><i>[New attempt]</i></a></td>
       </tr>
       <tr id="create_cancel_row" style="display: none">
-        <td colspan="2"><a href="#" onclick="create_solution(this, '{{ problem.id }}')"><i>[Create]</i></a></td>
-        <td><a href="#" onclick="cancel_new_attempt(this)"><i>[Cancel]</i></a></td>
+        <td colspan="2"><a id="create_button" href="#" onclick="create_solution(this, '{{ problem.id }}')"><i>[Create]</i></a></td>
+        <td><a id="cancel_button" href="#" onclick="cancel_new_attempt(this)"><i>[Cancel]</i></a></td>
         <td><span id="create_attempt_error_message" class="error-message"></span></td>
       </tr>
     </table>

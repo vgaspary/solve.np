@@ -31,16 +31,32 @@ function new_attempt(button: HTMLElement): void {
   const table = button.closest('table')!;
   const new_attempt_row = table.querySelector('#new_attempt_row') as HTMLElement;
   const create_cancel_row = table.querySelector('#create_cancel_row') as HTMLElement;
-  const new_row = table.insertRow(table.rows.length - 2);
+  const create_button = create_cancel_row.querySelector('#create_button') as HTMLElement;
+  const cancel_button = create_cancel_row.querySelector('#cancel_button') as HTMLElement;
+  const key_handler = (event: KeyboardEvent): void => {
+    switch (event.key) {
+      case 'Enter':
+        create_button.click();
+      case 'Escape':
+        cancel_button.click();
+    }
+  };
 
+  const new_row = table.insertRow(table.rows.length - 2);
+  new_attempt_row.style.display = 'none';
+  create_cancel_row.style.display = 'contents';
   new_row.innerHTML = `
     <td></td>
     <td></td>
     <td><input type="text" autocomplete="off" placeholder="Title" id="new_title"/></td>
     <td><input type="text" autocomplete="off" placeholder="Description (optional)" id="new_description"/></td>
   `;
-  new_attempt_row.style.display = 'none';
-  create_cancel_row.style.display = 'contents';
+
+  const title_input = new_row.querySelector("#new_title") as HTMLElement;
+  const description_input = new_row.querySelector("#new_description") as HTMLElement;
+  title_input.focus();
+  title_input.addEventListener('keydown', key_handler);
+  description_input.addEventListener('keydown', key_handler);
 }
 
 function cancel_new_attempt(button: HTMLElement): void {
@@ -73,16 +89,16 @@ function create_solution(button: HTMLElement, problemId: string): void {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ problem_id: problemId, title: title.value, description: description.value }),
-  })
-  .then(response => {
-    if (response.ok) {
-      location.reload();
-    } else {
-      return response.text().then(error => Promise.reject(error));
-    }
-  })
-  .catch((error) => {
-    error_msg.innerHTML = `${error}`;
-  });
+    })
+    .then(response => {
+      if (response.ok) {
+        location.reload();
+      } else {
+        return response.text().then(error => Promise.reject(error));
+      }
+    })
+    .catch((error) => {
+      error_msg.innerHTML = `${error}`;
+    });
 }
 
