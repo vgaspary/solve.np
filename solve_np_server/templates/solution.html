@@ -5,29 +5,65 @@
     <title>My Solutions - solve.NP</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="icon" href="/static/favicon.png">
-    <script src="/js_utils/problem_utils.js"></script>
   </head>
   <body>
     {{ header | safe }}
     <div>
-      <h1><a href="/problems/{{ problem.id }}">{{ problem.name }}</a></h1>
-      <article><p>{{ problem.description }}</p></article>
-    </div>
-    <div>
-      <h2>Sample input</h2> 
-      <pre><code>{{ sample_input }}</code></pre>
-      <textarea id="sample_solution" placeholder="Try your solution..." oninput="check_solution('{{ problem.id }}')"></textarea>
-      <p id="sample_solution_result"></p>
+      <h1>{{ solution.title }}</h1>
+      <p>Problem: <a href="/problems/{{ problem.id }}">{{ problem.name }}</a></p>
+      <p>Status: {% match solution.status %}
+      {% when Status::Untested %}
+      <span style="color: grey;">Untested</span>
+      {% when Status::Attempted %}
+      <span style="color: orange;">Attempted</span>
+      {% when Status::Solved(score) %}
+      <span style="color: green;">Solved</span>
+      {% endmatch %}</p>
     </div>
     {% for input in inputs %}
     <div>
-      <details>
-        <summary>{{ input.filename }}</summary>
-        <p>This is the content</p>
-        <textarea placeholder="solution goes here"></textarea>
-        <a href="#">[Submit]</a>
+      <details id="{{ input.id }}">
+        <summary>
+          <span>{% match input.status %}
+            {% when Status::Untested %}
+            <span style="color: grey; width: 130px; display: inline-block;">Untested</span>
+            {% when Status::Attempted %}
+            <span style="color: orange; width: 130px; display: inline-block;">Attempted</span>
+            {% when Status::Solved(score) %}
+            <span style="color: green; width: 130px; display: inline-block;">Solved</span>
+            {% endmatch %}</span>
+          <span>{{ input.filename }}</span>
+        </summary>
+        <pre><code>{{ input.preview }}...</code></pre>
+        <div>
+          <a href="/api/problems/{{ problem.id }}/inputs/{{ input.filename }}" target="_ablank">[Download]</a>
+        </div>
+        <div>
+          <br>
+          <textarea></textarea>
+          <br>
+        </div>
+        <div>
+          <a href="#">[Submit]</a>
+        </div>
       </details>
     </div>
     {% endfor %}
+    <script>
+      function maybe_expand() {
+        const queryParams = new URLSearchParams(window.location.search);
+        const input = queryParams.get('input_id');
+        if (!input) {
+          return;
+        }
+        const details = document.getElementById(input);
+        if (!details) {
+          return;
+        }
+        details.open = true;
+      }
+
+      maybe_expand();
+    </script>
   </body>
 </html>

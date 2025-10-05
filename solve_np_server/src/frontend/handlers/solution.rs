@@ -1,3 +1,6 @@
+use std::fs::metadata;
+use std::os::unix::fs::MetadataExt;
+
 use crate::frontend::handlers::header::HeaderTemplate;
 use crate::state::State;
 use actix_session::Session;
@@ -8,57 +11,139 @@ use actix_web::error::ErrorInternalServerError;
 use actix_web::http::header::ContentType;
 use actix_web::web;
 use askama::Template;
+use itertools::Itertools;
+use log::error;
 
-struct Problem<'a> {
-    id: &'a str,
-    name: &'a str,
-    description: &'a str,
+type Score = usize;
+
+#[derive(Clone, Copy)]
+pub enum Status {
+    Untested,
+    Attempted,
+    Solved(Score),
 }
 
-struct Input<'a> {
-    id: &'a str,
-    filename: &'a str,
-    preview: &'a str,
+impl TryFrom<i64> for Status {
+    type Error = ();
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Status::Untested),
+            1 => Ok(Status::Attempted),
+            2 => Ok(Status::Solved(0)),
+            _ => Err(()),
+        }
+    }
+}
+
+struct Problem {
+    id: String,
+    name: String,
+    description: String,
+}
+
+struct Input {
+    id: String,
+    filename: String,
+    preview: String,
+    status: Status,
+    size: u64,
+}
+
+struct Solution {
+    solution_id: String,
+    problem_id: String,
+    title: String,
+    description: String,
+    status: Status,
 }
 
 #[derive(Template)]
 #[template(path = "solution.html")]
-struct SolutionTemplate<'a> {
+struct SolutionTemplate {
     header: HeaderTemplate,
-    problem: Problem<'a>,
-    sample_input: &'a str,
-    inputs: Vec<Input<'a>>,
+    solution: Solution,
+    problem: Problem,
+    sample_input: String,
+    inputs: Vec<Input>,
 }
 
 pub async fn solution(
     session: Session,
-    _state: web::Data<State>,
+    path: web::Path<String>,
+    state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
+    let solution_id = path.into_inner();
+    let user_id = session
+        .get::<String>("user_id")?
+        .ok_or(ErrorInternalServerError("Internal error #9"))?;
+    let solution = state
+        .db
+        .lock()
+        .unwrap()
+        .query_row(
+            "SELECT problem_id, title, description, status FROM attempts WHERE user_id = ?1 AND solution_id = ?2",
+            [&user_id, &solution_id],
+            |row| Ok(Solution {
+                solution_id: solution_id.clone(),
+                problem_id: row.get(0)?,
+                title: row.get(1)?,
+                description: row.get(2)?,
+                status: Status::try_from(row.get::<usize, i64>(3)?).expect("Status value must be 0 || 1 || 2."),
+            })
+        )
+        .inspect_err(|err| error!("SQL query failed: {err}"))
+        .map_err(|_| ErrorInternalServerError("Internal error #10"))?;
+    let (problem, sample_input, inputs) = state
+        .static_data
+        .get(&solution.problem_id)
+        .map(|problem| {
+            (
+                Problem {
+                    id: solution.problem_id.clone(),
+                    name: problem.name.clone(),
+                    description: problem.description.clone(),
+                },
+                problem.sample_input.clone(),
+                problem
+                    .inputs
+                    .iter()
+                    .map(|(id, input)| {
+                        (
+                            id,
+                            input,
+                            metadata(&input.path)
+                                .map(|metadata| metadata.size())
+                                .unwrap_or(0),
+                        )
+                    })
+                    .sorted_by_key(|(_, _, size)| *size)
+                    .map(|(id, input, _)| Input {
+                        id: id.clone(),
+                        filename: input.filename.clone(),
+                        preview: input.preview.clone(),
+                        status: if id.starts_with("s") {
+                            Status::Solved(0)
+                        } else if id.starts_with("m") {
+                            Status::Attempted
+                        } else {
+                            Status::Untested
+                        }, // TODO!
+                        size: metadata(&input.path)
+                            .map(|metadata| metadata.size())
+                            .unwrap_or_default(),
+                    })
+                    .sorted_by_key(|input| input.size)
+                    .collect(),
+            )
+        })
+        .ok_or(ErrorInternalServerError("Internal error #11"))?;
+
     let body = SolutionTemplate {
         header: HeaderTemplate::try_from(&session)?,
-        problem: Problem {
-            id: "problem.id",
-            name: "problem.name",
-            description: "problem.description",
-        },
-        sample_input: "sample_input",
-        inputs: vec![
-            Input {
-                id: "input.id.1",
-                filename: "input.filename.1",
-                preview: "input.preview.1",
-            },
-            Input {
-                id: "input.id.2",
-                filename: "input.filename.2",
-                preview: "input.preview.2",
-            },
-            Input {
-                id: "input.id.3",
-                filename: "input.filename.3",
-                preview: "input.preview.3",
-            },
-        ],
+        solution,
+        problem,
+        sample_input,
+        inputs,
     }
     .render()
     .map_err(ErrorInternalServerError)?;

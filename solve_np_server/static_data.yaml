@@ -24,31 +24,229 @@ travelling_salesman:
   inputs:
     small_sparse:
       path: "../problems/travelling_salesman/inputs/small_sparse.txt"
+      filename: "small_sparse.txt"
       cmd: "tsp_gen -v 100 -d 0.3 -m 100 -s 20"
+      preview: |
+        58 75 167
+        30 82 72
+        21 37 93
+        67 81 107
+        41 69 115
+        78 89 160
+        75 90 101
+        72 99 89
+        60 77 108
+        20 23 113
+        5 72 87
+        7 32 122
+        7 14 123
+        3 93 89
+        26 71 123
+        30 95 81
+        76 79 95
+        22 27 99
+        18 36 98
+        72 92 76
     small_dense:
       path: "../problems/travelling_salesman/inputs/small_dense.txt"
+      filename: "small_dense.txt"
       cmd: "tsp_gen -v 100 -d 0.8 -m 100 -s 30"
+      preview: |
+        58 78 60
+        6 72 80
+        12 90 70
+        65 19 45
+        0 17 156
+        49 53 77
+        2 3 140
+        25 29 68
+        0 18 69
+        37 55 80
+        59 75 87
+        51 52 73
+        58 80 113
+        12 24 99
+        90 94 104
+        21 90 115
+        15 29 84
+        0 34 86
+        15 87 75
+        23 26 104
     small_full:
       path: "../problems/travelling_salesman/inputs/small_full.txt"
+      filename: "small_full.txt"
       cmd: "tsp_gen -v 100 -d 1.0 -m 100 -s 10"
+      preview: |
+        16 57 106
+        61 69 101
+        42 87 108
+        63 89 89
+        18 69 103
+        0 1 104
+        34 37 101
+        48 93 76
+        23 75 103
+        82 90 106
+        49 87 94
+        66 76 91
+        16 63 96
+        1 16 101
+        1 74 107
+        31 49 85
+        53 76 106
+        2 74 117
+        7 23 96
+        33 99 109
     medium_sparse:
       path: "../problems/travelling_salesman/inputs/medium_sparse.txt"
+      filename: "medium_sparse.txt"
       cmd: "tsp_gen -v 1000 -d 0.3 -m 100 -s 20"
+      preview: |
+        435 863 128
+        405 457 78
+        302 874 90
+        9 14 77
+        16 592 49
+        880 984 80
+        135 754 104
+        37 616 106
+        849 983 119
+        33 989 116
+        11 118 105
+        90 716 101
+        543 636 80
+        525 626 107
+        662 965 106
+        473 795 111
+        352 354 98
+        254 976 119
+        113 364 93
+        371 623 88
     medium_dense:
       path: "../problems/travelling_salesman/inputs/medium_dense.txt"
+      filename: "medium_dense.txt"
       cmd: "tsp_gen -v 1000 -d 0.8 -m 100 -s 30"
+      preview: |
+        455 868 63
+        257 767 85
+        319 384 104
+        117 295 120
+        307 886 120
+        535 553 23
+        449 800 116
+        436 500 123
+        846 919 76
+        96 254 42
+        467 763 123
+        420 728 140
+        121 252 75
+        669 843 145
+        164 658 69
+        665 747 111
+        645 829 147
+        100 956 108
+        436 717 65
+        246 859 130
     medium_full:
       path: "../problems/travelling_salesman/inputs/medium_full.txt"
+      filename: "medium_full.txt"
       cmd: "tsp_gen -v 1000 -d 1.0 -m 100 -s 10"
+      preview: |
+        100 162 91
+        189 204 95
+        12 605 115
+        222 828 96
+        696 838 101
+        419 573 101
+        458 517 112
+        208 260 107
+        298 841 108
+        284 792 86
+        49 901 105
+        393 463 87
+        343 708 96
+        72 249 90
+        429 464 105
+        509 804 94
+        715 765 113
+        495 501 98
+        623 973 102
+        31 528 96
     large_sparse:
       path: "../problems/travelling_salesman/inputs/large_sparse.txt"
+      filename: "large_sparse.txt"
       cmd: "tsp_gen -v 10000 -d 0.3 -m 100 -s 20"
+      preview: |
+        2814 3224 87
+        688 3568 114
+        2731 7958 39
+        2502 6483 92
+        6077 8611 112
+        3770 5368 113
+        1288 7732 110
+        1294 7665 109
+        6252 9118 102
+        5750 8028 127
+        1774 5671 89
+        3528 6556 126
+        2442 5304 87
+        4124 7539 76
+        1312 8800 110
+        6222 7998 98
+        338 7712 114
+        2822 9038 112
+        887 9000 54
+        5444 6303 112
     large_dense:
       path: "../problems/travelling_salesman/inputs/large_dense.txt"
+      filename: "large_dense.txt"
       cmd: "tsp_gen -v 10000 -d 0.8 -m 100 -s 30"
+      preview: |
+        4762 9570 104
+        730 6649 56
+        3756 9546 99
+        4096 4559 77
+        6735 8625 89
+        2907 6881 122
+        1931 4426 35
+        5593 6066 65
+        3126 4070 100
+        1643 4835 44
+        2508 2713 102
+        2529 3875 108
+        3015 8271 55
+        980 8052 92
+        569 2701 95
+        404 675 113
+        6062 6081 81
+        207 7952 76
+        7441 7785 108
+        3304 9457 113
     large_full:
       path: "../problems/travelling_salesman/inputs/large_full.txt"
+      filename: "large_full.txt"
       cmd: "tsp_gen -v 10000 -d 1.0 -m 100 -s 10"
+      preview: |
+        1955 6352 107
+        5733 7655 92
+        4139 4530 96
+        6178 8968 102
+        2604 8546 92
+        3729 7082 109
+        2279 4945 102
+        6894 9972 98
+        5207 6751 115
+        3708 6142 101
+        839 1261 94
+        598 3848 103
+        913 9232 100
+        5964 9031 100
+        5084 9068 97
+        7255 8621 81
+        4147 7439 99
+        2513 7137 122
+        1771 4783 96
+        1159 2200 101
 graph_coloring:
   name: "Graph Coloring"
   description: "Color the nodes of a graph with as few colors as possible such that connected nodes don't have the same color."
@@ -74,28 +272,226 @@ graph_coloring:
   inputs:
     small_ultra_sparse:
       path: "../problems/graph_coloring/inputs/small_ultra_sparse.txt"
+      filename: "small_ultra_sparse.txt"
       cmd: "graph_coloring_gen -v 100 -d 0.1"
+      preview: |
+        21 64
+        57 76
+        25 69
+        4 94
+        1 94
+        92 96
+        12 45
+        3 83
+        53 68
+        12 20
+        31 34
+        71 77
+        33 41
+        7 81
+        28 43
+        38 74
+        80 85
+        37 50
+        65 98
+        22 52
     small_sparse:
       path: "../problems/graph_coloring/inputs/small_sparse.txt"
+      filename: "small_sparse.txt"
       cmd: "graph_coloring_gen -v 100 -d 0.3"
+      preview: |
+        2 66
+        82 85
+        69 82
+        59 60
+        20 48
+        66 71
+        33 79
+        7 64
+        84 96
+        11 55
+        14 99
+        4 68
+        9 70
+        38 88
+        82 88
+        20 37
+        16 88
+        35 95
+        71 87
+        73 89
     small_dense:
       path: "../problems/graph_coloring/inputs/small_dense.txt"
+      filename: "small_dense.txt"
       cmd: "graph_coloring_gen -v 100 -d 0.6"
+      preview: |
+        20 58
+        31 83
+        44 58
+        28 87
+        31 35
+        14 58
+        5 79
+        6 13
+        30 45
+        18 70
+        19 53
+        1 57
+        61 83
+        81 85
+        1 31
+        13 80
+        34 43
+        16 96
+        13 25
+        5 80
     medium_ultra_sparse:
       path: "../problems/graph_coloring/inputs/medium_ultra_sparse.txt"
+      filename: "medium_ultra_sparse.txt"
       cmd: "graph_coloring_gen -v 1000 -d 0.1"
+      preview: |
+        513 795
+        384 848
+        780 933
+        210 790
+        197 526
+        481 488
+        415 429
+        318 917
+        390 834
+        213 261
+        87 870
+        105 513
+        433 804
+        108 790
+        798 927
+        405 715
+        601 879
+        28 110
+        89 957
+        69 251
     medium_sparse:
       path: "../problems/graph_coloring/inputs/medium_sparse.txt"
+      filename: "medium_sparse.txt"
       cmd: "graph_coloring_gen -v 1000 -d 0.3"
+      preview: |
+        354 921
+        82 869
+        301 851
+        463 521
+        349 486
+        182 934
+        352 986
+        941 942
+        246 876
+        508 855
+        177 541
+        239 865
+        170 877
+        108 430
+        224 923
+        280 547
+        331 929
+        84 903
+        74 669
+        271 623
     medium_dense:
       path: "../problems/graph_coloring/inputs/medium_dense.txt"
+      filename: "medium_dense.txt"
       cmd: "graph_coloring_gen -v 1000 -d 0.6"
+      preview: |
+        308 888
+        385 531
+        139 848
+        31 722
+        107 857
+        373 833
+        374 962
+        341 491
+        478 638
+        299 683
+        587 805
+        442 789
+        398 614
+        519 717
+        251 897
+        212 418
+        193 937
+        168 590
+        16 342
+        732 789
     large_ultra_sparse:
       path: "../problems/graph_coloring/inputs/large_ultra_sparse.txt"
+      filename: "large_ultra_sparse.txt"
       cmd: "graph_coloring_gen -v 10000 -d 0.1"
+      preview: |
+        3564 4483
+        5684 7775
+        4057 8294
+        1740 4898
+        779 6652
+        2791 4432
+        684 897
+        2838 3008
+        2765 5902
+        1978 7011
+        1991 5083
+        3433 5064
+        2608 6179
+        2291 8581
+        2746 6759
+        100 5729
+        6347 9485
+        6155 9235
+        2295 8705
+        652 8264
     large_sparse:
       path: "../problems/graph_coloring/inputs/large_sparse.txt"
+      filename: "large_sparse.txt"
       cmd: "graph_coloring_gen -v 10000 -d 0.3"
+      preview: |
+        1548 3484
+        6917 9479
+        5504 8135
+        2810 5734
+        5174 7135
+        3563 5846
+        860 7094
+        5829 7303
+        1943 4781
+        1874 2188
+        655 9880
+        1855 7678
+        3654 5850
+        2746 6338
+        327 2998
+        4965 9435
+        248 8147
+        8659 9647
+        5668 6016
+        749 1299
     large_dense:
       path: "../problems/graph_coloring/inputs/large_dense.txt"
+      filename: "large_dense.txt"
       cmd: "graph_coloring_gen -v 10000 -d 0.6"
+      preview: |
+        6410 6749
+        3989 7667
+        363 1785
+        4965 5597
+        7306 9087
+        345 4680
+        2998 7003
+        2607 8175
+        2217 3471
+        1246 4265
+        2055 7318
+        2896 8147
+        2270 5404
+        1863 7559
+        3632 6366
+        6107 9859
+        8761 9478
+        1402 9656
+        2493 7881
+        6741 8697

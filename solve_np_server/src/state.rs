@@ -28,6 +28,10 @@ pub struct Problem {
 pub struct Input {
     #[serde(alias = "path")]
     pub path: PathBuf,
+    #[serde(alias = "filename")]
+    pub filename: String,
     #[serde(alias = "cmd")]
     _cmd: String,
+    #[serde(alias = "preview")]
+    pub preview: String,
 }

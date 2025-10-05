@@ -52,11 +52,13 @@ pub struct Problem {
 struct SolutionsTemplate {
     header: HeaderTemplate,
     problems: Vec<Problem>,
+    input_id: Option<String>,
 }
 
 #[derive(serde::Deserialize)]
 pub struct SolutionsQueryParams {
     problem_id: Option<String>,
+    input_id: Option<String>,
 }
 
 pub async fn solutions(
@@ -64,6 +66,10 @@ pub async fn solutions(
     params: web::Query<SolutionsQueryParams>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
+    let SolutionsQueryParams {
+        problem_id,
+        input_id,
+    } = params.into_inner();
     let user_id = session
         .get::<String>("user_id")?
         .ok_or(ErrorInternalServerError("Internal error #4"))?;
@@ -89,7 +95,7 @@ pub async fn solutions(
     let problems = state
         .static_data
         .iter()
-        .filter(|&(id, _)| match &params.problem_id {
+        .filter(|&(id, _)| match &problem_id {
             Some(problem_id) => problem_id == id,
             None => true,
         })
@@ -107,6 +113,7 @@ pub async fn solutions(
     let body = SolutionsTemplate {
         header: HeaderTemplate::try_from(&session)?,
         problems,
+        input_id,
     }
     .render()
     .map_err(ErrorInternalServerError)?;
