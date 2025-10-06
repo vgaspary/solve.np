@@ -49,3 +49,40 @@ function check_solution(problem_id: string): void {
       console.log(err);
     });
 }
+
+function submit_solution(problem_id: string, input_id: string): void {
+  const solution_textarea = document.getElementById(input_id + '_solution') as HTMLTextAreaElement | null;
+  if (!solution_textarea) {
+    throw new Error(input_id + '_solution textarea not found.');
+  }
+  const solution = solution_textarea.value;
+  if (solution.trim() === '') {
+    return;
+  }
+
+  const status_paragraph = document.getElementById(input_id + '_status') as HTMLParagraphElement | null;
+  if (!status_paragraph) {
+    throw new Error(input_id + '_status paragraph not found.');
+  }
+
+  fetch('/api/submit_solution/' + problem_id + '/' + input_id,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(parse_solution(problem_id, solution))
+    })
+    .then(response => response.json())
+    .then(validation_result => {
+      if (validation_result.Valid) {
+        status_paragraph.innerHTML = validation_result.Valid;
+      } else if (validation_result.Invalid) {
+        status_paragraph.innerHTML = validation_result.Invalid;
+      }
+    })
+    .catch(err => {
+      console.log(err);
+    });
+
+}

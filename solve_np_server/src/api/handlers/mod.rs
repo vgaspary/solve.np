@@ -18,3 +18,6 @@ pub use delete_solution::delete_solution;
 
 pub mod create_solution;
 pub use create_solution::create_solution;
+
+pub mod submit_solution;
+pub use submit_solution::submit_solution;

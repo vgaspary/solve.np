@@ -5,6 +5,7 @@
     <title>My Solutions - solve.NP</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="icon" href="/static/favicon.png">
+    <script src="/js_utils/problem_utils.js"></script>
   </head>
   <body>
     {{ header | safe }}
@@ -40,11 +41,10 @@
         </div>
         <div>
           <br>
-          <textarea></textarea>
+          <textarea id="{{ input.id }}_solution"></textarea>
           <br>
-        </div>
-        <div>
-          <a href="#">[Submit]</a>
+          <p id="{{ input.id }}_status"></p>
+          <a href="#" onclick="submit_solution('{{ problem.id }}', '{{ input.id }}')">[Submit]</a>
         </div>
       </details>
     </div>

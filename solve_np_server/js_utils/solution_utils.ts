@@ -102,3 +102,7 @@ function create_solution(button: HTMLElement, problemId: string): void {
     });
 }
 
+function submit_solution(problem_id: string, input_id: string): void {
+  const solution = (document.getElementById(input_id + "_solution") as HTMLTextAreaElement)?.value;
+  solution.
+}

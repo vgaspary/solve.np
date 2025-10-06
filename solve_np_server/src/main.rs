@@ -100,7 +100,11 @@ async fn main() -> std::io::Result<()> {
                         "/solutions/{solution_id}",
                         delete().to(api_handlers::delete_solution),
                     )
-                    .route("/solutions", post().to(api_handlers::create_solution)),
+                    .route("/solutions", post().to(api_handlers::create_solution))
+                    .route(
+                        "/submit_solution/{problem_id}/{input_id}",
+                        post().to(api_handlers::submit_solution),
+                    ),
             )
             /* ----------------- */
             .route("/health_check", get().to(api_handlers::health_check))

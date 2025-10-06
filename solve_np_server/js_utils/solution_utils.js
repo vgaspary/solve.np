@@ -90,3 +90,9 @@ function create_solution(button, problemId) {
         error_msg.innerHTML = `${error}`;
     });
 }
+function submit_solution(problem_id, input_id) {
+    var _a;
+    const solution = (_a = document.getElementById(input_id + "_solution")) === null || _a === void 0 ? void 0 : _a.value;
+    solution.
+    ;
+}
