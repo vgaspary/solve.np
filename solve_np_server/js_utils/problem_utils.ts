@@ -50,11 +50,12 @@ function check_solution(problem_id: string): void {
     });
 }
 
-function submit_solution(problem_id: string, input_id: string): void {
+function submit_solution(problem_id: string, solution_id: string, input_id: string): void {
   const solution_textarea = document.getElementById(input_id + '_solution') as HTMLTextAreaElement | null;
   if (!solution_textarea) {
     throw new Error(input_id + '_solution textarea not found.');
   }
+  solution_textarea.classList = "";
   const solution = solution_textarea.value;
   if (solution.trim() === '') {
     return;
@@ -65,7 +66,7 @@ function submit_solution(problem_id: string, input_id: string): void {
     throw new Error(input_id + '_status paragraph not found.');
   }
 
-  fetch('/api/submit_solution/' + problem_id + '/' + input_id,
+  fetch('/api/submit_solution/' + problem_id + '/' + solution_id + '/' + input_id,
     {
       method: 'POST',
       headers: {
@@ -77,8 +78,10 @@ function submit_solution(problem_id: string, input_id: string): void {
     .then(validation_result => {
       if (validation_result.Valid) {
         status_paragraph.innerHTML = validation_result.Valid;
+        solution_textarea.classList = "success";
       } else if (validation_result.Invalid) {
         status_paragraph.innerHTML = validation_result.Invalid;
+        solution_textarea.classList = "error";
       }
     })
     .catch(err => {

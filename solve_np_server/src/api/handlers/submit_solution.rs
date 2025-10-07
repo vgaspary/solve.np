@@ -36,14 +36,14 @@ fn hash(solution: &Solution) -> u64 {
 pub async fn submit_solution(
     session: Session,
     solution: web::Json<Solution>,
-    path: web::Path<(String, String)>,
+    path: web::Path<(String, String, String)>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let user_id = session
+    let _user_id = session
         .get::<String>("user_id")?
         .ok_or(ErrorInternalServerError("Internal error #14"))?;
     let solution = solution.into_inner();
-    let (problem_id, input_id) = path.into_inner();
+    let (problem_id, _solution_id, input_id) = path.into_inner();
 
     let solution_hash = hash(&solution);
     // if there's a record in DB with this hash, there's nothing to be done

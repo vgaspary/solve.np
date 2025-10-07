@@ -22,6 +22,7 @@ a {
 }
 a:hover, a:focus {
   color: #c0caf5;
+  cursor: pointer;
 }
 h1, h2 {
   font-size: 1.2em;

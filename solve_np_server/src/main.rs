@@ -102,7 +102,7 @@ async fn main() -> std::io::Result<()> {
                     )
                     .route("/solutions", post().to(api_handlers::create_solution))
                     .route(
-                        "/submit_solution/{problem_id}/{input_id}",
+                        "/submit_solution/{problem_id}/{solution_id}/{input_id}",
                         post().to(api_handlers::submit_solution),
                     ),
             )

@@ -47,11 +47,12 @@ function check_solution(problem_id) {
         console.log(err);
     });
 }
-function submit_solution(problem_id, input_id) {
+function submit_solution(problem_id, solution_id, input_id) {
     const solution_textarea = document.getElementById(input_id + '_solution');
     if (!solution_textarea) {
         throw new Error(input_id + '_solution textarea not found.');
     }
+    solution_textarea.classList = "";
     const solution = solution_textarea.value;
     if (solution.trim() === '') {
         return;
@@ -60,7 +61,7 @@ function submit_solution(problem_id, input_id) {
     if (!status_paragraph) {
         throw new Error(input_id + '_status paragraph not found.');
     }
-    fetch('/api/submit_solution/' + problem_id + '/' + input_id, {
+    fetch('/api/submit_solution/' + problem_id + '/' + solution_id + '/' + input_id, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -71,9 +72,11 @@ function submit_solution(problem_id, input_id) {
         .then(validation_result => {
         if (validation_result.Valid) {
             status_paragraph.innerHTML = validation_result.Valid;
+            solution_textarea.classList = "success";
         }
         else if (validation_result.Invalid) {
             status_paragraph.innerHTML = validation_result.Invalid;
+            solution_textarea.classList = "error";
         }
     })
         .catch(err => {

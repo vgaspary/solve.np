@@ -38,7 +38,6 @@ impl TryFrom<i64> for Status {
 struct Problem {
     id: String,
     name: String,
-    description: String,
 }
 
 struct Input {
@@ -50,7 +49,7 @@ struct Input {
 }
 
 struct Solution {
-    solution_id: String,
+    id: String,
     problem_id: String,
     title: String,
     description: String,
@@ -63,7 +62,6 @@ struct SolutionTemplate {
     header: HeaderTemplate,
     solution: Solution,
     problem: Problem,
-    sample_input: String,
     inputs: Vec<Input>,
 }
 
@@ -84,7 +82,7 @@ pub async fn solution(
             "SELECT problem_id, title, description, status FROM attempts WHERE user_id = ?1 AND solution_id = ?2",
             [&user_id, &solution_id],
             |row| Ok(Solution {
-                solution_id: solution_id.clone(),
+                id: solution_id.clone(),
                 problem_id: row.get(0)?,
                 title: row.get(1)?,
                 description: row.get(2)?,
@@ -93,7 +91,7 @@ pub async fn solution(
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
         .map_err(|_| ErrorInternalServerError("Internal error #10"))?;
-    let (problem, sample_input, inputs) = state
+    let (problem, inputs) = state
         .static_data
         .get(&solution.problem_id)
         .map(|problem| {
@@ -101,9 +99,7 @@ pub async fn solution(
                 Problem {
                     id: solution.problem_id.clone(),
                     name: problem.name.clone(),
-                    description: problem.description.clone(),
                 },
-                problem.sample_input.clone(),
                 problem
                     .inputs
                     .iter()
@@ -142,7 +138,6 @@ pub async fn solution(
         header: HeaderTemplate::try_from(&session)?,
         solution,
         problem,
-        sample_input,
         inputs,
     }
     .render()

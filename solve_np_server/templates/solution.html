@@ -20,6 +20,7 @@
       {% when Status::Solved(score) %}
       <span style="color: green;">Solved</span>
       {% endmatch %}</p>
+      <p>{{ solution.description }}</p>
     </div>
     {% for input in inputs %}
     <div>
@@ -44,7 +45,7 @@
           <textarea id="{{ input.id }}_solution"></textarea>
           <br>
           <p id="{{ input.id }}_status"></p>
-          <a href="#" onclick="submit_solution('{{ problem.id }}', '{{ input.id }}')">[Submit]</a>
+          <a onclick="submit_solution('{{ problem.id }}', '{{ solution.id }}', '{{ input.id }}')">[Submit]</a>
         </div>
       </details>
     </div>
