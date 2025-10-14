@@ -1,3 +1,5 @@
+use crate::types::ProblemId;
+use crate::types::InputId;
 use rusqlite::Connection;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -5,8 +7,6 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::SystemTime;
 
-type ProblemId = String;
-type InputId = String;
 pub type StaticData = HashMap<ProblemId, Problem>;
 
 pub struct State {

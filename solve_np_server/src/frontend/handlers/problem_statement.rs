@@ -2,6 +2,8 @@ use crate::frontend::handlers::header::HeaderTemplate;
 use crate::frontend::utils::bytes_to_string_h;
 use crate::frontend::utils::get_file_metadata;
 use crate::state::State;
+use crate::types::InputId;
+use crate::types::ProblemId;
 use actix_session::Session;
 use actix_web::HttpResponse;
 use actix_web::Responder;
@@ -23,7 +25,7 @@ struct ProblemStatementTemplate {
 }
 
 struct Problem {
-    id: String,
+    id: ProblemId,
     name: String,
     problem_statement: String,
     sample_input: String,
@@ -31,7 +33,7 @@ struct Problem {
 }
 
 struct Input {
-    id: String,
+    id: InputId,
     filename: String,
     size: u64,
     size_h: String,
@@ -42,7 +44,7 @@ pub async fn problem_statement(
     path: web::Path<String>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let problem_id = path.into_inner();
+    let problem_id = path.into_inner().into();
     let problem = state
         .static_data
         .get(&problem_id)

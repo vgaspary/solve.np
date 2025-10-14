@@ -1,4 +1,5 @@
 use crate::state::State;
+use crate::types::SolutionId;
 use actix_session::Session;
 use actix_web::HttpResponse;
 use actix_web::Responder;
@@ -10,7 +11,7 @@ use rusqlite::params;
 
 pub async fn delete_solution(
     session: Session,
-    path: web::Path<String>,
+    path: web::Path<SolutionId>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let user_id = session

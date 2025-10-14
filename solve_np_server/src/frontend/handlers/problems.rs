@@ -1,5 +1,6 @@
 use crate::frontend::handlers::header::HeaderTemplate;
 use crate::state::State;
+use crate::types::ProblemId;
 use actix_session::Session;
 use actix_web::HttpResponse;
 use actix_web::Responder;
@@ -9,8 +10,6 @@ use actix_web::http::header::ContentType;
 use actix_web::web;
 use askama::Template;
 use itertools::Itertools;
-
-type ProblemId = String;
 
 struct Problem {
     id: ProblemId,

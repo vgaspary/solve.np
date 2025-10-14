@@ -1,5 +1,9 @@
 use crate::frontend::handlers::header::HeaderTemplate;
 use crate::state::State;
+use crate::types::InputId;
+use crate::types::ProblemId;
+use crate::types::SolutionId;
+use crate::types::Status;
 use actix_session::Session;
 use actix_web::HttpResponse;
 use actix_web::Responder;
@@ -11,38 +15,17 @@ use askama::Template;
 use itertools::Itertools;
 use log::error;
 
-type Score = usize;
-
-#[derive(Clone, Copy)]
-pub enum Status {
-    Untested,
-    Attempted,
-    Solved(Score),
-}
-
-impl TryFrom<i64> for Status {
-    type Error = ();
-    fn try_from(value: i64) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Status::Untested),
-            1 => Ok(Status::Attempted),
-            2 => Ok(Status::Solved(0)),
-            _ => Err(()),
-        }
-    }
-}
-
 #[derive(Clone)]
 pub struct Solution {
-    id: String,
-    problem_id: String,
+    id: SolutionId,
+    problem_id: ProblemId,
     title: String,
     description: String,
     status: Status,
 }
 
 pub struct Problem {
-    id: String,
+    id: ProblemId,
     name: String,
     solutions: Vec<Solution>,
 }
@@ -52,13 +35,13 @@ pub struct Problem {
 struct SolutionsTemplate {
     header: HeaderTemplate,
     problems: Vec<Problem>,
-    input_id: Option<String>,
+    input_id: Option<InputId>,
 }
 
 #[derive(serde::Deserialize)]
 pub struct SolutionsQueryParams {
-    problem_id: Option<String>,
-    input_id: Option<String>,
+    problem_id: Option<ProblemId>,
+    input_id: Option<InputId>,
 }
 
 pub async fn solutions(
@@ -87,7 +70,7 @@ pub async fn solutions(
                 problem_id: row.get(1)?,
                 title: row.get(2)?,
                 description: row.get(3)?,
-                status: Status::try_from(row.get::<usize, i64>(4)?).expect("Status value must be 0 || 1 || 2."),
+                status: row.get::<usize, i64>(4)?.into(),
             }))
         .map_err(|_| ErrorInternalServerError("Internal error #8"))?
         .filter_map(Result::ok)

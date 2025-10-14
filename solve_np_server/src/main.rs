@@ -1,6 +1,7 @@
 mod api;
 mod frontend;
 mod state;
+mod types;
 
 use actix_files::Files;
 use actix_session::SessionMiddleware;

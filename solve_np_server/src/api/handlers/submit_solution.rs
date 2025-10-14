@@ -1,5 +1,8 @@
 use crate::api::utils;
 use crate::state::State;
+use crate::types::InputId;
+use crate::types::ProblemId;
+use crate::types::SolutionId;
 use actix_session::Session;
 use actix_web::HttpResponse;
 use actix_web::Responder;
@@ -36,7 +39,7 @@ fn hash(solution: &Solution) -> u64 {
 pub async fn submit_solution(
     session: Session,
     solution: web::Json<Solution>,
-    path: web::Path<(String, String, String)>,
+    path: web::Path<(ProblemId, SolutionId, InputId)>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let _user_id = session

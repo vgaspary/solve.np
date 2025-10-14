@@ -36,7 +36,7 @@ pub async fn create_solution(
         .lock()
         .unwrap()
         .execute(
-            "INSERT INTO attempts (solution_id, user_id, problem_id, title, description, status) VALUES (?1, ?2, ?3, ?4, ?5, 0)", 
+            "INSERT INTO attempts (solution_id, user_id, problem_id, title, description, status) VALUES (?1, ?2, ?3, ?4, ?5, -2)", 
             params![solution_id, user_id, problem_id, title, description],
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))

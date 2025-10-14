@@ -3,6 +3,10 @@ use std::os::unix::fs::MetadataExt;
 
 use crate::frontend::handlers::header::HeaderTemplate;
 use crate::state::State;
+use crate::types::InputId;
+use crate::types::ProblemId;
+use crate::types::SolutionId;
+use crate::types::Status;
 use actix_session::Session;
 use actix_web::HttpResponse;
 use actix_web::Responder;
@@ -13,35 +17,15 @@ use actix_web::web;
 use askama::Template;
 use itertools::Itertools;
 use log::error;
-
-type Score = usize;
-
-#[derive(Clone, Copy)]
-pub enum Status {
-    Untested,
-    Attempted,
-    Solved(Score),
-}
-
-impl TryFrom<i64> for Status {
-    type Error = ();
-    fn try_from(value: i64) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Status::Untested),
-            1 => Ok(Status::Attempted),
-            2 => Ok(Status::Solved(0)),
-            _ => Err(()),
-        }
-    }
-}
+use rusqlite::params;
 
 struct Problem {
-    id: String,
+    id: ProblemId,
     name: String,
 }
 
 struct Input {
-    id: String,
+    id: InputId,
     filename: String,
     preview: String,
     status: Status,
@@ -49,8 +33,8 @@ struct Input {
 }
 
 struct Solution {
-    id: String,
-    problem_id: String,
+    id: SolutionId,
+    problem_id: ProblemId,
     title: String,
     description: String,
     status: Status,
@@ -67,7 +51,7 @@ struct SolutionTemplate {
 
 pub async fn solution(
     session: Session,
-    path: web::Path<String>,
+    path: web::Path<SolutionId>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let solution_id = path.into_inner();
@@ -80,13 +64,13 @@ pub async fn solution(
         .unwrap()
         .query_row(
             "SELECT problem_id, title, description, status FROM attempts WHERE user_id = ?1 AND solution_id = ?2",
-            [&user_id, &solution_id],
+            params![&user_id, &solution_id],
             |row| Ok(Solution {
                 id: solution_id.clone(),
                 problem_id: row.get(0)?,
                 title: row.get(1)?,
                 description: row.get(2)?,
-                status: Status::try_from(row.get::<usize, i64>(3)?).expect("Status value must be 0 || 1 || 2."),
+                status: row.get::<usize, i64>(3)?.into(),
             })
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
@@ -117,13 +101,7 @@ pub async fn solution(
                         id: id.clone(),
                         filename: input.filename.clone(),
                         preview: input.preview.clone(),
-                        status: if id.starts_with("s") {
-                            Status::Solved(0)
-                        } else if id.starts_with("m") {
-                            Status::Attempted
-                        } else {
-                            Status::Untested
-                        }, // TODO!
+                        status: Status::Untested,
                         size: metadata(&input.path)
                             .map(|metadata| metadata.size())
                             .unwrap_or_default(),
