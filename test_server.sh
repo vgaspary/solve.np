@@ -13,7 +13,7 @@ SERVER_URL="http://${SERVER_ADDRESS}:${SERVER_PORT}"
 # Create the database and the votes table
 rm -f "${DB_PATH}"
 sqlite3 "${DB_PATH}" "CREATE TABLE votes (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT UNIQUE, vote BOOLEAN);"
-sqlite3 "${DB_PATH}" "CREATE TABLE attempts (solution_id TEXT PRIMARY KEY, user_id TEXT, problem_id TEXT, title TEXT UNIQUE, description TEXT, status INTEGER);"
+sqlite3 "${DB_PATH}" "CREATE TABLE solutions (solution_id TEXT PRIMARY KEY, user_id TEXT, problem_id TEXT, title TEXT UNIQUE, description TEXT, status INTEGER);"
 
 # Generate a random base64 encoded key for the session middleware
 RANDOM_KEY=$(head /dev/urandom | tr -dc A-Za-z0-9_ | head -c 64 | base64 -w 0)

@@ -60,7 +60,7 @@ pub async fn solutions(
         .db
         .lock()
         .unwrap()
-        .prepare("SELECT solution_id, problem_id, title, description, status FROM attempts WHERE user_id = ?1")
+        .prepare("SELECT solution_id, problem_id, title, description, status FROM solutions WHERE user_id = ?1")
         .inspect_err(|err| error!("{err}"))
         .map_err(|_| ErrorInternalServerError("Internal error #7"))?
         .query_map(

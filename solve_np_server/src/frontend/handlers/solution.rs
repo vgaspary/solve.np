@@ -63,7 +63,7 @@ pub async fn solution(
         .lock()
         .unwrap()
         .query_row(
-            "SELECT problem_id, title, description, status FROM attempts WHERE user_id = ?1 AND solution_id = ?2",
+            "SELECT problem_id, title, description, status FROM solutions WHERE user_id = ?1 AND solution_id = ?2",
             params![&user_id, &solution_id],
             |row| Ok(Solution {
                 id: solution_id.clone(),

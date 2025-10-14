@@ -24,7 +24,7 @@ pub async fn delete_solution(
         .lock()
         .unwrap()
         .execute(
-            "DELETE FROM attempts WHERE solution_id = ?1 AND user_id = ?2",
+            "DELETE FROM solutions WHERE solution_id = ?1 AND user_id = ?2",
             params![solution_id, user_id],
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
