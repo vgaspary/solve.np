@@ -70,7 +70,7 @@ pub async fn solutions(
                 problem_id: row.get(1)?,
                 title: row.get(2)?,
                 description: row.get(3)?,
-                status: row.get::<usize, i64>(4)?.into(),
+                status: row.get(4)?,
             }))
         .map_err(|_| ErrorInternalServerError("Internal error #8"))?
         .filter_map(Result::ok)

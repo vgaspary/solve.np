@@ -70,7 +70,7 @@ pub async fn solution(
                 problem_id: row.get(0)?,
                 title: row.get(1)?,
                 description: row.get(2)?,
-                status: row.get::<usize, i64>(3)?.into(),
+                status: row.get(3)?,
             })
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))

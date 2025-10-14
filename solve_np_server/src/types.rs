@@ -12,12 +12,22 @@ pub enum Status {
     Solved(Score),
 }
 
-impl From<i64> for Status {
-    fn from(value: i64) -> Self {
-        match value {
-            -1 => Status::Untested,
-            -2 => Status::Attempted,
-            score => Status::Solved(score as usize),
+impl ToSql for Status {
+    fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
+        match self {
+            Self::Untested => (-2).to_sql(),
+            Self::Attempted => (-1).to_sql(),
+            Self::Solved(score) => score.to_sql(),
+        }
+    }
+}
+
+impl FromSql for Status {
+    fn column_result(value: rusqlite::types::ValueRef<'_>) -> rusqlite::types::FromSqlResult<Self> {
+        match value.as_i64()? {
+            -2 => Ok(Self::Untested),
+            -1 => Ok(Self::Attempted),
+            n => Ok(Self::Solved(n as usize)),
         }
     }
 }

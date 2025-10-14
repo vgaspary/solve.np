@@ -1,4 +1,5 @@
 use crate::state::State;
+use crate::types::Status;
 use actix_session::Session;
 use actix_web::HttpResponse;
 use actix_web::Responder;
@@ -36,8 +37,8 @@ pub async fn create_solution(
         .lock()
         .unwrap()
         .execute(
-            "INSERT INTO solutions (solution_id, user_id, problem_id, title, description, status) VALUES (?1, ?2, ?3, ?4, ?5, -2)", 
-            params![solution_id, user_id, problem_id, title, description],
+            "INSERT INTO solutions (solution_id, user_id, problem_id, title, description, status) VALUES (?1, ?2, ?3, ?4, ?5, ?6)", 
+            params![solution_id, user_id, problem_id, title, description, Status::Untested],
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
         .map_err(|_| ErrorConflict("Pick a different title. Another attempt exists with the same title."))?;
