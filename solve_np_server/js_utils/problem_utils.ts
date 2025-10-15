@@ -74,7 +74,14 @@ function submit_solution(problem_id: string, solution_id: string, input_id: stri
       },
       body: JSON.stringify(parse_solution(problem_id, solution))
     })
-    .then(response => response.json())
+    .then(response => {
+      if (response.status === 204) {
+        status_paragraph.innerHTML = "This solution has already been submitted.";
+        solution_textarea.classList = "";
+        return;
+      }
+      return response.json();
+    })
     .then(validation_result => {
       if (validation_result.Valid) {
         status_paragraph.innerHTML = validation_result.Valid;

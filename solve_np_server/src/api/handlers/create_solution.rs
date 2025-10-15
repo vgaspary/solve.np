@@ -37,10 +37,20 @@ pub async fn create_solution(
         .lock()
         .unwrap()
         .execute(
-            "INSERT INTO solutions (solution_id, user_id, problem_id, title, description, status) VALUES (?1, ?2, ?3, ?4, ?5, ?6)", 
-            params![solution_id, user_id, problem_id, title, description, Status::Untested],
+            "INSERT INTO solutions (solution_id, user_id, problem_id, title, description, status)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            params![
+                solution_id,
+                user_id,
+                problem_id,
+                title,
+                description,
+                Status::Untested
+            ],
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
-        .map_err(|_| ErrorConflict("Pick a different title. Another attempt exists with the same title."))?;
+        .map_err(|_| {
+            ErrorConflict("Pick a different title. Another attempt exists with the same title.")
+        })?;
     Ok(HttpResponse::Ok())
 }

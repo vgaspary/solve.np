@@ -3,12 +3,16 @@ use crate::state::State;
 use crate::types::InputId;
 use crate::types::ProblemId;
 use crate::types::SolutionId;
+use crate::types::Status;
 use actix_session::Session;
 use actix_web::HttpResponse;
 use actix_web::Responder;
 use actix_web::error::Error as HttpError;
 use actix_web::error::ErrorInternalServerError;
 use actix_web::web;
+use itertools::Itertools;
+use log::error;
+use rusqlite::params;
 use serde::Deserialize;
 use serde::Serialize;
 use std::fs;
@@ -18,10 +22,19 @@ use std::hash::Hasher;
 
 pub type Score = usize;
 
-#[derive(Deserialize, Hash, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Hash, Eq, PartialEq)]
 pub enum Solution {
     TspSolution(Vec<usize>),
     GraphColoringSolution(Vec<usize>),
+}
+
+impl ToString for Solution {
+    fn to_string(&self) -> String {
+        match self {
+            Self::TspSolution(path) => path.iter().join(" "),
+            Self::GraphColoringSolution(colors) => colors.iter().join(" "),
+        }
+    }
 }
 
 #[derive(Serialize)]
@@ -42,19 +55,54 @@ pub async fn submit_solution(
     path: web::Path<(ProblemId, SolutionId, InputId)>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let _user_id = session
+    let user_id = session
         .get::<String>("user_id")?
         .ok_or(ErrorInternalServerError("Internal error #14"))?;
     let solution = solution.into_inner();
-    let (problem_id, _solution_id, input_id) = path.into_inner();
+    let (problem_id, solution_id, input_id) = path.into_inner();
 
-    let solution_hash = hash(&solution);
-    // if there's a record in DB with this hash, there's nothing to be done
-    if solution_hash == 0 {
+    let hash_digest = hash(&solution) as i64;
+    let same_hash_digest: bool = state
+        .db
+        .lock()
+        .unwrap()
+        .query_one(
+            "SELECT EXISTS (
+                SELECT 1 FROM submissions
+                WHERE
+                    user_id = ?1 AND
+                    problem_id = ?2 AND
+                    solution_id = ?3 AND
+                    input_id = ?4 AND
+                    hash_digest = ?5);",
+            params![user_id, problem_id, solution_id, input_id, hash_digest],
+            |row| row.get(0),
+        )
+        .inspect_err(|err| error!("{err}"))
+        .map_err(|_| ErrorInternalServerError("Internal error #15"))?;
+    if same_hash_digest {
         return Ok(HttpResponse::NoContent().finish());
     }
 
-    match solution {
+    state
+        .db
+        .lock()
+        .unwrap()
+        .execute(
+            "INSERT INTO submissions (user_id, problem_id, solution_id, input_id, solution, hash_digest, status, invalid_message)
+             VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+             ON CONFLICT(user_id, problem_id, solution_id, input_id)
+             DO UPDATE SET
+                solution = ?5,
+                hash_digest = ?6,
+                status = ?7,
+                invalid_message = ?8;",
+            params![user_id, problem_id, solution_id, input_id, solution.to_string(), hash_digest, Status::Untested, ""],
+        )
+        .inspect_err(|err| error!("SQL query failed: {err}"))
+        .map_err(|_| ErrorInternalServerError("Internal error #16"))?;
+
+    let validation_result: ValidateSolutionResult = match solution {
         Solution::TspSolution(path) => {
             let graph = state
                 .static_data
@@ -63,12 +111,9 @@ pub async fn submit_solution(
                 .and_then(|input| fs::read_to_string(&input.path).ok())
                 .and_then(|input| utils::parse_tsp_input(&input))
                 .ok_or(ErrorInternalServerError("Internal error #12"))?;
-            match tsp_validate::validate(&graph, path) {
-                Ok(score) => Ok(HttpResponse::Ok().json(ValidateSolutionResult::Valid(score))),
-                Err(err) => {
-                    Ok(HttpResponse::Ok().json(ValidateSolutionResult::Invalid(err.to_string())))
-                }
-            }
+            tsp_validate::validate(&graph, path)
+                .map(|score| ValidateSolutionResult::Valid(score))
+                .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
         Solution::GraphColoringSolution(coloring) => {
             let graph = state
@@ -78,12 +123,63 @@ pub async fn submit_solution(
                 .and_then(|input| fs::read_to_string(&input.path).ok())
                 .and_then(|input| utils::parse_graph_coloring_input(&input))
                 .ok_or(ErrorInternalServerError("Internal error #13"))?;
-            match graph_coloring_validate::validate(&graph, coloring) {
-                Ok(score) => Ok(HttpResponse::Ok().json(ValidateSolutionResult::Valid(score))),
-                Err(err) => {
-                    Ok(HttpResponse::Ok().json(ValidateSolutionResult::Invalid(err.to_string())))
-                }
-            }
+            graph_coloring_validate::validate(&graph, coloring)
+                .map(|score| ValidateSolutionResult::Valid(score))
+                .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
+        }
+    };
+
+    match &validation_result {
+        ValidateSolutionResult::Valid(score) => {
+            state
+                .db
+                .lock()
+                .unwrap()
+                .execute(
+                    "UPDATE submissions SET
+                        status = ?5
+                     WHERE
+                        user_id = ?1 AND
+                        problem_id = ?2 AND
+                        solution_id = ?3 AND
+                        input_id = ?4;",
+                    params![
+                        user_id,
+                        problem_id,
+                        solution_id,
+                        input_id,
+                        Status::Solved(*score)
+                    ],
+                )
+                .inspect_err(|err| error!("SQL query failed: {err}"))
+                .map_err(|_| ErrorInternalServerError("Internal error #17"))?;
+        }
+        ValidateSolutionResult::Invalid(invalid_message) => {
+            state
+                .db
+                .lock()
+                .unwrap()
+                .execute(
+                    "UPDATE submissions SET
+                        status = ?5,
+                        invalid_message = ?6
+                     WHERE
+                        user_id = ?1 AND
+                        problem_id = ?2 AND
+                        solution_id = ?3 AND
+                        input_id = ?4;",
+                    params![
+                        user_id,
+                        problem_id,
+                        solution_id,
+                        input_id,
+                        Status::Attempted,
+                        invalid_message,
+                    ],
+                )
+                .inspect_err(|err| error!("SQL query failed: {err}"))
+                .map_err(|_| ErrorInternalServerError("Internal error #17"))?;
         }
     }
+    Ok(HttpResponse::Ok().json(validation_result))
 }

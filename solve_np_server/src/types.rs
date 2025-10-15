@@ -53,12 +53,24 @@ impl FromSql for ProblemId {
     }
 }
 
+impl ToSql for ProblemId {
+    fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
+        self.0.to_sql()
+    }
+}
+
 #[derive(Deserialize, Hash, Eq, PartialEq, Clone)]
 pub struct InputId(String);
 
 impl fmt::Display for InputId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt::Display::fmt(&self.0, f)
+    }
+}
+
+impl ToSql for InputId {
+    fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
+        self.0.to_sql()
     }
 }
 

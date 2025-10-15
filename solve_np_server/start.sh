@@ -6,6 +6,8 @@ if [ ! -f ../solve_np.db3 ]; then
 
   sqlite3 ../solve_np.db3 "CREATE TABLE solutions (solution_id TEXT PRIMARY KEY, user_id TEXT, problem_id TEXT, title TEXT, description TEXT, status INTEGER);" || exit 1
   sqlite3 ../solve_np.db3 "CREATE UNIQUE INDEX idx_user_problem_title ON solutions (user_id, problem_id, title);" || exit 1
+
+  sqlite3 ../solve_np.db3 "CREATE TABLE submissions (user_id TEXT, problem_id TEXT, solution_id TEXT, input_id TEXT, solution TEXT, hash_digest INTEGER, status INTEGER, invalid_message TEXT, PRIMARY KEY (user_id, problem_id, solution_id, input_id));" || exit 1
 fi
 
 cargo watch -i "js_utils/*.js" -i "../solve_np.db3" -s "tsc --project js_utils/tsconfig.json; cargo r -- -s static_data.yaml -k 4M/q/i1+d9eQXO3Bzn0L4sRWBrJ3cpCschtUAsC22Z4KrbVhXiVpBMBJnhk+pG85qy5Ra1IwkvPyXTtlAyleuw== -d ../solve_np.db3 -p 3333"

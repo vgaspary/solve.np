@@ -28,7 +28,9 @@ struct Input {
     id: InputId,
     filename: String,
     preview: String,
+    solution: Option<String>,
     status: Status,
+    invalid_message: Option<String>,
     size: u64,
 }
 
@@ -54,15 +56,14 @@ pub async fn solution(
     path: web::Path<SolutionId>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let solution_id = path.into_inner();
     let user_id = session
         .get::<String>("user_id")?
         .ok_or(ErrorInternalServerError("Internal error #9"))?;
-    let solution = state
-        .db
-        .lock()
-        .unwrap()
-        .query_row(
+    let solution_id = path.into_inner();
+    let db = state.db.lock().unwrap();
+
+    let solution = db
+        .query_one(
             "SELECT problem_id, title, description, status FROM solutions WHERE user_id = ?1 AND solution_id = ?2",
             params![&user_id, &solution_id],
             |row| Ok(Solution {
@@ -97,14 +98,30 @@ pub async fn solution(
                         )
                     })
                     .sorted_by_key(|(_, _, size)| *size)
-                    .map(|(id, input, _)| Input {
-                        id: id.clone(),
-                        filename: input.filename.clone(),
-                        preview: input.preview.clone(),
-                        status: Status::Untested,
-                        size: metadata(&input.path)
-                            .map(|metadata| metadata.size())
-                            .unwrap_or_default(),
+                    .map(|(id, input, _)| {
+                        let (solution, status, invalid_message) = db
+                            .query_one(
+                                "SELECT solution, status, invalid_message FROM submissions
+                                 WHERE
+                                    user_id = ?1 AND
+                                    problem_id = ?2 AND
+                                    solution_id = ?3 AND
+                                    input_id = ?4;",
+                                params![user_id, solution.problem_id, solution.id, id],
+                                |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+                            )
+                            .unwrap_or((None, Status::Untested, None));
+                        Input {
+                            id: id.clone(),
+                            filename: input.filename.clone(),
+                            preview: input.preview.clone(),
+                            solution,
+                            status,
+                            invalid_message,
+                            size: metadata(&input.path)
+                                .map(|metadata| metadata.size())
+                                .unwrap_or_default(),
+                        }
                     })
                     .sorted_by_key(|input| input.size)
                     .collect(),

@@ -29,10 +29,10 @@ fn get_vote_data(
     };
     let db = state.db.lock().unwrap();
     let Some(voted_eq) = db
-        .query_row(
+        .query_one(
             "SELECT vote FROM votes WHERE user_id = ?1",
             params![user_id],
-            |row| row.get::<usize, bool>(0),
+            |row| row.get(0),
         )
         .inspect_err(|err| error!("{err}"))
         .ok()
@@ -41,7 +41,7 @@ fn get_vote_data(
     };
     let vote = PEqualsNP(voted_eq);
     let (num_eq, num_neq) = db
-        .query_row(
+        .query_one(
             "SELECT COUNT(*) FILTER (WHERE vote = 1), COUNT(*) FILTER (WHERE vote = 0) FROM votes",
             params![],
             |row| Ok((row.get(0)?, row.get(1)?)),
