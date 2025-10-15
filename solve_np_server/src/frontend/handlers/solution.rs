@@ -28,9 +28,9 @@ struct Input {
     id: InputId,
     filename: String,
     preview: String,
-    solution: Option<String>,
+    solution: String,
     status: Status,
-    invalid_message: Option<String>,
+    invalid_message: String,
     size: u64,
 }
 
@@ -115,9 +115,9 @@ pub async fn solution(
                             id: id.clone(),
                             filename: input.filename.clone(),
                             preview: input.preview.clone(),
-                            solution,
+                            solution: solution.unwrap_or_default(),
                             status,
-                            invalid_message,
+                            invalid_message: invalid_message.unwrap_or_default(),
                             size: metadata(&input.path)
                                 .map(|metadata| metadata.size())
                                 .unwrap_or_default(),

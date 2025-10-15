@@ -9,6 +9,7 @@ use actix_web::HttpResponse;
 use actix_web::Responder;
 use actix_web::error::Error as HttpError;
 use actix_web::error::ErrorInternalServerError;
+use actix_web::rt::task;
 use actix_web::web;
 use itertools::Itertools;
 use log::error;
@@ -102,32 +103,38 @@ pub async fn submit_solution(
         .inspect_err(|err| error!("SQL query failed: {err}"))
         .map_err(|_| ErrorInternalServerError("Internal error #16"))?;
 
-    let validation_result: ValidateSolutionResult = match solution {
+    let state_clone = state.clone();
+    let problem_id_clone = problem_id.clone();
+    let input_id_clone = input_id.clone();
+    let validation_result = task::spawn_blocking(move || match solution {
         Solution::TspSolution(path) => {
-            let graph = state
+            let graph = state_clone
                 .static_data
-                .get(&problem_id)
-                .and_then(|problem| problem.inputs.get(&input_id))
+                .get(&problem_id_clone)
+                .and_then(|problem| problem.inputs.get(&input_id_clone))
                 .and_then(|input| fs::read_to_string(&input.path).ok())
                 .and_then(|input| utils::parse_tsp_input(&input))
-                .ok_or(ErrorInternalServerError("Internal error #12"))?;
-            tsp_validate::validate(&graph, path)
+                .ok_or("Internal error #12")?;
+            Ok(tsp_validate::validate(&graph, path)
                 .map(|score| ValidateSolutionResult::Valid(score))
-                .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
+                .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string())))
         }
         Solution::GraphColoringSolution(coloring) => {
-            let graph = state
+            let graph = state_clone
                 .static_data
-                .get(&problem_id)
-                .and_then(|problem| problem.inputs.get(&input_id))
+                .get(&problem_id_clone)
+                .and_then(|problem| problem.inputs.get(&input_id_clone))
                 .and_then(|input| fs::read_to_string(&input.path).ok())
                 .and_then(|input| utils::parse_graph_coloring_input(&input))
-                .ok_or(ErrorInternalServerError("Internal error #13"))?;
-            graph_coloring_validate::validate(&graph, coloring)
+                .ok_or("Internal error #13")?;
+            Ok(graph_coloring_validate::validate(&graph, coloring)
                 .map(|score| ValidateSolutionResult::Valid(score))
-                .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
+                .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string())))
         }
-    };
+    })
+    .await
+    .map_err(|_| ErrorInternalServerError("Internal error #19"))?
+    .map_err(|msg: &'static str| ErrorInternalServerError(msg))?;
 
     match &validation_result {
         ValidateSolutionResult::Valid(score) => {
@@ -178,7 +185,7 @@ pub async fn submit_solution(
                     ],
                 )
                 .inspect_err(|err| error!("SQL query failed: {err}"))
-                .map_err(|_| ErrorInternalServerError("Internal error #17"))?;
+                .map_err(|_| ErrorInternalServerError("Internal error #18"))?;
         }
     }
     Ok(HttpResponse::Ok().json(validation_result))

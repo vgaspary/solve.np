@@ -61,6 +61,10 @@ function submit_solution(problem_id, solution_id, input_id) {
     if (!status_paragraph) {
         throw new Error(input_id + '_status paragraph not found.');
     }
+    const status_label = document.getElementById(input_id + '_status_label');
+    if (!status_label) {
+        throw new Error(input_id + '_status_label span not found.');
+    }
     fetch('/api/submit_solution/' + problem_id + '/' + solution_id + '/' + input_id, {
         method: 'POST',
         headers: {
@@ -80,10 +84,14 @@ function submit_solution(problem_id, solution_id, input_id) {
         if (validation_result.Valid) {
             status_paragraph.innerHTML = validation_result.Valid;
             solution_textarea.classList = "success";
+            status_label.innerHTML = 'Solved';
+            status_label.style = 'color: green; width: 130px; display: inline-block;';
         }
         else if (validation_result.Invalid) {
             status_paragraph.innerHTML = validation_result.Invalid;
             solution_textarea.classList = "error";
+            status_label.innerHTML = 'Attempted';
+            status_label.style = 'color: orange; width: 130px; display: inline-block;';
         }
     })
         .catch(err => {
