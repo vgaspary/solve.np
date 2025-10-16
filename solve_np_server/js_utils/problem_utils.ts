@@ -89,7 +89,7 @@ function submit_solution(problem_id: string, solution_id: string, input_id: stri
     })
     .then(validation_result => {
       if (validation_result.Valid) {
-        status_paragraph.innerHTML = validation_result.Valid;
+        status_paragraph.innerHTML = 'Score: ' + validation_result.Valid;
         solution_textarea.classList = "success";
         status_label.innerHTML = 'Solved';
         status_label.style = 'color: green; width: 130px; display: inline-block;';

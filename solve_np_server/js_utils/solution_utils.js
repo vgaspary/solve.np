@@ -33,8 +33,10 @@ function new_attempt(button) {
         switch (event.key) {
             case 'Enter':
                 create_button.click();
+                break;
             case 'Escape':
                 cancel_button.click();
+                break;
         }
     };
     const new_row = table.insertRow(table.rows.length - 2);

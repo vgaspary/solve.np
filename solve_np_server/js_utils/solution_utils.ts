@@ -37,8 +37,10 @@ function new_attempt(button: HTMLElement): void {
     switch (event.key) {
       case 'Enter':
         create_button.click();
+        break;
       case 'Escape':
         cancel_button.click();
+        break;
     }
   };
 
