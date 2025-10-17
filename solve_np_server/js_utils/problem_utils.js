@@ -65,6 +65,8 @@ function submit_solution(problem_id, solution_id, input_id) {
     if (!status_label) {
         throw new Error(input_id + '_status_label span not found.');
     }
+    const cancellation_token = { stop: false };
+    show_in_progress(status_paragraph, 0, cancellation_token);
     fetch('/api/submit_solution/' + problem_id + '/' + solution_id + '/' + input_id, {
         method: 'POST',
         headers: {
@@ -73,6 +75,7 @@ function submit_solution(problem_id, solution_id, input_id) {
         body: JSON.stringify(parse_solution(problem_id, solution))
     })
         .then(response => {
+        cancellation_token.stop = true;
         if (response.status === 204) {
             status_paragraph.innerHTML = "This solution has already been submitted.";
             solution_textarea.classList = "";
@@ -95,6 +98,15 @@ function submit_solution(problem_id, solution_id, input_id) {
         }
     })
         .catch(err => {
+        cancellation_token.stop = true;
         console.log(err);
     });
+}
+function show_in_progress(paragraph, i, cancellation_token) {
+    if (cancellation_token.stop) {
+        return;
+    }
+    const progress = '⠋⠙⠸⢰⣠⣄⡆⠇';
+    paragraph.innerHTML = progress[i % progress.length] + ' Validation in progress...';
+    setTimeout(() => show_in_progress(paragraph, i + 1, cancellation_token), 100);
 }

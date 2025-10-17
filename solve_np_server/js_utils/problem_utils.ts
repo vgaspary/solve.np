@@ -1,5 +1,7 @@
 type SampleSolution = { TspSolution: number[] } | { GraphColoringSolution: number[] };
 
+type CancellationToken = { stop: boolean };
+
 function parse_solution(problem_id: string, input: string): SampleSolution | null {
   if (problem_id === "travelling_salesman") {
     return { TspSolution: input.trim().split(/\s+/).map(n => Number(n)) };
@@ -71,6 +73,9 @@ function submit_solution(problem_id: string, solution_id: string, input_id: stri
     throw new Error(input_id + '_status_label span not found.');
   }
 
+  const cancellation_token: CancellationToken = { stop: false };
+  show_in_progress(status_paragraph, 0, cancellation_token);
+
   fetch('/api/submit_solution/' + problem_id + '/' + solution_id + '/' + input_id,
     {
       method: 'POST',
@@ -80,6 +85,7 @@ function submit_solution(problem_id: string, solution_id: string, input_id: stri
       body: JSON.stringify(parse_solution(problem_id, solution))
     })
     .then(response => {
+      cancellation_token.stop = true;
       if (response.status === 204) {
         status_paragraph.innerHTML = "This solution has already been submitted.";
         solution_textarea.classList = "";
@@ -101,7 +107,17 @@ function submit_solution(problem_id: string, solution_id: string, input_id: stri
       }
     })
     .catch(err => {
+      cancellation_token.stop = true;
       console.log(err);
     });
 
+}
+
+function show_in_progress(paragraph: HTMLParagraphElement, i: number, cancellation_token: CancellationToken) {
+  if (cancellation_token.stop) {
+    return;
+  }
+  const progress = '⠋⠙⠸⢰⣠⣄⡆⠇';
+  paragraph.innerHTML = progress[i % progress.length] + ' Validation in progress...';
+  setTimeout(() => show_in_progress(paragraph, i + 1, cancellation_token), 100);
 }
