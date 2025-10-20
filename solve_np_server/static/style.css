@@ -561,6 +561,43 @@ table {
   color: #1a1b26;
 }
 
+.choose-solution-dialog-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.choose-solution-dialog {
+  background: #1a1b26;
+  border: 1px solid #414868;
+  padding: 20px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.choose-solution-dialog button {
+  background: #24283b;
+  border: 1px solid #7aa2f7;
+  font-family: inherit;
+  font-size: inherit;
+  margin: 0 10px;
+  padding: 5px 10px;
+  color: #7aa2f7;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.choose-solution-dialog button:hover, .choose-solution-dialog button:focus {
+  background: #7aa2f7;
+  color: #1a1b26;
+}
+
 .error-message {
   color: #f7768e;
   font-size: 0.8em;

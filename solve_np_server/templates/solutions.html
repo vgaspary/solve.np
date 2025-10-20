@@ -10,39 +10,8 @@
   <body>
     {{ header | safe }}
     {% for problem in problems %}
-    <h2><a href="/problems/{{ problem.id }}">{{ problem.name }}</a></h2>
-    <table id="{{ problem.id }}_tbl">
-      {% for solution in problem.solutions %}
-      <tr>
-        <td><a onclick="maybe_delete('{{ solution.id }}', '{{ solution.title }}')">[🗑]</a></td>
-        <td>{% match solution.status %}
-          {% when Status::Untested %}
-          <span style="color: grey;">Untested</span>
-          {% when Status::Attempted %}
-          <span style="color: orange;">Attempted</span>
-          {% when Status::Solved(score) %}
-          <span style="color: green;">Solved</span>
-          {% endmatch %}</td>
-        <td><a href="/solutions/{{ solution.id }}{% if let Some(input_id) = input_id %}?input_id={{ input_id }}{% endif %}">{{ solution.title }}</a></td>
-        <td colspan="2"><i>{{ solution.description }}</i></td>
-      </tr>
-      {% endfor %}
-      <tr id="new_attempt_row" >
-        <td colspan="2"><a onclick="new_attempt(this)"><i>[New attempt]</i></a></td>
-      </tr>
-      <tr id="create_cancel_row" style="display: none">
-        <td colspan="2"><a id="create_button" onclick="create_solution(this, '{{ problem.id }}')"><i>[Create]</i></a></td>
-        <td><a id="cancel_button" onclick="cancel_new_attempt(this)"><i>[Cancel]</i></a></td>
-        <td><span id="create_attempt_error_message" class="error-message"></span></td>
-      </tr>
-    </table>
+      <h2><a href="/problems/{{ problem.id }}">{{ problem.name }}</a></h2>
+      {{ problem.solution_table | safe }}
     {% endfor %}
-    <div id="confirm-dialog" class="confirm-dialog-container" style="display: none;">
-      <div class="confirm-dialog">
-        <div id="confirm-dialog-message"></div>
-        <button id="confirm-dialog-button">Confirm</button>
-        <button id="cancel-dialog-button">Cancel</button>
-      </div>
-    </div>
   </body>
 </html>

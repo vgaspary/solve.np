@@ -11,7 +11,7 @@
     "target": "es2015",
     "types": [],
     // For nodejs:
-    // "lib": ["es5", "es2015.promise", "dom"],
+    "lib": ["ES2021.String", "es2021", "dom"],
     // "types": ["node"],
     // and npm install -D @types/node
 

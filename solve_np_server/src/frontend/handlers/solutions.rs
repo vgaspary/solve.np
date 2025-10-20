@@ -1,9 +1,9 @@
-use crate::frontend::handlers::header::HeaderTemplate;
+use crate::frontend_handlers::header::HeaderTemplate;
+use crate::frontend_handlers::solution_table::Solution;
+use crate::frontend_handlers::solution_table::SolutionTable;
 use crate::state::State;
 use crate::types::InputId;
 use crate::types::ProblemId;
-use crate::types::SolutionId;
-use crate::types::Status;
 use actix_session::Session;
 use actix_web::HttpResponse;
 use actix_web::Responder;
@@ -15,19 +15,10 @@ use askama::Template;
 use itertools::Itertools;
 use log::error;
 
-#[derive(Clone)]
-pub struct Solution {
-    id: SolutionId,
-    problem_id: ProblemId,
-    title: String,
-    description: String,
-    status: Status,
-}
-
 pub struct Problem {
     id: ProblemId,
     name: String,
-    solutions: Vec<Solution>,
+    solution_table: SolutionTable,
 }
 
 #[derive(Template)]
@@ -35,7 +26,6 @@ pub struct Problem {
 struct SolutionsTemplate {
     header: HeaderTemplate,
     problems: Vec<Problem>,
-    input_id: Option<InputId>,
 }
 
 #[derive(serde::Deserialize)]
@@ -65,13 +55,18 @@ pub async fn solutions(
         .map_err(|_| ErrorInternalServerError("Internal error #7"))?
         .query_map(
             [user_id],
-            |row| Ok(Solution {
-                id: row.get(0)?,
-                problem_id: row.get(1)?,
-                title: row.get(2)?,
-                description: row.get(3)?,
-                status: row.get(4)?,
-            }))
+            |row| Ok(
+                (
+                    row.get::<usize, ProblemId>(1)?,
+                    Solution {
+                        id: row.get(0)?,
+                        title: row.get(2)?,
+                        description: row.get(3)?,
+                        status: row.get(4)?,
+                    },
+                )
+                )
+            )
         .map_err(|_| ErrorInternalServerError("Internal error #8"))?
         .filter_map(Result::ok)
         .collect_vec();
@@ -85,18 +80,27 @@ pub async fn solutions(
         .map(|(id, problem)| Problem {
             id: id.clone(),
             name: problem.name.clone(),
-            solutions: solutions
-                .iter()
-                .filter(|solution| &solution.problem_id == id)
-                .cloned()
-                .collect(),
+            solution_table: SolutionTable {
+                solutions: solutions
+                    .iter()
+                    .filter_map(|(problem_id, solution)| {
+                        if problem_id == id {
+                            Some(solution)
+                        } else {
+                            None
+                        }
+                    })
+                    .cloned()
+                    .collect(),
+                problem_id: id.clone(),
+                input_id: input_id.clone(),
+            },
         })
         .sorted_by_key(|problem| problem.id.clone())
         .collect::<Vec<_>>();
     let body = SolutionsTemplate {
         header: HeaderTemplate::try_from(&session)?,
         problems,
-        input_id,
     }
     .render()
     .map_err(ErrorInternalServerError)?;

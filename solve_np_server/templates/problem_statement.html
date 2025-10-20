@@ -24,7 +24,7 @@
           <tr>
             <td><a href="/api/problems/{{ problem.id }}/inputs/{{ input.filename }}" target="_ablank">{{ input.filename }}</a></td>
             <td>{{ input.size_h }}</td>
-            <td>{% if header.logged_in %} <a href="/solutions?problem_id={{ problem.id }}&input_id={{ input.id }}">[Submit solution]</a>{% endif %}</td>
+            <td>{% if header.logged_in %} <a onclick="choose_solution('{{ problem.id }}', '{{ input.id }}')">[Submit solution]</a>{% endif %}</td>
           </tr>
           {% endfor %}
         </table>
@@ -33,6 +33,13 @@
         <p><i><a href="/log_in?redirect=/problems/{{ problem.id }}">[Log in]</a> to test and submit a solution.</i></p>
         {% endif %}
       </article>
+    </div>
+    <div id="choose_solution_dialog" class="choose-solution-dialog-container" style="display: none;">
+      <div class="choose-solution-dialog">
+        <span>Choose a solution</span>
+        {{ solution_table | safe }}
+        <button id="cancel_choosing_solution_button">Cancel</button>
+      </div>
     </div>
   </body>
 </html>

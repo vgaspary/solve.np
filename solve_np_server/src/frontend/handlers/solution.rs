@@ -1,6 +1,3 @@
-use std::fs::metadata;
-use std::os::unix::fs::MetadataExt;
-
 use crate::frontend::handlers::header::HeaderTemplate;
 use crate::state::State;
 use crate::types::InputId;
@@ -18,6 +15,8 @@ use askama::Template;
 use itertools::Itertools;
 use log::error;
 use rusqlite::params;
+use std::fs::metadata;
+use std::os::unix::fs::MetadataExt;
 
 struct Problem {
     id: ProblemId,

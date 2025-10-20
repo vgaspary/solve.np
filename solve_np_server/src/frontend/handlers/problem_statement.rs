@@ -1,6 +1,8 @@
-use crate::frontend::handlers::header::HeaderTemplate;
 use crate::frontend::utils::bytes_to_string_h;
 use crate::frontend::utils::get_file_metadata;
+use crate::frontend_handlers::header::HeaderTemplate;
+use crate::frontend_handlers::solution_table::Solution;
+use crate::frontend_handlers::solution_table::SolutionTable;
 use crate::state::State;
 use crate::types::InputId;
 use crate::types::ProblemId;
@@ -14,7 +16,9 @@ use actix_web::web;
 use askama::Template;
 use itertools::Itertools;
 use log::debug;
+use log::error;
 use pulldown_cmark::Parser;
+use rusqlite::params;
 use std::fs;
 
 #[derive(Template)]
@@ -22,6 +26,7 @@ use std::fs;
 struct ProblemStatementTemplate {
     header: HeaderTemplate,
     problem: Problem,
+    solution_table: SolutionTable,
 }
 
 struct Problem {
@@ -49,13 +54,13 @@ pub async fn problem_statement(
         .static_data
         .get(&problem_id)
         .ok_or_else(|| ErrorInternalServerError("No problem found with ID"))
-        .and_then(move |problem| {
+        .and_then(|problem| {
             let md_content = fs::read_to_string(&problem.problem_statement)?;
             let parser = Parser::new(&md_content);
             let mut problem_statement = String::new();
             pulldown_cmark::html::push_html(&mut problem_statement, parser);
             Ok(Problem {
-                id: problem_id,
+                id: problem_id.clone(),
                 name: problem.name.clone(),
                 problem_statement,
                 sample_input: problem.sample_input.clone(),
@@ -82,9 +87,36 @@ pub async fn problem_statement(
                     .collect::<Result<Vec<_>, _>>()?,
             })
         })?;
+
+    let solutions = if let Some(user_id) = session.get::<String>("user_id")? {
+        state.db
+            .lock()
+            .unwrap()
+            .prepare("SELECT solution_id, title, description, status FROM solutions WHERE user_id = ?1 AND problem_id = ?2")
+            .inspect_err(|err| error!("{err}"))
+            .map_err(|_| ErrorInternalServerError("Internal error #20"))?
+            .query_map(params![user_id, problem_id],
+                |row| Ok(
+                    Solution {
+                        id: row.get(0)?,
+                        title: row.get(1)?,
+                        description: row.get(2)?,
+                        status: row.get(3)?,
+                    }))
+            .map_err(|_| ErrorInternalServerError("Internal error #21"))?
+            .filter_map(Result::ok)
+            .collect_vec()
+    } else {
+        vec![]
+    };
     let body = ProblemStatementTemplate {
         header: HeaderTemplate::try_from(&session)?,
         problem,
+        solution_table: SolutionTable {
+            solutions,
+            problem_id,
+            input_id: None,
+        },
     }
     .render()
     .map_err(ErrorInternalServerError)?;

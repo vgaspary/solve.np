@@ -85,6 +85,10 @@ async fn main() -> std::io::Result<()> {
                 "/solutions/{solution_id}",
                 get().to(frontend_handlers::solution),
             )
+            .route(
+                "/solution_table/{problem_id}",
+                get().to(frontend_handlers::solution_table),
+            )
             /* ---------------------- */
             /* --- API scope --- */
             .service(

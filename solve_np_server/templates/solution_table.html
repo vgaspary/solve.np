@@ -1,0 +1,35 @@
+<div id="{{ problem_id }}_solution_table">
+  <script src="/js_utils/solution_utils.js"></script>
+  <table id="{{ problem_id }}_tbl">
+    {% for solution in solutions %}
+    <tr>
+      <td><a onclick="maybe_delete('{{ solution.id }}', '{{ problem_id }}', '{{ solution.title }}')">[🗑]</a></td>
+      <td>{% match solution.status %}
+        {% when Status::Untested %}
+        <span style="color: grey;">Untested</span>
+        {% when Status::Attempted %}
+        <span style="color: orange;">Attempted</span>
+        {% when Status::Solved(score) %}
+        <span style="color: green;">Solved</span>
+        {% endmatch %}</td>
+      <td><a href="/solutions/{{ solution.id }}?input_id={% if let Some(input_id) = input_id %}{{ input_id }}{% else %}INPUT_ID_PLACEHOLDER{% endif %}">{{ solution.title }}</a></td>
+      <td colspan="2"><i>{{ solution.description }}</i></td>
+    </tr>
+    {% endfor %}
+    <tr id="new_attempt_row" >
+      <td colspan="2"><a onclick="new_attempt(this)"><i>[New attempt]</i></a></td>
+    </tr>
+    <tr id="create_cancel_row" style="display: none">
+      <td colspan="2"><a id="create_button" onclick="create_solution(this, '{{ problem_id }}')"><i>[Create]</i></a></td>
+      <td><a id="cancel_button" onclick="cancel_new_attempt(this)"><i>[Cancel]</i></a></td>
+      <td><span id="create_attempt_error_message" class="error-message"></span></td>
+    </tr>
+  </table>
+  <div id="confirm-dialog" class="confirm-dialog-container" style="display: none;">
+    <div class="confirm-dialog">
+      <div id="confirm-dialog-message"></div>
+      <button id="confirm-dialog-button">Confirm</button>
+      <button id="cancel-dialog-button">Cancel</button>
+    </div>
+  </div>
+</div>

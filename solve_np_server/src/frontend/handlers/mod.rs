@@ -6,6 +6,7 @@ pub mod problem_statement;
 pub mod problems;
 pub mod solution;
 pub mod solutions;
+pub mod solution_table;
 
 pub use home_page::home_page;
 pub use log_in::log_in;
@@ -14,3 +15,4 @@ pub use problem_statement::problem_statement;
 pub use problems::problems;
 pub use solution::solution;
 pub use solutions::solutions;
+pub use solution_table::solution_table;
