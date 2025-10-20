@@ -15,8 +15,7 @@ rm -f "${DB_PATH}"
 sqlite3 "${DB_PATH}" "CREATE TABLE votes (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT UNIQUE, vote BOOLEAN);"
 sqlite3 "${DB_PATH}" "CREATE TABLE solutions (solution_id TEXT PRIMARY KEY, user_id TEXT, problem_id TEXT, title TEXT, description TEXT, status INTEGER);"
 sqlite3 "${DB_PATH}" "CREATE UNIQUE INDEX idx_user_problem_title ON solutions (user_id, problem_id, title);"
-sqlite3 "${DB_PATH}" "CREATE TABLE submissions (submission_id TEXT PRIMARY KEY, user_id TEXT, problem_id TEXT, solution_id TEXT, solution TEXT, status INTEGER);"
-sqlite3 "${DB_PATH}" "CREATE UNIQUE INDEX idx_user_problem_solution ON submissions (user_id, problem_id, solution_id);"
+sqlite3 "${DB_PATH}" "CREATE TABLE submissions (user_id TEXT, problem_id TEXT, solution_id TEXT, input_id TEXT, solution TEXT, hash_digest INTEGER, status INTEGER, invalid_message TEXT, PRIMARY KEY (user_id, problem_id, solution_id, input_id));"
 
 # Generate a random base64 encoded key for the session middleware
 RANDOM_KEY=$(head /dev/urandom | tr -dc A-Za-z0-9_ | head -c 64 | base64 -w 0)
@@ -380,6 +379,30 @@ else
     exit 1
 fi
 rm "${COOKIE_JAR_SOLUTION}"
+
+# Test 23: Submit Solution
+echo "Testing /api/submit_solution (POST)..."
+COOKIE_JAR_SUBMISSION=$(mktemp)
+
+# Log in as 'user'
+curl -s -c "${COOKIE_JAR_SUBMISSION}" -X POST -d "username=user&password=pass" "${SERVER_URL}/api/log_in" > /dev/null
+
+# Create a solution
+CREATE_SOLUTION_RESPONSE=$(curl -s -X POST -b "${COOKIE_JAR_SUBMISSION}" -H "Content-Type: application/json" -d '{"problem_id":"graph_coloring","title":"My submission solution","description":"A description"}' "${SERVER_URL}/api/solutions")
+SOLUTIONS_PAGE_HTML=$(curl -s -b "${COOKIE_JAR_SUBMISSION}" "${SERVER_URL}/solutions")
+SOLUTION_ID=$(echo "${SOLUTIONS_PAGE_HTML}" | grep -oP "[0-9a-f]{32}" | head -n 1)
+
+# Submit a solution
+SUBMIT_SOLUTION_RESPONSE=$(curl -s -X POST -b "${COOKIE_JAR_SUBMISSION}" -H "Content-Type: application/json" -d '{"GraphColoringSolution":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99]}' "${SERVER_URL}/api/submit_solution/graph_coloring/${SOLUTION_ID}/small_ultra_sparse")
+
+if echo "${SUBMIT_SOLUTION_RESPONSE}" | jq -e '.Valid' > /dev/null; then
+    echo -e "/api/submit_solution (POST) \e[32mpassed\e[0m."
+else
+    echo -e "/api/submit_solution (POST) \e[31mfailed\e[0m. Response: ${SUBMIT_SOLUTION_RESPONSE}"
+    rm "${COOKIE_JAR_SUBMISSION}"
+    exit 1
+fi
+rm "${COOKIE_JAR_SUBMISSION}"
 
 
 echo -e "\e[32mAll tests passed!\e[0m"
