@@ -1,39 +1,78 @@
 type CancellationToken = { stop: boolean };
 
-function maybe_delete(solution_id: string, problem_id: string, solution_title: string): void {
-  const dialog = document.getElementById('confirm-dialog') as HTMLElement;
-  const message = document.getElementById('confirm-dialog-message') as HTMLElement;
-  const confirmButton = document.getElementById('confirm-dialog-button') as HTMLElement;
-  const cancelButton = document.getElementById('cancel-dialog-button') as HTMLElement;
-  const solution_table = document.getElementById(`${problem_id}_solution_table`) as HTMLElement;
+class EventListenerStack {
+  private readonly target: EventTarget;
+  private readonly type: string;
+  private event_listener_stack: EventListenerOrEventListenerObject[] = [];
 
-  if (dialog && message && confirmButton && cancelButton) {
-    const key_handler = (event: KeyboardEvent): void => {
+  constructor(target: EventTarget, type: string) {
+    this.target = target;
+    this.type = type;
+  }
+
+  public push(event_listener: EventListenerOrEventListenerObject): void {
+    const current_listener = this.event_listener_stack.at(-1);
+    if (current_listener) {
+      this.target.removeEventListener(this.type, current_listener);
+    }
+
+    this.event_listener_stack.push(event_listener);
+    this.target.addEventListener(this.type, event_listener);
+  }
+
+  public pop(): void {
+    const current_listener = this.event_listener_stack.pop();
+    if (current_listener) {
+      this.target.removeEventListener(this.type, current_listener);
+
+      const previous_listener = this.event_listener_stack.at(-1);
+      if (previous_listener) {
+        this.target.addEventListener(this.type, previous_listener);
+      }
+    }
+  }
+}
+
+const global_event_listener_stack = new EventListenerStack(window, 'keydown');
+
+function maybe_delete(solution_id: string, problem_id: string, solution_title: string): void {
+  const dialog = document.getElementById('confirm-dialog');
+  if (!dialog) return;
+  const message = document.getElementById('confirm-dialog-message');
+  if (!message) return;
+  const confirm_button = document.getElementById('confirm-dialog-button');
+  if (!confirm_button) return;
+  const cancel_button = document.getElementById('cancel-dialog-button');
+  if (!cancel_button) return;
+  const solution_table = document.getElementById(`${problem_id}_solution_table`);
+  if (!solution_table) return;
+
+  global_event_listener_stack.push((event: Event): void => {
+    if (event instanceof KeyboardEvent) {
       switch (event.key) {
         case 'Enter':
-          confirmButton.click();
+          confirm_button.click();
           break;
         case 'Escape':
-          cancelButton.click();
+          cancel_button.click();
           break;
       }
-    };
-    window.addEventListener('keydown', key_handler);
+    }
+  });
 
-    message.textContent = `Are you sure you want to delete the ${solution_title} solution?`;
-    dialog.style.display = 'flex';
+  message.textContent = `Are you sure you want to delete the ${solution_title} solution?`;
+  dialog.style.display = 'flex';
 
-    confirmButton.onclick = () => {
-      window.removeEventListener('keydown', key_handler);
-      delete_solution(solution_id, problem_id, solution_table);
-      dialog.style.display = 'none';
-    };
+  confirm_button.onclick = () => {
+    global_event_listener_stack.pop();
+    delete_solution(solution_id, problem_id, solution_table);
+    dialog.style.display = 'none';
+  };
 
-    cancelButton.onclick = () => {
-      window.removeEventListener('keydown', key_handler);
-      dialog.style.display = 'none';
-    };
-  }
+  cancel_button.onclick = () => {
+    global_event_listener_stack.pop();
+    dialog.style.display = 'none';
+  };
 }
 
 function delete_solution(solution_id: string, problem_id: string, solution_table: HTMLElement): void {
@@ -54,16 +93,6 @@ function new_attempt(button: HTMLElement): void {
   const create_cancel_row = table.querySelector('#create_cancel_row') as HTMLElement;
   const create_button = create_cancel_row.querySelector('#create_button') as HTMLElement;
   const cancel_button = create_cancel_row.querySelector('#cancel_button') as HTMLElement;
-  const key_handler = (event: KeyboardEvent): void => {
-    switch (event.key) {
-      case 'Enter':
-        create_button.click();
-        break;
-      case 'Escape':
-        cancel_button.click();
-        break;
-    }
-  };
 
   const new_row = table.insertRow(table.rows.length - 2);
   new_attempt_row.style.display = 'none';
@@ -76,10 +105,19 @@ function new_attempt(button: HTMLElement): void {
   `;
 
   const title_input = new_row.querySelector("#new_title") as HTMLElement;
-  const description_input = new_row.querySelector("#new_description") as HTMLElement;
   title_input.focus();
-  title_input.addEventListener('keydown', key_handler);
-  description_input.addEventListener('keydown', key_handler);
+  global_event_listener_stack.push((event: Event): void => {
+    if (event instanceof KeyboardEvent) {
+      switch (event.key) {
+        case 'Enter':
+          create_button.click();
+          break;
+        case 'Escape':
+          cancel_button.click();
+          break;
+      }
+    }
+  });
 }
 
 function cancel_new_attempt(button: HTMLElement): void {
@@ -92,6 +130,7 @@ function cancel_new_attempt(button: HTMLElement): void {
   new_attempt_row.style.display = 'contents';
   create_cancel_row.style.display = 'none';
   error_msg.innerHTML = '';
+  global_event_listener_stack.pop();
 }
 
 function create_solution(button: HTMLElement, problemId: string): void {
@@ -106,27 +145,28 @@ function create_solution(button: HTMLElement, problemId: string): void {
     return;
   }
 
-  fetch('/api/solutions',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ problem_id: problemId, title: title.value, description: description.value }),
-    })
-    .then(response => {
-      if (response.ok) {
-        fetch(`/solution_table/${problemId}`)
-          .then(response => response.text())
-          .then(content => solution_table.innerHTML = content)
-          .catch(console.log);
-      } else {
-        return response.text().then(error => Promise.reject(error));
+  (async () => {
+    try {
+      const create_response = await fetch('/api/solutions',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ problem_id: problemId, title: title.value, description: description.value }),
+        });
+      if (!create_response.ok) {
+        throw await create_response.text();
       }
-    })
-    .catch((error) => {
-      error_msg.innerHTML = `${error}`;
-    });
+
+      const response = await fetch(`/solution_table/${problemId}`);
+      const content = await response.text();
+      solution_table.innerHTML = content;
+      global_event_listener_stack.pop();
+    } catch (err) {
+      error_msg.innerHTML = `${err}`;
+    }
+  })();
 }
 
 function submit_solution(problem_id: string, solution_id: string, input_id: string): void {
@@ -216,18 +256,17 @@ function choose_solution(problem_id: string, input_id: string) {
     if (!cancel_button) {
       return;
     }
-    const key_handler = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') {
-        cancel_button.click();
-      }
-    };
 
     dialog.style.display = 'flex';
-    window.addEventListener('keydown', key_handler);
+    global_event_listener_stack.push((event: Event): void => {
+      if (event instanceof KeyboardEvent && event.key === 'Escape') {
+        cancel_button.click();
+      }
+    });
     cancel_button.onclick = () => {
       dialog.style.display = 'none';
       dialog.innerHTML = template_inner_HTML;
-      window.removeEventListener('keydown', key_handler);
+      global_event_listener_stack.pop();
     };
   })();
 }
