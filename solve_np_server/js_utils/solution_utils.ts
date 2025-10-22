@@ -171,9 +171,7 @@ function create_solution(button: HTMLElement, problemId: string): void {
 
 function submit_solution(problem_id: string, solution_id: string, input_id: string): void {
   const solution_textarea = document.getElementById(input_id + '_solution') as HTMLTextAreaElement | null;
-  if (!solution_textarea) {
-    throw new Error(input_id + '_solution textarea not found.');
-  }
+  if (!solution_textarea) return;
   solution_textarea.classList = "";
   const solution = solution_textarea.value;
   if (solution.trim() === '') {
@@ -181,53 +179,70 @@ function submit_solution(problem_id: string, solution_id: string, input_id: stri
   }
 
   const status_paragraph = document.getElementById(input_id + '_status') as HTMLParagraphElement | null;
-  if (!status_paragraph) {
-    throw new Error(input_id + '_status paragraph not found.');
-  }
-
+  if (!status_paragraph) return;
   const status_label = document.getElementById(input_id + '_status_label') as HTMLSpanElement | null;
-  if (!status_label) {
-    throw new Error(input_id + '_status_label span not found.');
-  }
+  if (!status_label) return;
 
   const cancellation_token: CancellationToken = { stop: false };
   show_in_progress(status_paragraph, 0, cancellation_token);
 
-  fetch('/api/submit_solution/' + problem_id + '/' + solution_id + '/' + input_id,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(parse_solution(problem_id, solution))
-    })
-    .then(response => {
+  (async () => {
+    try {
+      const response = await
+        fetch(`/api/submit_solution/${problem_id}/${solution_id}/${input_id}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(parse_solution(problem_id, solution))
+          });
       cancellation_token.stop = true;
       if (response.status === 204) {
         status_paragraph.innerHTML = "This solution has already been submitted.";
         solution_textarea.classList = "";
         return;
       }
-      return response.json();
-    })
-    .then(validation_result => {
+      const validation_result = await response.json();
       if (validation_result.Valid) {
         status_paragraph.innerHTML = 'Score: ' + validation_result.Valid;
         solution_textarea.classList = "success";
-        status_label.innerHTML = 'Solved';
-        status_label.style = 'color: green; width: 130px; display: inline-block;';
       } else if (validation_result.Invalid) {
         status_paragraph.innerHTML = validation_result.Invalid;
         solution_textarea.classList = "error";
-        status_label.innerHTML = 'Attempted';
-        status_label.style = 'color: orange; width: 130px; display: inline-block;';
       }
-    })
-    .catch(err => {
+      await maybe_update_status(solution_id, input_id);
+    } finally {
       cancellation_token.stop = true;
-      console.log(err);
-    });
+    }
+  })();
+}
 
+async function maybe_update_status(solution_id: string, input_id: string): Promise<void> {
+  const submission_status = document.getElementById(`${input_id}_status_label`);
+  if (submission_status) {
+    await maybe_update_status_helper(`../api/solutions/${solution_id}/input/${input_id}/status`, submission_status);
+  }
+
+  const solution_status = document.getElementById('solution_status');
+  if (solution_status) {
+    await maybe_update_status_helper(`../api/solutions/${solution_id}/status`, solution_status);
+  }
+}
+
+async function maybe_update_status_helper(resource: string, target: HTMLElement): Promise<void> {
+  const response = await fetch(resource);
+  const status = await response.json();
+  if (status === 'Untested') {
+    target.innerHTML = 'Untested';
+    target.style.color = 'grey';
+  } else if (status === 'Attempted') {
+    target.innerHTML = 'Attempted';
+    target.style.color = 'orange';
+  } else if ('Solved' in status) {
+    target.innerHTML = 'Solved';
+    target.style.color = 'green';
+  }
 }
 
 function show_in_progress(paragraph: HTMLParagraphElement, i: number, cancellation_token: CancellationToken) {

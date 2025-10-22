@@ -12,10 +12,58 @@ SERVER_URL="http://${SERVER_ADDRESS}:${SERVER_PORT}"
 
 # Create the database and the votes table
 rm -f "${DB_PATH}"
-sqlite3 "${DB_PATH}" "CREATE TABLE votes (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT UNIQUE, vote BOOLEAN);"
-sqlite3 "${DB_PATH}" "CREATE TABLE solutions (solution_id TEXT PRIMARY KEY, user_id TEXT, problem_id TEXT, title TEXT, description TEXT, status INTEGER);"
+
+sqlite3 "${DB_PATH}" \
+  "CREATE TABLE votes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT UNIQUE,
+    vote BOOLEAN
+    );"
+
+sqlite3 "${DB_PATH}" \
+      "CREATE TABLE solutions (
+        solution_id TEXT PRIMARY KEY,
+        user_id TEXT,
+        problem_id TEXT,
+        title TEXT,
+        description TEXT,
+        status INTEGER
+        );"
+
 sqlite3 "${DB_PATH}" "CREATE UNIQUE INDEX idx_user_problem_title ON solutions (user_id, problem_id, title);"
-sqlite3 "${DB_PATH}" "CREATE TABLE submissions (user_id TEXT, problem_id TEXT, solution_id TEXT, input_id TEXT, solution TEXT, hash_digest INTEGER, status INTEGER, invalid_message TEXT, PRIMARY KEY (user_id, problem_id, solution_id, input_id));"
+
+sqlite3 "${DB_PATH}" \
+  "CREATE TABLE submissions (
+    user_id TEXT,
+    problem_id TEXT,
+    solution_id TEXT,
+    input_id TEXT,
+    solution TEXT,
+    hash_digest INTEGER,
+    status INTEGER,
+    invalid_message TEXT,
+    PRIMARY KEY (user_id, problem_id, solution_id, input_id)
+    );"
+
+sqlite3 "${DB_PATH}" \
+  "CREATE TRIGGER update_solution_status_on_new_submission
+AFTER UPDATE OF solution_id, status ON submissions
+FOR EACH ROW
+  WHEN OLD.status <> NEW.status
+  BEGIN
+  UPDATE solutions
+  SET status = (
+    SELECT
+      CASE
+        WHEN MIN(T1.status) = -2 AND MAX(T1.status) = -2 THEN -2
+        WHEN MIN(T1.status) >= 0 THEN 0
+      ELSE -1
+      END
+      FROM submissions AS T1
+      WHERE T1.solution_id = NEW.solution_id
+    )
+    WHERE solution_id = NEW.solution_id;
+  END;"
 
 # Generate a random base64 encoded key for the session middleware
 RANDOM_KEY=$(head /dev/urandom | tr -dc A-Za-z0-9_ | head -c 64 | base64 -w 0)
@@ -39,7 +87,6 @@ cleanup() {
   echo "Stopping server (PID: ${SERVER_PID})..."
   kill -9 "${SERVER_PID}" || true # Use || true to prevent script from exiting if kill fails
   wait "${SERVER_PID}" 2>/dev/null || true # Wait for the process to terminate
-  rm -f "${DB_PATH}"
   echo "Server stopped."
 }
 
@@ -405,5 +452,51 @@ fi
 rm "${COOKIE_JAR_SUBMISSION}"
 
 
+
+# Test 24: Solution Status
+echo "Testing /solutions/{solution_id}/status..."
+COOKIE_JAR_SOLUTION_STATUS=$(mktemp)
+
+# Log in as 'user'
+curl -s -c "${COOKIE_JAR_SOLUTION_STATUS}" -X POST -d "username=user&password=pass" "${SERVER_URL}/api/log_in" > /dev/null
+
+
+# Create a solution
+CREATE_SOLUTION_RESPONSE=$(curl -s -X POST -b "${COOKIE_JAR_SOLUTION_STATUS}" -H "Content-Type: application/json" -d '{"problem_id":"graph_coloring","title":"Solution for status test","description":"A description"}' "${SERVER_URL}/api/solutions")
+SOLUTIONS_PAGE_HTML=$(curl -s -b "${COOKIE_JAR_SOLUTION_STATUS}" "${SERVER_URL}/solutions")
+SOLUTION_ID_STATUS=$(echo "${SOLUTIONS_PAGE_HTML}" | grep "Solution for status test" | grep -oP "[0-9a-f]{32}" | head -n 1)
+
+if [ -z "${SOLUTION_ID_STATUS}" ]; then
+    echo -e "/solutions/{solution_id}/status \e[31mfailed\e[0m. Could not retrieve Solution ID."
+    rm "${COOKIE_JAR_SOLUTION_STATUS}"
+    exit 1
+fi
+
+SOLUTION_STATUS_RESPONSE=$(curl -s -b "${COOKIE_JAR_SOLUTION_STATUS}" "${SERVER_URL}/api/solutions/${SOLUTION_ID_STATUS}/status")
+
+if [ "${SOLUTION_STATUS_RESPONSE}" == "\"Untested\"" ]; then
+    echo -e "/solutions/{solution_id}/status \e[32mpassed\e[0m."
+else
+    echo -e "/solutions/{solution_id}/status \e[31mfailed\e[0m. Response: ${SOLUTION_STATUS_RESPONSE}"
+    rm "${COOKIE_JAR_SOLUTION_STATUS}"
+    exit 1
+fi
+
+# Test 25: Solution Input Status
+echo "Testing /solutions/{solution_id}/input/{input_id}/status..."
+INPUT_ID="small_ultra_sparse" # Using an input_id from existing tests
+
+SOLUTION_INPUT_STATUS_RESPONSE=$(curl -s -b "${COOKIE_JAR_SOLUTION_STATUS}" "${SERVER_URL}/api/solutions/${SOLUTION_ID}/input/${INPUT_ID}/status")
+
+if [ "${SOLUTION_INPUT_STATUS_RESPONSE}" == "{\"Solved\":100}" ]; then
+    echo -e "/solutions/{solution_id}/input/{input_id}/status \e[32mpassed\e[0m."
+else
+    echo -e "/solutions/{solution_id}/input/{input_id}/status \e[31mfailed\e[0m. Response: ${SOLUTION_INPUT_STATUS_RESPONSE}"
+    rm "${COOKIE_JAR_SOLUTION_STATUS}"
+    exit 1
+fi
+rm "${COOKIE_JAR_SOLUTION_STATUS}"
+
 echo -e "\e[32mAll tests passed!\e[0m"
+rm -f "${DB_PATH}"
 rm -f test.log

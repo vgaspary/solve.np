@@ -161,57 +161,80 @@ function create_solution(button, problemId) {
 }
 function submit_solution(problem_id, solution_id, input_id) {
     const solution_textarea = document.getElementById(input_id + '_solution');
-    if (!solution_textarea) {
-        throw new Error(input_id + '_solution textarea not found.');
-    }
+    if (!solution_textarea)
+        return;
     solution_textarea.classList = "";
     const solution = solution_textarea.value;
     if (solution.trim() === '') {
         return;
     }
     const status_paragraph = document.getElementById(input_id + '_status');
-    if (!status_paragraph) {
-        throw new Error(input_id + '_status paragraph not found.');
-    }
+    if (!status_paragraph)
+        return;
     const status_label = document.getElementById(input_id + '_status_label');
-    if (!status_label) {
-        throw new Error(input_id + '_status_label span not found.');
-    }
+    if (!status_label)
+        return;
     const cancellation_token = { stop: false };
     show_in_progress(status_paragraph, 0, cancellation_token);
-    fetch('/api/submit_solution/' + problem_id + '/' + solution_id + '/' + input_id, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(parse_solution(problem_id, solution))
-    })
-        .then(response => {
-        cancellation_token.stop = true;
-        if (response.status === 204) {
-            status_paragraph.innerHTML = "This solution has already been submitted.";
-            solution_textarea.classList = "";
-            return;
+    (() => __awaiter(this, void 0, void 0, function* () {
+        try {
+            const response = yield fetch(`/api/submit_solution/${problem_id}/${solution_id}/${input_id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(parse_solution(problem_id, solution))
+            });
+            cancellation_token.stop = true;
+            if (response.status === 204) {
+                status_paragraph.innerHTML = "This solution has already been submitted.";
+                solution_textarea.classList = "";
+                return;
+            }
+            const validation_result = yield response.json();
+            if (validation_result.Valid) {
+                status_paragraph.innerHTML = 'Score: ' + validation_result.Valid;
+                solution_textarea.classList = "success";
+            }
+            else if (validation_result.Invalid) {
+                status_paragraph.innerHTML = validation_result.Invalid;
+                solution_textarea.classList = "error";
+            }
+            yield maybe_update_status(solution_id, input_id);
         }
-        return response.json();
-    })
-        .then(validation_result => {
-        if (validation_result.Valid) {
-            status_paragraph.innerHTML = 'Score: ' + validation_result.Valid;
-            solution_textarea.classList = "success";
-            status_label.innerHTML = 'Solved';
-            status_label.style = 'color: green; width: 130px; display: inline-block;';
+        finally {
+            cancellation_token.stop = true;
         }
-        else if (validation_result.Invalid) {
-            status_paragraph.innerHTML = validation_result.Invalid;
-            solution_textarea.classList = "error";
-            status_label.innerHTML = 'Attempted';
-            status_label.style = 'color: orange; width: 130px; display: inline-block;';
+    }))();
+}
+function maybe_update_status(solution_id, input_id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const submission_status = document.getElementById(`${input_id}_status_label`);
+        if (submission_status) {
+            yield maybe_update_status_helper(`../api/solutions/${solution_id}/input/${input_id}/status`, submission_status);
         }
-    })
-        .catch(err => {
-        cancellation_token.stop = true;
-        console.log(err);
+        const solution_status = document.getElementById('solution_status');
+        if (solution_status) {
+            yield maybe_update_status_helper(`../api/solutions/${solution_id}/status`, solution_status);
+        }
+    });
+}
+function maybe_update_status_helper(resource, target) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield fetch(resource);
+        const status = yield response.json();
+        if (status === 'Untested') {
+            target.innerHTML = 'Untested';
+            target.style.color = 'grey';
+        }
+        else if (status === 'Attempted') {
+            target.innerHTML = 'Attempted';
+            target.style.color = 'orange';
+        }
+        else if ('Solved' in status) {
+            target.innerHTML = 'Solved';
+            target.style.color = 'green';
+        }
     });
 }
 function show_in_progress(paragraph, i, cancellation_token) {

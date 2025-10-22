@@ -15,11 +15,11 @@
       <p>Problem: <a href="/problems/{{ problem.id }}">{{ problem.name }}</a></p>
       <p>Status: {% match solution.status %}
       {% when Status::Untested %}
-      <span style="color: grey;">Untested</span>
+      <span id="solution_status" style="color: grey;">Untested</span>
       {% when Status::Attempted %}
-      <span style="color: orange;">Attempted</span>
+      <span id="solution_status" style="color: orange;">Attempted</span>
       {% when Status::Solved(score) %}
-      <span style="color: green;">Solved</span>
+      <span id="solution_status" style="color: green;">Solved</span>
       {% endmatch %}</p>
       <p>{{ solution.description }}</p>
     </div>

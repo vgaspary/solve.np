@@ -109,6 +109,14 @@ async fn main() -> std::io::Result<()> {
                     .route(
                         "/submit_solution/{problem_id}/{solution_id}/{input_id}",
                         post().to(api_handlers::submit_solution),
+                    )
+                    .route(
+                        "/solutions/{solution_id}/status",
+                        get().to(api_handlers::solution_status),
+                    )
+                    .route(
+                        "/solutions/{solution_id}/input/{input_id}/status",
+                        get().to(api_handlers::submission_status),
                     ),
             )
             /* ----------------- */

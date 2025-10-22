@@ -1,11 +1,12 @@
 use rusqlite::types::FromSql;
 use rusqlite::types::ToSql;
 use serde::Deserialize;
+use serde::Serialize;
 use std::fmt;
 
 pub type Score = usize;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Serialize)]
 pub enum Status {
     Untested,
     Attempted,
