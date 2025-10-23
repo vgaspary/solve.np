@@ -23,6 +23,11 @@ pub struct Solution {
     pub status: Status,
 }
 
+#[derive(serde::Deserialize)]
+pub struct SolutionTableParams {
+    input_id: Option<InputId>,
+}
+
 #[derive(Template)]
 #[template(path = "solution_table.html")]
 pub struct SolutionTable {
@@ -34,6 +39,7 @@ pub struct SolutionTable {
 pub async fn solution_table(
     session: Session,
     path: web::Path<ProblemId>,
+    query: web::Query<SolutionTableParams>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let user_id = session
@@ -68,7 +74,7 @@ pub async fn solution_table(
     let body = SolutionTable {
         solutions,
         problem_id,
-        input_id: None,
+        input_id: query.into_inner().input_id,
     }
     .render()
     .map_err(ErrorInternalServerError)?;

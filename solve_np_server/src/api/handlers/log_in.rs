@@ -16,7 +16,7 @@ pub struct LogInForm {
 
 pub async fn log_in(
     session: Session,
-    params: web::Query<LogInQueryParams>,
+    query: web::Query<LogInQueryParams>,
     form: web::Form<LogInForm>,
 ) -> Result<impl Responder, HttpError> {
     let LogInForm { username, password } = form.into_inner();
@@ -25,6 +25,6 @@ pub async fn log_in(
     } else {
         session.insert("user_id", sha256::digest(format!("{username}{password}")))?;
         session.insert("username", username)?;
-        web::Redirect::to(params.redirect.clone().unwrap_or("/".to_string())).see_other()
+        web::Redirect::to(query.redirect.clone().unwrap_or("/".to_string())).see_other()
     })
 }

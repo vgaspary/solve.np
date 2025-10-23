@@ -36,13 +36,13 @@ pub struct SolutionsQueryParams {
 
 pub async fn solutions(
     session: Session,
-    params: web::Query<SolutionsQueryParams>,
+    query: web::Query<SolutionsQueryParams>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let SolutionsQueryParams {
         problem_id,
         input_id,
-    } = params.into_inner();
+    } = query.into_inner();
     let user_id = session
         .get::<String>("user_id")?
         .ok_or(ErrorInternalServerError("Internal error #4"))?;

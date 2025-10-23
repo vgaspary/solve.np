@@ -24,13 +24,13 @@ pub struct LogInQueryParams {
 }
 
 pub async fn log_in(
-    params: web::Query<LogInQueryParams>,
+    query: web::Query<LogInQueryParams>,
     session: Session,
 ) -> Result<impl Responder, HttpError> {
     let body = LogInTemplate {
         header: HeaderTemplate::try_from(&session)?,
-        redirect: params.redirect.clone(),
-        error_msg: params.err.clone().unwrap_or_default(),
+        redirect: query.redirect.clone(),
+        error_msg: query.err.clone().unwrap_or_default(),
     }
     .render()
     .map_err(ErrorInternalServerError)?;

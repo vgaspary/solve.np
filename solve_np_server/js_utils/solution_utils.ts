@@ -35,7 +35,7 @@ class EventListenerStack {
 
 const global_event_listener_stack = new EventListenerStack(window, 'keydown');
 
-function maybe_delete(solution_id: string, problem_id: string, solution_title: string): void {
+function maybe_delete(solution_id: string, problem_id: string, input_id: string, solution_title: string): void {
   const dialog = document.getElementById('confirm-dialog');
   if (!dialog) return;
   const message = document.getElementById('confirm-dialog-message');
@@ -65,7 +65,7 @@ function maybe_delete(solution_id: string, problem_id: string, solution_title: s
 
   confirm_button.onclick = () => {
     global_event_listener_stack.pop();
-    delete_solution(solution_id, problem_id, solution_table);
+    delete_solution(solution_id, problem_id, input_id, solution_table);
     dialog.style.display = 'none';
   };
 
@@ -75,15 +75,16 @@ function maybe_delete(solution_id: string, problem_id: string, solution_title: s
   };
 }
 
-function delete_solution(solution_id: string, problem_id: string, solution_table: HTMLElement): void {
+function delete_solution(solution_id: string, problem_id: string, input_id: string, solution_table: HTMLElement): void {
   fetch(`/api/solutions/${solution_id}`, { method: 'DELETE' })
-    .then(() => load_solution_table(problem_id))
+    .then(() => load_solution_table(problem_id, input_id))
     .then(content => solution_table.innerHTML = content)
     .catch(console.log);
 }
 
-async function load_solution_table(problem_id: string): Promise<string> {
-  const response = await fetch(`/solution_table/${problem_id}`);
+async function load_solution_table(problem_id: string, input_id: string | null): Promise<string> {
+  const query_params = input_id ? `?input_id=${input_id}` : "";
+  const response = await fetch(`/solution_table/${problem_id}${query_params}`);
   return await response.text();
 }
 
@@ -256,7 +257,7 @@ function show_in_progress(paragraph: HTMLParagraphElement, i: number, cancellati
 
 function choose_solution(problem_id: string, input_id: string) {
   (async () => {
-    let content = await load_solution_table(problem_id);
+    let content = await load_solution_table(problem_id, input_id);
     const solution_table = document.getElementById(`${problem_id}_solution_table`) as HTMLElement;
     solution_table.innerHTML = content;
 

@@ -34,7 +34,7 @@ class EventListenerStack {
     }
 }
 const global_event_listener_stack = new EventListenerStack(window, 'keydown');
-function maybe_delete(solution_id, problem_id, solution_title) {
+function maybe_delete(solution_id, problem_id, input_id, solution_title) {
     const dialog = document.getElementById('confirm-dialog');
     if (!dialog)
         return;
@@ -66,7 +66,7 @@ function maybe_delete(solution_id, problem_id, solution_title) {
     dialog.style.display = 'flex';
     confirm_button.onclick = () => {
         global_event_listener_stack.pop();
-        delete_solution(solution_id, problem_id, solution_table);
+        delete_solution(solution_id, problem_id, input_id, solution_table);
         dialog.style.display = 'none';
     };
     cancel_button.onclick = () => {
@@ -74,15 +74,16 @@ function maybe_delete(solution_id, problem_id, solution_title) {
         dialog.style.display = 'none';
     };
 }
-function delete_solution(solution_id, problem_id, solution_table) {
+function delete_solution(solution_id, problem_id, input_id, solution_table) {
     fetch(`/api/solutions/${solution_id}`, { method: 'DELETE' })
-        .then(() => load_solution_table(problem_id))
+        .then(() => load_solution_table(problem_id, input_id))
         .then(content => solution_table.innerHTML = content)
         .catch(console.log);
 }
-function load_solution_table(problem_id) {
+function load_solution_table(problem_id, input_id) {
     return __awaiter(this, void 0, void 0, function* () {
-        const response = yield fetch(`/solution_table/${problem_id}`);
+        const query_params = input_id ? `?input_id=${input_id}` : "";
+        const response = yield fetch(`/solution_table/${problem_id}${query_params}`);
         return yield response.text();
     });
 }
@@ -247,7 +248,7 @@ function show_in_progress(paragraph, i, cancellation_token) {
 }
 function choose_solution(problem_id, input_id) {
     (() => __awaiter(this, void 0, void 0, function* () {
-        let content = yield load_solution_table(problem_id);
+        let content = yield load_solution_table(problem_id, input_id);
         const solution_table = document.getElementById(`${problem_id}_solution_table`);
         solution_table.innerHTML = content;
         const dialog = document.getElementById('choose_solution_dialog');
