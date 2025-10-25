@@ -1,4 +1,3 @@
-use crate::api::utils;
 use crate::state::State;
 use actix_web::HttpResponse;
 use actix_web::Responder;
@@ -31,7 +30,7 @@ pub async fn validate_sample(
                 .static_data
                 .get(&"travelling_salesman".into())
                 .map(|problem| problem.sample_input.as_ref())
-                .and_then(utils::parse_tsp_input)
+                .and_then(tsp_validate::parse_input)
                 .ok_or(ErrorInternalServerError(
                     "Server error: failed parsing TSP sample input.",
                 ))?;
@@ -50,7 +49,7 @@ pub async fn validate_sample(
                 .static_data
                 .get(&"graph_coloring".into())
                 .map(|problem| problem.sample_input.as_ref())
-                .and_then(utils::parse_graph_coloring_input)
+                .and_then(graph_coloring_validate::parse_input)
                 .ok_or(ErrorInternalServerError(
                     "Server error: failed parsing Graph Coloring sample input.",
                 ))?;

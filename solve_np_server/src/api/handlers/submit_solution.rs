@@ -1,4 +1,3 @@
-use crate::api::utils;
 use crate::state::State;
 use crate::types::InputId;
 use crate::types::ProblemId;
@@ -113,7 +112,7 @@ pub async fn submit_solution(
                 .get(&problem_id_clone)
                 .and_then(|problem| problem.inputs.get(&input_id_clone))
                 .and_then(|input| fs::read_to_string(&input.path).ok())
-                .and_then(|input| utils::parse_tsp_input(&input))
+                .and_then(|input| tsp_validate::parse_input(&input))
                 .ok_or("Internal error #12")?;
             Ok(tsp_validate::validate(&graph, path)
                 .map(|score| ValidateSolutionResult::Valid(score))
@@ -125,7 +124,7 @@ pub async fn submit_solution(
                 .get(&problem_id_clone)
                 .and_then(|problem| problem.inputs.get(&input_id_clone))
                 .and_then(|input| fs::read_to_string(&input.path).ok())
-                .and_then(|input| utils::parse_graph_coloring_input(&input))
+                .and_then(|input| graph_coloring_validate::parse_input(&input))
                 .ok_or("Internal error #13")?;
             Ok(graph_coloring_validate::validate(&graph, coloring)
                 .map(|score| ValidateSolutionResult::Valid(score))
