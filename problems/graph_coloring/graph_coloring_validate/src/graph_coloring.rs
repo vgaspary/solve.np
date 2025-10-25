@@ -37,8 +37,7 @@ pub fn validate(input: &Graph, solution: Vec<Color>) -> Result<Score, Error> {
 
 pub fn parse_input(input: &str) -> Option<Graph> {
     let edges = input
-        .split("\n")
-        .filter(|line| !line.is_empty())
+        .lines()
         .map(|line| {
             match line
                 .split_ascii_whitespace()
@@ -171,9 +170,8 @@ mod tests {
     #[test]
     fn test_parse_input_empty_line() {
         let input = "0 1\n\n1 2\n";
-        let graph = parse_input(input).unwrap();
-        assert_eq!(graph.num_vertices(), 3);
-        assert_eq!(graph.edges().count(), 2);
+        let graph = parse_input(input);
+        assert!(graph.is_none());
     }
 
     #[test]

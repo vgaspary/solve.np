@@ -68,8 +68,7 @@ pub fn validate(input: &Graph<Weight>, solution: Vec<usize>) -> Result<Score, Er
 
 pub fn parse_input(input: &str) -> Option<Graph<Weight>> {
     let edges = input
-        .split("\n")
-        .filter(|line| !line.is_empty())
+        .lines()
         .map(|line| {
             match line
                 .split_ascii_whitespace()
@@ -195,9 +194,8 @@ mod tests {
     #[test]
     fn test_parse_tsp_input_empty_line() {
         let input = "0 1 10\n\n1 2 20\n";
-        let graph = parse_input(input).unwrap();
-        assert_eq!(graph.num_vertices(), 3);
-        assert_eq!(graph.edges().count(), 2);
+        let graph = parse_input(input);
+        assert!(graph.is_none());
     }
 
     #[test]
