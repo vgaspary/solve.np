@@ -4,7 +4,7 @@
   <table id="{{ problem_id }}_tbl">
     {% for solution in solutions %}
     <tr>
-      <td><a onclick="maybe_delete('{{ solution.id }}', '{{ problem_id }}', '{{ solution.title }}', {% if let Some(input_id) = input_id %}'{{ input_id }}'{% else %}null{% endif %})">[🗑]</a></td>
+      <td><a onclick="maybe_delete('{{ solution.id }}', '{{ problem_id }}', {% if let Some(input_id) = input_id %}'{{ input_id }}'{% else %}null{% endif %}, '{{ solution.title }}')">[🗑]</a></td>
       <td>{% match solution.status %}
         {% when Status::Untested %}
         <span style="color: grey;">Untested</span>
