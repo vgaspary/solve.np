@@ -1,6 +1,9 @@
+import { global_event_listener_stack } from "./event_listener_stack";
+import { parse_solution } from "./problem_utils";
+
 type CancellationToken = { stop: boolean };
 
-function maybe_delete(solution_id: string, problem_id: string, input_id: string, solution_title: string): void {
+export function maybe_delete(solution_id: string, problem_id: string, input_id: string, solution_title: string): void {
   const dialog = document.getElementById('confirm-dialog');
   if (!dialog) return;
   const message = document.getElementById('confirm-dialog-message');
@@ -53,7 +56,7 @@ async function load_solution_table(problem_id: string, input_id: string | null):
   return await response.text();
 }
 
-function new_attempt(button: HTMLElement): void {
+export function new_attempt(button: HTMLElement): void {
   const table = button.closest('table')!;
   const new_attempt_row = table.querySelector('#new_attempt_row') as HTMLElement;
   const create_cancel_row = table.querySelector('#create_cancel_row') as HTMLElement;
@@ -86,7 +89,7 @@ function new_attempt(button: HTMLElement): void {
   });
 }
 
-function cancel_new_attempt(button: HTMLElement): void {
+export function cancel_new_attempt(button: HTMLElement): void {
   const table = button.closest('table')!;
   const new_attempt_row = table.querySelector('#new_attempt_row') as HTMLElement;
   const create_cancel_row = table.querySelector('#create_cancel_row') as HTMLElement;
@@ -99,7 +102,7 @@ function cancel_new_attempt(button: HTMLElement): void {
   global_event_listener_stack.pop();
 }
 
-function create_solution(button: HTMLElement, problemId: string): void {
+export function create_solution(button: HTMLElement, problemId: string): void {
   const table = button.closest('table')!;
   const title = table.querySelector('#new_title') as HTMLInputElement;
   const description = table.querySelector('#new_description') as HTMLInputElement;
@@ -135,7 +138,7 @@ function create_solution(button: HTMLElement, problemId: string): void {
   })();
 }
 
-function submit_solution(problem_id: string, solution_id: string, input_id: string): void {
+export function submit_solution(problem_id: string, solution_id: string, input_id: string): void {
   const solution_textarea = document.getElementById(input_id + '_solution') as HTMLTextAreaElement | null;
   if (!solution_textarea) return;
   solution_textarea.classList = "";
@@ -220,7 +223,7 @@ function show_in_progress(paragraph: HTMLParagraphElement, i: number, cancellati
   setTimeout(() => show_in_progress(paragraph, i + 1, cancellation_token), 100);
 }
 
-function choose_solution(problem_id: string, input_id: string) {
+export function choose_solution(problem_id: string, input_id: string) {
   (async () => {
     let content = await load_solution_table(problem_id, input_id);
     const solution_table = document.getElementById(`${problem_id}_solution_table`) as HTMLElement;

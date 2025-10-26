@@ -31,4 +31,4 @@ class EventListenerStack {
   }
 }
 
-const global_event_listener_stack = new EventListenerStack(window, 'keydown');
+export const global_event_listener_stack = new EventListenerStack(window, 'keydown');

@@ -1,10 +1,8 @@
 <div id="{{ problem_id }}_solution_table">
-  <script src="/js_utils/event_listener_stack.js"></script>
-  <script src="/js_utils/solution_utils.js"></script>
   <table id="{{ problem_id }}_tbl">
     {% for solution in solutions %}
     <tr>
-      <td><a onclick="maybe_delete('{{ solution.id }}', '{{ problem_id }}', {% if let Some(input_id) = input_id %}'{{ input_id }}'{% else %}null{% endif %}, '{{ solution.title }}')">[🗑]</a></td>
+      <td><a onclick="solve_np.maybe_delete('{{ solution.id }}', '{{ problem_id }}', {% if let Some(input_id) = input_id %}'{{ input_id }}'{% else %}null{% endif %}, '{{ solution.title }}')">[🗑]</a></td>
       <td>{% match solution.status %}
         {% when Status::Untested %}
         <span style="color: grey;">Untested</span>
@@ -18,11 +16,11 @@
     </tr>
     {% endfor %}
     <tr id="new_attempt_row" >
-      <td colspan="2"><a onclick="new_attempt(this)"><i>[New attempt]</i></a></td>
+      <td colspan="2"><a onclick="solve_np.new_attempt(this)"><i>[New attempt]</i></a></td>
     </tr>
     <tr id="create_cancel_row" style="display: none">
-      <td colspan="2"><a id="create_button" onclick="create_solution(this, '{{ problem_id }}')"><i>[Create]</i></a></td>
-      <td><a id="cancel_button" onclick="cancel_new_attempt(this)"><i>[Cancel]</i></a></td>
+      <td colspan="2"><a id="create_button" onclick="solve_np.create_solution(this, '{{ problem_id }}')"><i>[Create]</i></a></td>
+      <td><a id="cancel_button" onclick="solve_np.cancel_new_attempt(this)"><i>[Cancel]</i></a></td>
       <td><span id="create_attempt_error_message" class="error-message"></span></td>
     </tr>
   </table>

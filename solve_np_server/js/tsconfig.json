@@ -7,18 +7,18 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "es2015",
-    "target": "es2015",
+    // "module": "nodenext",
+    "target": "esnext",
     "types": [],
     // For nodejs:
-    "lib": ["ES2021.String", "esnext", "dom"],
+    "lib": ["ES2021.String"],
     // "types": ["node"],
     // and npm install -D @types/node
 
     // Other Outputs
-    "sourceMap": false,
-    "declaration": false,
-    "declarationMap": false,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
@@ -34,15 +34,11 @@
 
     // Recommended Options
     "strict": true,
-    "verbatimModuleSyntax": false,
-    "isolatedModules": false,
+    "jsx": "react-jsx",
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
-    // "allowImportingTsExtensions": true,
-    // "noEmit" : true,
-    // "moduleDetection": "force",
+    "moduleDetection": "force",
     "skipLibCheck": true,
-  },
-  
-  "include": ["*.ts"],
-  "exclude": ["*.js"]
+  }
 }

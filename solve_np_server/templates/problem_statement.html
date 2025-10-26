@@ -5,7 +5,6 @@
     <title>{{ problem.name }} - solve.NP</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="icon" href="/static/favicon.png">
-    <script src="/js_utils/problem_utils.js"></script>
   </head>
   <body>
     {{ header | safe }}
@@ -15,7 +14,7 @@
         <hr>
         <h2><em>Sample input</em></h2> 
         <pre><code>{{ problem.sample_input }}</code></pre>
-        <textarea id="sample_solution" placeholder="Try your solution..." oninput="check_solution('{{ problem.id }}')"></textarea>
+        <textarea id="sample_solution" placeholder="Try your solution..." oninput="solve_np.check_solution('{{ problem.id }}')"></textarea>
         <p id="sample_solution_result"></p>
         <hr>
         <h2><em>Inputs</em></h2>
@@ -24,7 +23,7 @@
           <tr>
             <td><a href="/api/problems/{{ problem.id }}/inputs/{{ input.filename }}" target="_ablank">{{ input.filename }}</a></td>
             <td>{{ input.size_h }}</td>
-            <td>{% if header.logged_in %} <a onclick="choose_solution('{{ problem.id }}', '{{ input.id }}')">[Submit solution]</a>{% endif %}</td>
+            <td>{% if header.logged_in %} <a onclick="solve_np.choose_solution('{{ problem.id }}', '{{ input.id }}')">[Submit solution]</a>{% endif %}</td>
           </tr>
           {% endfor %}
         </table>

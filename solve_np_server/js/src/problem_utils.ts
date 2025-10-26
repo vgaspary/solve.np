@@ -1,6 +1,6 @@
 type SampleSolution = { TspSolution: number[] } | { GraphColoringSolution: number[] };
 
-function parse_solution(problem_id: string, input: string): SampleSolution | null {
+export function parse_solution(problem_id: string, input: string): SampleSolution | null {
   if (problem_id === "travelling_salesman") {
     return { TspSolution: input.trim().split(/\s+/).map(n => Number(n)) };
   } else if (problem_id === "graph_coloring") {
@@ -9,7 +9,7 @@ function parse_solution(problem_id: string, input: string): SampleSolution | nul
   return null;
 }
 
-function check_solution(problem_id: string): void {
+export function check_solution(problem_id: string): void {
   const solution_textarea = document.getElementById("sample_solution") as HTMLTextAreaElement | null;
   if (!solution_textarea) {
     throw new Error("'sample_solution' textarea not found.");

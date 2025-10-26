@@ -4,3 +4,5 @@
 !**/inputs/sample.txt
 test.log
 *.db3
+/solve_np_server/js/node_modules/
+/solve_np_server/js/dist/

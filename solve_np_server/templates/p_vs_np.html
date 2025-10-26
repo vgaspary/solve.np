@@ -5,9 +5,6 @@
     <title>P vs NP - solve.NP</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="icon" href="/static/favicon.png">
-    <script src="/js_utils/event_listener_stack.js"></script>
-    <script src="/js_utils/solution_utils.js"></script>
-    <script src="/js_utils/p_vs_np_utils.js"></script>
   </head>
   <body>
     {{ header | safe }}
@@ -27,8 +24,8 @@
             </ul>
           {% else %}
             <ul>
-              <li><a style="cursor: pointer;" onclick="maybe_vote('eq')" >[P == NP]</a></li>
-              <li><a style="cursor: pointer;" onclick="maybe_vote('neq')">[P != NP]</a></li>
+              <li><a style="cursor: pointer;" onclick="solve_np.maybe_vote('eq')" >[P == NP]</a></li>
+              <li><a style="cursor: pointer;" onclick="solve_np.maybe_vote('neq')">[P != NP]</a></li>
             </ul>
           {% endif %}
         {% else %}

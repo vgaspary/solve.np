@@ -71,7 +71,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(state.clone())
             /* --- Frontend scope --- */
             .service(Files::new("/static", "./static"))
-            .service(Files::new("/js_utils", "./js_utils"))
+            .service(Files::new("/js/dist", "./js/dist"))
             .route("/", get().to(frontend_handlers::home_page))
             .route("/log_in", get().to(frontend_handlers::log_in))
             .route("/p_vs_np", get().to(frontend_handlers::p_vs_np))
