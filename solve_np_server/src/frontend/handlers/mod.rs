@@ -7,6 +7,7 @@ pub mod problems;
 pub mod solution;
 pub mod solutions;
 pub mod solution_table;
+pub mod leaderboard;
 
 pub use home_page::home_page;
 pub use log_in::log_in;
@@ -16,3 +17,4 @@ pub use problems::problems;
 pub use solution::solution;
 pub use solutions::solutions;
 pub use solution_table::solution_table;
+pub use leaderboard::leaderboard;

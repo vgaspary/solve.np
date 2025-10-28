@@ -1,4 +1,5 @@
-use crate::{frontend::handlers::header::HeaderTemplate, state::State};
+use crate::frontend::handlers::header::HeaderTemplate;
+use crate::state::State;
 use actix_session::Session;
 use actix_web::HttpResponse;
 use actix_web::Responder;

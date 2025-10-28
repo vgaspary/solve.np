@@ -74,6 +74,7 @@ async fn main() -> std::io::Result<()> {
             .service(Files::new("/js/dist", "./js/dist"))
             .route("/", get().to(frontend_handlers::home_page))
             .route("/log_in", get().to(frontend_handlers::log_in))
+            .route("/leaderboard", get().to(frontend_handlers::leaderboard))
             .route("/p_vs_np", get().to(frontend_handlers::p_vs_np))
             .route("/problems", get().to(frontend_handlers::problems))
             .route(
