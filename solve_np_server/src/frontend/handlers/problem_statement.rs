@@ -1,3 +1,4 @@
+use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::utils::bytes_to_string_h;
 use crate::frontend::utils::get_file_metadata;
 use crate::frontend_handlers::header::HeaderTemplate;
@@ -24,6 +25,7 @@ use std::fs;
 #[derive(Template)]
 #[template(path = "problem_statement.html")]
 struct ProblemStatementTemplate {
+    head: HeadTemplate,
     header: HeaderTemplate,
     problem: Problem,
     solution_table: SolutionTable,
@@ -110,6 +112,9 @@ pub async fn problem_statement(
         vec![]
     };
     let body = ProblemStatementTemplate {
+        head: HeadTemplate {
+            title: format!("{} - solve.NP", problem.name),
+        },
         header: HeaderTemplate::try_from(&session)?,
         problem,
         solution_table: SolutionTable {

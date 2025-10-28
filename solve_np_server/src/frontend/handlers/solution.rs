@@ -1,3 +1,4 @@
+use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::handlers::header::HeaderTemplate;
 use crate::state::State;
 use crate::types::InputId;
@@ -44,6 +45,7 @@ struct Solution {
 #[derive(Template)]
 #[template(path = "solution.html")]
 struct SolutionTemplate {
+    head: HeadTemplate,
     header: HeaderTemplate,
     solution: Solution,
     problem: Problem,
@@ -129,6 +131,7 @@ pub async fn solution(
         .ok_or(ErrorInternalServerError("Internal error #11"))?;
 
     let body = SolutionTemplate {
+        head: HeadTemplate { title: "My Solutions - solve.NP".into() },
         header: HeaderTemplate::try_from(&session)?,
         solution,
         problem,

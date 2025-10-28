@@ -1,3 +1,4 @@
+use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::handlers::header::HeaderTemplate;
 use actix_session::Session;
 use actix_web::HttpResponse;
@@ -12,6 +13,7 @@ use serde::Deserialize;
 #[derive(Template)]
 #[template(path = "log_in.html")]
 struct LogInTemplate {
+    head: HeadTemplate,
     header: HeaderTemplate,
     redirect: Option<String>,
     error_msg: String,
@@ -28,6 +30,7 @@ pub async fn log_in(
     session: Session,
 ) -> Result<impl Responder, HttpError> {
     let body = LogInTemplate {
+        head: HeadTemplate { title: "Log In - solve.NP".into() },
         header: HeaderTemplate::try_from(&session)?,
         redirect: query.redirect.clone(),
         error_msg: query.err.clone().unwrap_or_default(),

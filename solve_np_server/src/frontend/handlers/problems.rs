@@ -1,3 +1,4 @@
+use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::handlers::header::HeaderTemplate;
 use crate::state::State;
 use crate::types::ProblemId;
@@ -20,6 +21,7 @@ struct Problem {
 #[derive(Template)]
 #[template(path = "problems.html")]
 struct ProblemsTemplate {
+    head: HeadTemplate,
     header: HeaderTemplate,
     problems: Vec<Problem>,
 }
@@ -39,6 +41,9 @@ pub async fn problems(
         .sorted_by_key(|problem| problem.id.clone())
         .collect::<Vec<_>>();
     let body = ProblemsTemplate {
+        head: HeadTemplate {
+            title: "Problems - solve.NP".into(),
+        },
         header: HeaderTemplate::try_from(&session)?,
         problems,
     }

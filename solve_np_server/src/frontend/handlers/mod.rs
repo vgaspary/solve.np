@@ -1,20 +1,21 @@
+pub mod head;
 pub mod header;
 pub mod home_page;
+pub mod leaderboard;
 pub mod log_in;
 pub mod p_vs_np;
 pub mod problem_statement;
 pub mod problems;
 pub mod solution;
-pub mod solutions;
 pub mod solution_table;
-pub mod leaderboard;
+pub mod solutions;
 
 pub use home_page::home_page;
+pub use leaderboard::leaderboard;
 pub use log_in::log_in;
 pub use p_vs_np::p_vs_np;
 pub use problem_statement::problem_statement;
 pub use problems::problems;
 pub use solution::solution;
-pub use solutions::solutions;
 pub use solution_table::solution_table;
-pub use leaderboard::leaderboard;
+pub use solutions::solutions;

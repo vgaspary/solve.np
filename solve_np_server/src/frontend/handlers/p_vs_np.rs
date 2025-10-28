@@ -1,3 +1,4 @@
+use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::handlers::header::HeaderTemplate;
 use crate::state::State;
 use actix_session::Session;
@@ -17,6 +18,7 @@ struct PEqualsNP(bool);
 #[derive(Template)]
 #[template(path = "p_vs_np.html")]
 struct PvsNpTemplate {
+    head: HeadTemplate,
     header: HeaderTemplate,
     eq_neq_text: Option<(String, String)>,
 }
@@ -73,6 +75,9 @@ pub async fn p_vs_np(
     session: Session,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
+    let head = HeadTemplate {
+        title: "P vs NP - solve.NP".into(),
+    };
     let header = HeaderTemplate::try_from(&session)?;
     let eq_neq_text = if header.logged_in {
         get_vote_data(&session, &state)?.and_then(|(vote, num_eq, num_neq)| {
@@ -86,6 +91,7 @@ pub async fn p_vs_np(
     };
 
     let body = PvsNpTemplate {
+        head,
         header,
         eq_neq_text,
     }

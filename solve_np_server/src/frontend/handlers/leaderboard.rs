@@ -1,3 +1,4 @@
+use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::handlers::header::HeaderTemplate;
 use crate::state::State;
 use actix_session::Session;
@@ -12,6 +13,7 @@ use askama::Template;
 #[derive(Template)]
 #[template(path = "leaderboard.html")]
 struct LeaderboardTemplate {
+    head: HeadTemplate,
     header: HeaderTemplate,
 }
 
@@ -20,6 +22,9 @@ pub async fn leaderboard(
     _state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let body = LeaderboardTemplate {
+        head: HeadTemplate {
+            title: "Leaderboard - solve.NP".into(),
+        },
         header: HeaderTemplate::try_from(&session)?,
     }
     .render()

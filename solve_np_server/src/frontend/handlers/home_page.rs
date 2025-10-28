@@ -1,4 +1,5 @@
-use crate::frontend::handlers::header::HeaderTemplate;
+use crate::frontend_handlers::head::HeadTemplate;
+use crate::frontend_handlers::header::HeaderTemplate;
 use actix_session::Session;
 use actix_web::HttpResponse;
 use actix_web::Responder;
@@ -10,6 +11,7 @@ use askama::Template;
 #[derive(Template)]
 #[template(path = "index.html")]
 struct HomePageTemplate {
+    head: HeadTemplate,
     header: HeaderTemplate,
     user_name: String,
 }
@@ -19,6 +21,9 @@ pub async fn home_page(session: Session) -> Result<impl Responder, HttpError> {
         .get::<String>("username")?
         .unwrap_or(String::from("Unknown user"));
     let body = HomePageTemplate {
+        head: HeadTemplate {
+            title: "solve.NP".into(),
+        },
         header: HeaderTemplate::try_from(&session)?,
         user_name,
     }
