@@ -24,8 +24,6 @@ fn main() {
     println!("cargo:rerun-if-changed=js/package-lock.json");
     println!("cargo:rerun-if-changed=js/tsconfig.json");
     println!("cargo:rerun-if-changed=js/src");
-
-
     let esbuild_status = Command::new("npx")
         .arg("esbuild")
         .arg("js/src/index.ts")
