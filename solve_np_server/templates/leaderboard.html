@@ -3,5 +3,49 @@
   {{ head | safe }}
   <body>
     {{ header | safe }}
+    {% for problem in problems %}
+      <h1><a href="/problems/{{ problem.id }}">{{ problem.name }}</a></h1>
+      <table>
+        <tr>
+          <th>Rank</th>
+          <th>User</th>
+          <th>Solution</th>
+          <th>Description</th>
+        </tr>
+        {% for ranking in problem.rankings %}
+        <tr>
+          <td>{{ ranking.0 }}</td>
+          <td>{{ ranking.1 }}</td>
+          <td>{{ ranking.2.title }}</td>
+          <td>{% if let Some(desc) = ranking.2.description %}{{ desc }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      <details>
+        <summary>Details</summary>
+        {% for input in problem.inputs %}
+        <h2>{{ input.filename }}</h2>
+        <table>
+          <tr>
+            <th>Rank</th>
+            <th>User</th>
+            <th>Score</th>
+            <th>Solution</th>
+            <th>Description</th>
+          </tr>
+          {% for ranking in input.rankings %}
+          <tr>
+            <td>{{ ranking.0 }}</td>
+            <td>{{ ranking.1 }}</td>
+            <td>{{ ranking.2 }}</td>
+            <td>{{ ranking.3.title }}</td>
+            <td>{% if let Some(desc) = ranking.3.description %}{{ desc }}{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% endfor %}
+      </details>
+      <br>
+    {% endfor %}
   </body>
 </html>

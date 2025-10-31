@@ -39,7 +39,7 @@ pub async fn problems(
             description: problem.description.clone(),
         })
         .sorted_by_key(|problem| problem.id.clone())
-        .collect::<Vec<_>>();
+        .collect();
     let body = ProblemsTemplate {
         head: HeadTemplate {
             title: "Problems - solve.NP".into(),

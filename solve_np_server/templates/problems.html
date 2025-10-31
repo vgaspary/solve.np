@@ -3,15 +3,12 @@
   {{ head | safe }}
   <body>
     {{ header | safe }}
+    {% for problem in problems %}
     <div>
-      <ul>
-        {% for problem in problems %}
-        <li>
-          <h1><a href="/problems/{{ problem.id }}">{{ problem.name }}</a></h1>
-          <article><p>{{ problem.description }}</p></article>
-        </li>
-        {% endfor %}
-      </ul>
+      <h1><a href="/problems/{{ problem.id }}">{{ problem.name }}</a></h1>
+      <article><p>{{ problem.description }}</p></article>
+      <br>
     </div>
+    {% endfor %}
   </body>
 </html>
