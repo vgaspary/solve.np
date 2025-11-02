@@ -28,7 +28,9 @@ pub async fn validate_sample(
         SampleSolution::TspSolution(path) => {
             let graph = state
                 .static_data
-                .get(&"travelling_salesman".into())
+                .problems
+                .iter()
+                .find(|problem| problem.id == "travelling_salesman".into())
                 .map(|problem| problem.sample_input.as_ref())
                 .and_then(tsp_validate::parse_input)
                 .ok_or(ErrorInternalServerError(
@@ -47,7 +49,9 @@ pub async fn validate_sample(
         SampleSolution::GraphColoringSolution(coloring) => {
             let graph = state
                 .static_data
-                .get(&"graph_coloring".into())
+                .problems
+                .iter()
+                .find(|problem| problem.id == "graph_coloring".into())
                 .map(|problem| problem.sample_input.as_ref())
                 .and_then(graph_coloring_validate::parse_input)
                 .ok_or(ErrorInternalServerError(

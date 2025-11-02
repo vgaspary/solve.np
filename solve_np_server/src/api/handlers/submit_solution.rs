@@ -105,30 +105,36 @@ pub async fn submit_solution(
     let state_clone = state.clone();
     let problem_id_clone = problem_id.clone();
     let input_id_clone = input_id.clone();
-    let validation_result = task::spawn_blocking(move || match solution {
-        Solution::TspSolution(path) => {
-            let graph = state_clone
-                .static_data
-                .get(&problem_id_clone)
-                .and_then(|problem| problem.inputs.get(&input_id_clone))
-                .and_then(|input| fs::read_to_string(&input.path).ok())
-                .and_then(|input| tsp_validate::parse_input(&input))
-                .ok_or("Internal error #12")?;
-            Ok(tsp_validate::validate(&graph, path)
-                .map(|score| ValidateSolutionResult::Valid(score))
-                .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string())))
-        }
-        Solution::GraphColoringSolution(coloring) => {
-            let graph = state_clone
-                .static_data
-                .get(&problem_id_clone)
-                .and_then(|problem| problem.inputs.get(&input_id_clone))
-                .and_then(|input| fs::read_to_string(&input.path).ok())
-                .and_then(|input| graph_coloring_validate::parse_input(&input))
-                .ok_or("Internal error #13")?;
-            Ok(graph_coloring_validate::validate(&graph, coloring)
-                .map(|score| ValidateSolutionResult::Valid(score))
-                .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string())))
+    let validation_result = task::spawn_blocking(move || {
+        let input = state_clone
+            .static_data
+            .problems
+            .iter()
+            .find(|problem| problem.id == problem_id_clone)
+            .and_then(|problem| {
+                problem
+                    .inputs
+                    .iter()
+                    .find(|input| input.id == input_id_clone)
+            })
+            .and_then(|input| fs::read_to_string(&input.path).ok());
+        match solution {
+            Solution::TspSolution(path) => {
+                let graph = input
+                    .and_then(|input| tsp_validate::parse_input(&input))
+                    .ok_or("Internal error #12")?;
+                Ok(tsp_validate::validate(&graph, path)
+                    .map(|score| ValidateSolutionResult::Valid(score))
+                    .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string())))
+            }
+            Solution::GraphColoringSolution(coloring) => {
+                let graph = input
+                    .and_then(|input| graph_coloring_validate::parse_input(&input))
+                    .ok_or("Internal error #13")?;
+                Ok(graph_coloring_validate::validate(&graph, coloring)
+                    .map(|score| ValidateSolutionResult::Valid(score))
+                    .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string())))
+            }
         }
     })
     .await

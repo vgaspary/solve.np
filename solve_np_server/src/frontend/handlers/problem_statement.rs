@@ -42,7 +42,6 @@ struct Problem {
 struct Input {
     id: InputId,
     filename: String,
-    size: u64,
     size_h: String,
 }
 
@@ -51,10 +50,12 @@ pub async fn problem_statement(
     path: web::Path<String>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let problem_id = path.into_inner().into();
+    let problem_id: ProblemId = path.into_inner().into();
     let problem = state
         .static_data
-        .get(&problem_id)
+        .problems
+        .iter()
+        .find(|problem| problem.id == problem_id)
         .ok_or_else(|| ErrorInternalServerError("No problem found with ID"))
         .and_then(|problem| {
             let md_content = fs::read_to_string(&problem.problem_statement)?;
@@ -69,7 +70,7 @@ pub async fn problem_statement(
                 inputs: problem
                     .inputs
                     .iter()
-                    .map(|(id, input)| {
+                    .map(|input| {
                         let (filename, size) = get_file_metadata(&input.path)
                             .inspect_err(|err| {
                                 debug!(
@@ -79,13 +80,11 @@ pub async fn problem_statement(
                             })
                             .map_err(|_| ErrorInternalServerError("Internal error #3"))?;
                         Ok::<Input, HttpError>(Input {
-                            id: id.clone(),
+                            id: input.id.clone(),
                             filename,
-                            size,
                             size_h: bytes_to_string_h(size),
                         })
                     })
-                    .sorted_by_key(|input| input.as_ref().map_or(0, |input| input.size))
                     .collect::<Result<Vec<_>, _>>()?,
             })
         })?;

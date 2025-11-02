@@ -1,13 +1,10 @@
-use crate::types::ProblemId;
 use crate::types::InputId;
+use crate::types::ProblemId;
 use rusqlite::Connection;
 use serde::Deserialize;
-use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::SystemTime;
-
-pub type StaticData = HashMap<ProblemId, Problem>;
 
 pub struct State {
     pub start_time: SystemTime,
@@ -16,22 +13,26 @@ pub struct State {
 }
 
 #[derive(Deserialize)]
+pub struct StaticData {
+    pub problems: Vec<Problem>,
+}
+
+#[derive(Deserialize)]
 pub struct Problem {
+    pub id: ProblemId,
     pub name: String,
     pub description: String,
     pub problem_statement: PathBuf,
     pub sample_input: String,
-    pub inputs: HashMap<InputId, Input>,
+    pub inputs: Vec<Input>,
 }
 
 #[derive(Deserialize)]
 pub struct Input {
-    #[serde(alias = "path")]
+    pub id: InputId,
     pub path: PathBuf,
-    #[serde(alias = "filename")]
     pub filename: String,
     #[serde(alias = "cmd")]
     _cmd: String,
-    #[serde(alias = "preview")]
     pub preview: String,
 }

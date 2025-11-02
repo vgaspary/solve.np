@@ -10,7 +10,6 @@ use actix_web::error::ErrorInternalServerError;
 use actix_web::http::header::ContentType;
 use actix_web::web;
 use askama::Template;
-use itertools::Itertools;
 
 struct Problem {
     id: ProblemId,
@@ -32,13 +31,13 @@ pub async fn problems(
 ) -> Result<impl Responder, HttpError> {
     let problems = state
         .static_data
+        .problems
         .iter()
-        .map(|(id, problem)| Problem {
-            id: id.clone(),
+        .map(|problem| Problem {
+            id: problem.id.clone(),
             name: problem.name.clone(),
             description: problem.description.clone(),
         })
-        .sorted_by_key(|problem| problem.id.clone())
         .collect();
     let body = ProblemsTemplate {
         head: HeadTemplate {

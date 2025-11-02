@@ -13,11 +13,8 @@ use actix_web::error::ErrorInternalServerError;
 use actix_web::http::header::ContentType;
 use actix_web::web;
 use askama::Template;
-use itertools::Itertools;
 use log::error;
 use rusqlite::params;
-use std::fs::metadata;
-use std::os::unix::fs::MetadataExt;
 
 struct Problem {
     id: ProblemId,
@@ -31,7 +28,6 @@ struct Input {
     solution: String,
     status: Status,
     invalid_message: String,
-    size: u64,
 }
 
 struct Solution {
@@ -79,27 +75,19 @@ pub async fn solution(
         .map_err(|_| ErrorInternalServerError("Internal error #10"))?;
     let (problem, inputs) = state
         .static_data
-        .get(&solution.problem_id)
+        .problems
+        .iter()
+        .find(|problem| problem.id == solution.problem_id)
         .map(|problem| {
             (
                 Problem {
-                    id: solution.problem_id.clone(),
+                    id: problem.id.clone(),
                     name: problem.name.clone(),
                 },
                 problem
                     .inputs
                     .iter()
-                    .map(|(id, input)| {
-                        (
-                            id,
-                            input,
-                            metadata(&input.path)
-                                .map(|metadata| metadata.size())
-                                .unwrap_or(0),
-                        )
-                    })
-                    .sorted_by_key(|(_, _, size)| *size)
-                    .map(|(id, input, _)| {
+                    .map(|input| {
                         let (solution, status, invalid_message) = db
                             .query_one(
                                 "SELECT solution, status, invalid_message FROM submissions
@@ -108,30 +96,28 @@ pub async fn solution(
                                     problem_id = ?2 AND
                                     solution_id = ?3 AND
                                     input_id = ?4;",
-                                params![user_id, solution.problem_id, solution.id, id],
+                                params![user_id, solution.problem_id, solution.id, input.id],
                                 |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
                             )
                             .unwrap_or((None, Status::Untested, None));
                         Input {
-                            id: id.clone(),
+                            id: input.id.clone(),
                             filename: input.filename.clone(),
                             preview: input.preview.clone(),
                             solution: solution.unwrap_or_default(),
                             status,
                             invalid_message: invalid_message.unwrap_or_default(),
-                            size: metadata(&input.path)
-                                .map(|metadata| metadata.size())
-                                .unwrap_or_default(),
                         }
                     })
-                    .sorted_by_key(|input| input.size)
                     .collect(),
             )
         })
         .ok_or(ErrorInternalServerError("Internal error #11"))?;
 
     let body = SolutionTemplate {
-        head: HeadTemplate { title: "My Solutions - solve.NP".into() },
+        head: HeadTemplate {
+            title: "My Solutions - solve.NP".into(),
+        },
         header: HeaderTemplate::try_from(&session)?,
         solution,
         problem,

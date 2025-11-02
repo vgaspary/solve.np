@@ -85,9 +85,10 @@ pub async fn leaderboard(
 
     let problems = state
         .static_data
+        .problems
         .iter()
-        .map(|(id, problem)| Problem {
-            id: id.clone(),
+        .map(|problem| Problem {
+            id: problem.id.clone(),
             name: problem.name.clone(),
             rankings: vec![
                 (
@@ -166,8 +167,8 @@ pub async fn leaderboard(
             inputs: problem
                 .inputs
                 .iter()
-                .map(|(id, input)| Input {
-                    id: id.clone(),
+                .map(|input| Input {
+                    id: input.id.clone(),
                     filename: input.filename.clone(),
                     rankings: vec![
                         (
@@ -284,7 +285,6 @@ pub async fn leaderboard(
                 })
                 .collect(),
         })
-        .sorted_by_key(|problem| problem.id.clone())
         .collect();
     let body = LeaderboardTemplate {
         head: HeadTemplate {

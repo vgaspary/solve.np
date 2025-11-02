@@ -33,7 +33,7 @@ impl FromSql for Status {
     }
 }
 
-#[derive(Hash, Eq, PartialEq, Clone, Ord, PartialOrd, Deserialize)]
+#[derive(Eq, PartialEq, Clone, Ord, PartialOrd, Deserialize)]
 pub struct ProblemId(String);
 
 impl<T: Into<String>> From<T> for ProblemId {
@@ -60,7 +60,7 @@ impl ToSql for ProblemId {
     }
 }
 
-#[derive(Deserialize, Hash, Eq, PartialEq, Clone)]
+#[derive(Deserialize, Ord, PartialOrd, Eq, PartialEq, Clone)]
 pub struct InputId(String);
 
 impl fmt::Display for InputId {

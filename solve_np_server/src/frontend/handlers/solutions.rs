@@ -74,19 +74,20 @@ pub async fn solutions(
         .collect_vec();
     let problems = state
         .static_data
+        .problems
         .iter()
-        .filter(|&(id, _)| match &problem_id {
-            Some(problem_id) => problem_id == id,
+        .filter(|&problem| match &problem_id {
+            Some(problem_id) => problem_id == &problem.id,
             None => true,
         })
-        .map(|(id, problem)| Problem {
-            id: id.clone(),
+        .map(|problem| Problem {
+            id: problem.id.clone(),
             name: problem.name.clone(),
             solution_table: SolutionTable {
                 solutions: solutions
                     .iter()
                     .filter_map(|(problem_id, solution)| {
-                        if problem_id == id {
+                        if problem_id == &problem.id {
                             Some(solution)
                         } else {
                             None
@@ -94,11 +95,10 @@ pub async fn solutions(
                     })
                     .cloned()
                     .collect(),
-                problem_id: id.clone(),
+                problem_id: problem.id.clone(),
                 input_id: input_id.clone(),
             },
         })
-        .sorted_by_key(|problem| problem.id.clone())
         .collect();
     let body = SolutionsTemplate {
         head: HeadTemplate {
