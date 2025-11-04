@@ -523,6 +523,10 @@ table {
   border-collapse: separate;
   border-spacing: 20px 5px;
 }
+th {
+  background-color: #24283b;
+  color: #c0caf5;
+}
 
 .confirm-dialog-container {
   position: fixed;
