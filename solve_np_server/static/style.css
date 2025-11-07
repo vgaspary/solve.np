@@ -24,6 +24,9 @@ a:hover, a:focus {
   color: #c0caf5;
   cursor: pointer;
 }
+a.active {
+  color: #9ece6a;
+}
 h1 {
   font-size: 1.5em;
   font-weight: 700;

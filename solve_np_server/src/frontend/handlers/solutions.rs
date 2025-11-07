@@ -1,5 +1,6 @@
 use crate::frontend_handlers::head::HeadTemplate;
 use crate::frontend_handlers::header::HeaderTemplate;
+use crate::frontend_handlers::header::Page;
 use crate::frontend_handlers::solution_table::Solution;
 use crate::frontend_handlers::solution_table::SolutionTable;
 use crate::state::State;
@@ -104,7 +105,7 @@ pub async fn solutions(
         head: HeadTemplate {
             title: "My Solutions - solve.NP".into(),
         },
-        header: HeaderTemplate::try_from(&session)?,
+        header: HeaderTemplate::try_from(&session)?.with_active(Page::Solutions),
         problems,
     }
     .render()

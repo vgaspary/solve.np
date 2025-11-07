@@ -1,5 +1,6 @@
 use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::handlers::header::HeaderTemplate;
+use crate::frontend::handlers::header::Page;
 use crate::state::State;
 use actix_session::Session;
 use actix_web::HttpResponse;
@@ -78,7 +79,7 @@ pub async fn p_vs_np(
     let head = HeadTemplate {
         title: "P vs NP - solve.NP".into(),
     };
-    let header = HeaderTemplate::try_from(&session)?;
+    let header = HeaderTemplate::try_from(&session)?.with_active(Page::PvsNP);
     let eq_neq_text = if header.logged_in {
         get_vote_data(&session, &state)?.and_then(|(vote, num_eq, num_neq)| {
             Some((

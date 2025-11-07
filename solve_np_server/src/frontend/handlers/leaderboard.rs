@@ -1,5 +1,6 @@
 use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::handlers::header::HeaderTemplate;
+use crate::frontend::handlers::header::Page;
 use crate::state::State;
 use crate::types::InputId;
 use crate::types::ProblemId;
@@ -202,7 +203,7 @@ pub async fn leaderboard(
         head: HeadTemplate {
             title: "Leaderboard - solve.NP".into(),
         },
-        header: HeaderTemplate::try_from(&session)?,
+        header: HeaderTemplate::try_from(&session)?.with_active(Page::Leaderboard),
         problems,
     }
     .render()

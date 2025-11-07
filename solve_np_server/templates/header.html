@@ -3,14 +3,14 @@
     <h1><a href="/">solve.NP</a></h1>
     <nav>
       <ul>
-        <li><a href="/problems">[Problems]</a></li>
-        <li><a href="/leaderboard">[Leaderboard]</a></li>
-        <li><a href="/p_vs_np">[P vs NP]</a></li>
+        <li><a href="/problems" {% if active == Some(Page::Problems) %}class="active"{% endif %}>[Problems]</a></li>
+        <li><a href="/leaderboard" {% if active == Some(Page::Leaderboard) %}class="active"{% endif %}>[Leaderboard]</a></li>
+        <li><a href="/p_vs_np" {% if active == Some(Page::PvsNP) %}class="active"{% endif %}>[P vs NP]</a></li>
         {% if logged_in %}
-        <li><a href="/solutions">[My Solutions]</a></li>
+        <li><a href="/solutions" {% if active == Some(Page::Solutions) %}class="active"{% endif %}>[My Solutions]</a></li>
         <li><a href="/api/log_out">[Log Out]</a></li>
         {% else %}
-        <li><a href="/log_in">[Log In]</a></li>
+        <li><a href="/log_in" {% if active == Some(Page::LogIn) %}class="active"{% endif %}>[Log In]</a></li>
         {% endif %}
       </ul>
     </nav>

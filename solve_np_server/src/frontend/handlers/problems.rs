@@ -1,5 +1,6 @@
 use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::handlers::header::HeaderTemplate;
+use crate::frontend::handlers::header::Page;
 use crate::state::State;
 use crate::types::ProblemId;
 use actix_session::Session;
@@ -43,7 +44,7 @@ pub async fn problems(
         head: HeadTemplate {
             title: "Problems - solve.NP".into(),
         },
-        header: HeaderTemplate::try_from(&session)?,
+        header: HeaderTemplate::try_from(&session)?.with_active(Page::Problems),
         problems,
     }
     .render()
