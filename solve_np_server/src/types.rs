@@ -33,7 +33,7 @@ impl FromSql for Status {
     }
 }
 
-#[derive(Eq, PartialEq, Clone, Ord, PartialOrd, Deserialize)]
+#[derive(Hash, Eq, PartialEq, Clone, Ord, PartialOrd, Deserialize)]
 pub struct ProblemId(String);
 
 impl<T: Into<String>> From<T> for ProblemId {
@@ -60,8 +60,14 @@ impl ToSql for ProblemId {
     }
 }
 
-#[derive(Deserialize, Ord, PartialOrd, Eq, PartialEq, Clone)]
+#[derive(Deserialize, Ord, PartialOrd, Hash, Eq, PartialEq, Clone)]
 pub struct InputId(String);
+
+impl<T: Into<String>> From<T> for InputId {
+    fn from(value: T) -> Self {
+        Self(value.into())
+    }
+}
 
 impl fmt::Display for InputId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -72,6 +78,12 @@ impl fmt::Display for InputId {
 impl ToSql for InputId {
     fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
         self.0.to_sql()
+    }
+}
+
+impl FromSql for InputId {
+    fn column_result(value: rusqlite::types::ValueRef<'_>) -> rusqlite::types::FromSqlResult<Self> {
+        Ok(value.as_str()?.into())
     }
 }
 

@@ -9,10 +9,12 @@ CREATE TABLE
   solutions (
     solution_id TEXT PRIMARY KEY,
     user_id TEXT,
+    user_name TEXT,
     problem_id TEXT,
     title TEXT,
     description TEXT,
-    status INTEGER
+    status INTEGER,
+    ranking INTEGER
   );
 
 CREATE UNIQUE INDEX idx_user_problem_title ON solutions (user_id, problem_id, title);
@@ -20,6 +22,7 @@ CREATE UNIQUE INDEX idx_user_problem_title ON solutions (user_id, problem_id, ti
 CREATE TABLE
   submissions (
     user_id TEXT,
+    user_name TEXT,
     problem_id TEXT,
     solution_id TEXT,
     input_id TEXT,
@@ -27,6 +30,7 @@ CREATE TABLE
     hash_digest INTEGER,
     status INTEGER,
     invalid_message TEXT,
+    ranking INTEGER,
     PRIMARY KEY (user_id, problem_id, solution_id, input_id)
   );
 

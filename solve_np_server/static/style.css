@@ -24,8 +24,18 @@ a:hover, a:focus {
   color: #c0caf5;
   cursor: pointer;
 }
-h1, h2 {
+h1 {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #c0caf5;
+}
+h2 {
   font-size: 1.2em;
+  font-weight: 700;
+  color: #c0caf5;
+}
+h3 {
+  font-size: 1.0em;
   font-weight: 700;
   color: #c0caf5;
 }
@@ -608,8 +618,9 @@ th {
 }
 
 summary {
-  font-size: 1.2em;
-  font-weight: 700;
-  color: #c0caf5;
   cursor: pointer;
+}
+
+details[open] > summary {
+  font-size: 1.2em;
 }

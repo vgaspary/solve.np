@@ -4,7 +4,8 @@
   <body>
     {{ header | safe }}
     {% for problem in problems %}
-      <h1><a href="/problems/{{ problem.id }}">{{ problem.name }}</a></h1>
+      <h2><a href="/problems/{{ problem.id }}">{{ problem.name }}</a></h2>
+      <span>Overall ranking</span>
       <table>
         <tr>
           <th>Rank</th>
@@ -12,19 +13,21 @@
           <th>Solution</th>
           <th>Description</th>
         </tr>
-        {% for ranking in problem.rankings %}
+        {% for Ranked(rank, solution) in problem.overall_ranking %}
         <tr>
-          <td>{{ ranking.0 }}</td>
-          <td>{{ ranking.1 }}</td>
-          <td>{{ ranking.2.title }}</td>
-          <td>{% if let Some(desc) = ranking.2.description %}{{ desc }}{% endif %}</td>
+          <td>{{ rank }}</td>
+          <td>{{ solution.user_name }}</td>
+          <td>{{ solution.title }}</td>
+          <td>{% if let Some(desc) = solution.description %}{{ desc }}{% endif %}</td>
         </tr>
         {% endfor %}
       </table>
+      <br>
+      <br>
       <details>
-        <summary>Details</summary>
+        <summary>Rankings per input</summary>
         {% for input in problem.inputs %}
-        <h2>{{ input.filename }}</h2>
+        <span>{{ input.filename }}</span>
         <table>
           <tr>
             <th>Rank</th>
@@ -33,13 +36,13 @@
             <th>Solution</th>
             <th>Description</th>
           </tr>
-          {% for ranking in input.rankings %}
+          {% for Ranked(rank, submission) in input.ranking %}
           <tr>
-            <td>{{ ranking.0 }}</td>
-            <td>{{ ranking.1 }}</td>
-            <td>{{ ranking.2 }}</td>
-            <td>{{ ranking.3.title }}</td>
-            <td>{% if let Some(desc) = ranking.3.description %}{{ desc }}{% endif %}</td>
+            <td>{{ rank }}</td>
+            <td>{{ submission.user_name }}</td>
+            <td>{{ submission.score }}</td>
+            <td>{{ submission.solution_title }}</td>
+            <td>{% if let Some(desc) = submission.solution_description %}{{ desc }}{% endif %}</td>
           </tr>
           {% endfor %}
         </table>
