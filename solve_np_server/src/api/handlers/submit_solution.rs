@@ -58,6 +58,9 @@ pub async fn submit_solution(
     let user_id = session
         .get::<String>("user_id")?
         .ok_or(ErrorInternalServerError("Internal error #14"))?;
+    let user_name = session
+        .get::<String>("username")?
+        .ok_or(ErrorInternalServerError("Internal error #33"))?;
     let solution = solution.into_inner();
     let (problem_id, solution_id, input_id) = path.into_inner();
 
@@ -89,15 +92,15 @@ pub async fn submit_solution(
         .lock()
         .unwrap()
         .execute(
-            "INSERT INTO submissions (user_id, problem_id, solution_id, input_id, solution, hash_digest, status, invalid_message)
-             VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+            "INSERT INTO submissions (user_id, user_name, problem_id, solution_id, input_id, solution, hash_digest, status, invalid_message)
+             VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
              ON CONFLICT(user_id, problem_id, solution_id, input_id)
              DO UPDATE SET
-                solution = ?5,
-                hash_digest = ?6,
-                status = ?7,
-                invalid_message = ?8;",
-            params![user_id, problem_id, solution_id, input_id, solution.to_string(), hash_digest, Status::Untested, ""],
+                solution = ?6,
+                hash_digest = ?7,
+                status = ?8,
+                invalid_message = ?9;",
+            params![user_id, user_name, problem_id, solution_id, input_id, solution.to_string(), hash_digest, Status::Untested, ""],
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
         .map_err(|_| ErrorInternalServerError("Internal error #16"))?;

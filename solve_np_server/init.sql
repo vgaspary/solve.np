@@ -1,19 +1,19 @@
 CREATE TABLE
   votes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id TEXT UNIQUE,
-    vote BOOLEAN
+    user_id TEXT UNIQUE NOT NULL,
+    vote BOOLEAN NOT NULL
   );
 
 CREATE TABLE
   solutions (
     solution_id TEXT PRIMARY KEY,
-    user_id TEXT,
-    user_name TEXT,
-    problem_id TEXT,
-    title TEXT,
+    user_id TEXT NOT NULL,
+    user_name TEXT NOT NULL,
+    problem_id TEXT NOT NULL,
+    title TEXT NOT NULL,
     description TEXT,
-    status INTEGER,
+    status INTEGER NOT NULL,
     ranking INTEGER
   );
 
@@ -21,15 +21,15 @@ CREATE UNIQUE INDEX idx_user_problem_title ON solutions (user_id, problem_id, ti
 
 CREATE TABLE
   submissions (
-    user_id TEXT,
-    user_name TEXT,
-    problem_id TEXT,
-    solution_id TEXT,
-    input_id TEXT,
-    solution TEXT,
-    hash_digest INTEGER,
-    status INTEGER,
-    invalid_message TEXT,
+    user_id TEXT NOT NULL,
+    user_name TEXT NOT NULL,
+    problem_id TEXT NOT NULL,
+    solution_id TEXT NOT NULL,
+    input_id TEXT NOT NULL,
+    solution TEXT NOT NULL,
+    hash_digest INTEGER NOT NULL,
+    status INTEGER NOT NULL,
+    invalid_message TEXT NOT NULL,
     ranking INTEGER,
     PRIMARY KEY (user_id, problem_id, solution_id, input_id)
   );

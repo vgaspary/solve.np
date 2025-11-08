@@ -27,6 +27,9 @@ pub async fn create_solution(
     let user_id = session
         .get::<String>("user_id")?
         .ok_or(ErrorInternalServerError("Internal error #5"))?;
+    let user_name = session
+        .get::<String>("username")?
+        .ok_or(ErrorInternalServerError("Internal error #32"))?;
     let problem_id = &body.problem_id;
     let solution_id = Uuid::new_v4().as_simple().to_string();
     let title = &body.title;
@@ -37,11 +40,12 @@ pub async fn create_solution(
         .lock()
         .unwrap()
         .execute(
-            "INSERT INTO solutions (solution_id, user_id, problem_id, title, description, status)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            "INSERT INTO solutions (solution_id, user_id, user_name, problem_id, title, description, status)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
             params![
                 solution_id,
                 user_id,
+                user_name,
                 problem_id,
                 title,
                 description,
