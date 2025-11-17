@@ -1,5 +1,5 @@
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct Rank(usize);
+pub struct Rank(pub usize);
 
 pub struct RankedBy<I, F, K> {
     iter: I,

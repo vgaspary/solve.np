@@ -87,7 +87,7 @@ impl FromSql for InputId {
     }
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Deserialize, Hash, PartialEq, Eq)]
 pub struct SolutionId(String);
 
 impl<T: Into<String>> From<T> for SolutionId {

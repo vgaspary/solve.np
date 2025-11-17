@@ -1,8 +1,10 @@
 mod api;
 mod frontend;
+mod ranking;
 mod state;
 mod types;
 
+use crate::ranking::update_ranking;
 use actix_files::Files;
 use actix_session::SessionMiddleware;
 use actix_session::config::PersistentSession;
@@ -25,47 +27,71 @@ use state::StaticData;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::sync::Mutex;
+use std::time::Duration;
 use std::time::SystemTime;
+use tokio::task;
+use tokio::time::sleep;
 
 #[derive(Parser)]
 struct Args {
     /// Static data path.
-    #[arg(short, long)]
+    #[arg(long, default_value = "static_data.yaml")]
     static_data_path: PathBuf,
 
     /// Session cookie key.
-    #[arg(short, long)]
+    #[arg(long)]
     key: String,
 
     /// DB path.
-    #[arg(short, long)]
+    #[arg(long, default_value = "solve_np.db3")]
     db_path: PathBuf,
 
-    /// Port
-    #[arg(short, long)]
+    /// Port.
+    #[arg(long, default_value_t = 3333)]
     port: u16,
+
+    /// Ranking update period.
+    #[arg(long, default_value_t = 3)]
+    rerank_period: u64,
+}
+
+impl TryFrom<&Args> for State {
+    type Error = std::io::Error;
+
+    fn try_from(args: &Args) -> Result<Self, Self::Error> {
+        let start_time = SystemTime::now();
+        let static_data: StaticData =
+            serde_yaml::from_reader(BufReader::new(File::open(&args.static_data_path)?))
+                .map_err(std::io::Error::other)?;
+        let db = Mutex::new(Connection::open(&args.db_path).map_err(std::io::Error::other)?);
+        Ok(Self {
+            start_time,
+            static_data,
+            db,
+        })
+    }
+}
+
+fn start_background_tasks(rerank_period: Duration, state: Arc<State>) {
+    task::spawn(async move {
+        loop {
+            sleep(rerank_period).await;
+            update_ranking(state.as_ref());
+        }
+    });
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let args = Args::parse();
-    let start_time = SystemTime::now();
-    let static_data: StaticData =
-        serde_yaml::from_reader(BufReader::new(File::open(args.static_data_path)?))
-            .map_err(std::io::Error::other)?;
-    let db = Mutex::new(Connection::open(args.db_path).map_err(std::io::Error::other)?);
-    let state = Data::new(State {
-        start_time,
-        static_data,
-        db,
-    });
-    let secret_key = actix_web::cookie::Key::from(
-        &BASE64_STANDARD
-            .decode(args.key)
-            .expect("Secret key must be base64 encoded."),
-    );
     env_logger::init_from_env(env_logger::Env::default().default_filter_or("debug"));
+    let args = Args::parse();
+    let state = Data::new(State::try_from(&args)?);
+    let key = BASE64_STANDARD
+        .decode(args.key)
+        .expect("Secret key must be base64 encoded.");
+    start_background_tasks(Duration::from_secs(args.rerank_period), Arc::clone(&state));
     HttpServer::new(move || {
         App::new()
             .app_data(state.clone())
@@ -124,13 +150,16 @@ async fn main() -> std::io::Result<()> {
             .route("/health_check", get().to(api_handlers::health_check))
             .wrap(actix_web::middleware::Logger::default())
             .wrap(
-                SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
-                    .cookie_secure(false)
-                    .session_lifecycle(
-                        PersistentSession::default()
-                            .session_ttl(actix_web::cookie::time::Duration::days(5)),
-                    )
-                    .build(),
+                SessionMiddleware::builder(
+                    CookieSessionStore::default(),
+                    actix_web::cookie::Key::from(&key),
+                )
+                .cookie_secure(false)
+                .session_lifecycle(
+                    PersistentSession::default()
+                        .session_ttl(actix_web::cookie::time::Duration::days(5)),
+                )
+                .build(),
             )
     })
     .bind(("0.0.0.0", args.port))?
