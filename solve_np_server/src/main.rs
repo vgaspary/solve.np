@@ -21,6 +21,7 @@ use api::handlers as api_handlers;
 use base64::prelude::*;
 use clap::Parser;
 use frontend::handlers as frontend_handlers;
+use log::error;
 use rusqlite::Connection;
 use state::State;
 use state::StaticData;
@@ -78,7 +79,7 @@ fn start_background_tasks(rerank_period: Duration, state: Arc<State>) {
     task::spawn(async move {
         loop {
             sleep(rerank_period).await;
-            update_ranking(state.as_ref());
+            let _ = update_ranking(state.as_ref()).inspect_err(|err| error!("{err}"));
         }
     });
 }

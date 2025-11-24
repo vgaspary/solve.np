@@ -1,26 +1,44 @@
 #![allow(dead_code)]
 
+use std::collections::HashMap;
+
 use crate::state::State;
 use crate::types::InputId;
 use crate::types::ProblemId;
 use crate::types::Score;
 use crate::types::SolutionId;
+use anyhow::Context;
 use itertools::Itertools;
 use librank::Rank;
 use librank::RankedExt;
-use log::debug;
-use std::time::Duration;
+use log::info;
+use rusqlite::params;
+use rusqlite::types::FromSql;
 
 struct Submission {
     problem_id: ProblemId,
-    input_id: InputId,
     solution_id: SolutionId,
+    input_id: InputId,
     score: Score,
+    ranking: Ranking,
 }
 
 struct Solution {
     solution_id: SolutionId,
     problem_id: ProblemId,
+    ranking: Ranking,
+}
+
+#[derive(Clone, Copy)]
+struct Ranking(Option<Rank>);
+
+impl FromSql for Ranking {
+    fn column_result(value: rusqlite::types::ValueRef<'_>) -> rusqlite::types::FromSqlResult<Self> {
+        match value.as_i64_or_null()? {
+            Some(n) => Ok(Self(Some(Rank(n as usize)))),
+            None => Ok(Self(None)),
+        }
+    }
 }
 
 // Assumes that all submissions belong to solved solutions.
@@ -40,7 +58,20 @@ fn rank_submissions(submissions: Vec<Submission>) -> Vec<(Rank, Submission)> {
         .collect()
 }
 
-fn rank_solutions(submission_ranking: &[(Rank, Submission)]) -> Vec<(Rank, Solution)> {
+fn rank_solutions(
+    solutions: Vec<Solution>,
+    submission_ranking: &[(Rank, Submission)],
+) -> Vec<(Rank, Solution)> {
+    let solution_ranking = solutions
+        .into_iter()
+        .map(
+            |Solution {
+                 solution_id,
+                 problem_id,
+                 ranking,
+             }| ((solution_id, problem_id), ranking),
+        )
+        .collect::<HashMap<_, _>>();
     submission_ranking
         .iter()
         .into_group_map_by(|(_, submission)| submission.solution_id.clone())
@@ -48,11 +79,13 @@ fn rank_solutions(submission_ranking: &[(Rank, Submission)]) -> Vec<(Rank, Solut
         .filter_map(|submissions| {
             let solution_id = submissions.first()?.1.solution_id.clone();
             let problem_id = submissions.first()?.1.problem_id.clone();
+            let ranking = *solution_ranking.get(&(solution_id.clone(), problem_id.clone()))?;
             let aggregate_rank: usize = submissions.into_iter().map(|(Rank(r), _)| r).sum();
             Some((
                 Solution {
                     solution_id,
                     problem_id,
+                    ranking,
                 },
                 aggregate_rank,
             ))
@@ -69,43 +102,134 @@ fn rank_solutions(submission_ranking: &[(Rank, Submission)]) -> Vec<(Rank, Solut
         .collect()
 }
 
-pub fn update_ranking(state: &State) {
-    /*
-     * 1. Sanitize.
-     *
-     * `solutions.status` is the truth source for ranking availability both for solutions and
-     * submissions belonging to it. First, we need to make sure that only *solved* solutions and
-     * the corresponding submissions have non-`None` ranks. A solution is solved if
-     * `solutions.status = 0`.
-     *
-     * ```sql
-     * UPDATE solutions SET
-     *  ranking = NULL
-     * WHERE
-     *  status <> 0;
-     *
-     * UPDATE submissions SET
-     *  ranking = NULL
-     * WHERE
-     *  solution_id.status <> 0;
-     * ```
-     *
-     * 2. Collect all solved solutions (`WHERE status = 0`) and submissions belonging to them.
-     *
-     * For each solution there are `N` submissions, where `N` is the number of inputs the problem
-     * correpsonding to the solution has.
-     *
-     * 3. Release the DB object lock. To avoid race conditions, 1. and 2. are executed atomically.
-     *
-     * 4. Confirm that the solution-submission relationship is upheld as described in 2..
-     *
-     * 5. Rank the submissions, use an aggregation to rank solutions based on the former.
-     *
-     * 6. Update the rank of the solution/submission entries as per recalculation.
-     *
-     * Note: Ranking changes are expected to be rare. It's important to lock the DB object if and
-     * only if necessary.
-     *
-     * 7. Sleep for some time.
-     */
+fn sanitize_and_select(state: &State) -> anyhow::Result<(Vec<Solution>, Vec<Submission>)> {
+    let db = state.db.lock().unwrap();
+    info!("[Background task] Sanitizing...");
+    db.execute(
+        "UPDATE solutions SET
+                ranking = NULL
+            WHERE
+                status <> 0;",
+        [],
+    )
+    .context("Sanitizing solutions")?;
+    db.execute(
+        "UPDATE submissions SET 
+            ranking = NULL
+        FROM solutions AS s
+        WHERE
+            submissions.solution_id = s.solution_id AND
+            s.status <> 0;",
+        [],
+    )
+    .context("Sanitizing submissions")?;
+    info!("[Background task] Selecting...");
+    let solutions = db
+        .prepare(
+            "SELECT solution_id, problem_id, ranking
+            FROM solutions
+            WHERE
+                status = 0;",
+        )
+        .context("Collecting solutions")?
+        .query_map([], |row| {
+            Ok(Solution {
+                solution_id: row.get(0)?,
+                problem_id: row.get(1)?,
+                ranking: row.get(2)?,
+            })
+        })
+        .context("Collecting solutions")?
+        .filter_map(Result::ok)
+        .collect_vec();
+    let submissions = db
+        .prepare(
+            "SELECT
+                s.problem_id, s.solution_id, s.input_id, s.status, s.ranking
+            FROM submissions AS s
+            INNER JOIN solutions
+            ON s.solution_id = solutions.solution_id
+            WHERE
+                solutions.status = 0;",
+        )
+        .context("Collecting solutions")?
+        .query_map([], |row| {
+            Ok(Submission {
+                problem_id: row.get(0)?,
+                solution_id: row.get(1)?,
+                input_id: row.get(2)?,
+                score: row.get(3)?,
+                ranking: row.get(4)?,
+            })
+        })
+        .context("Collecting solutions")?
+        .filter_map(Result::ok)
+        .collect_vec();
+    Ok((solutions, submissions))
+}
+
+fn maybe_update(
+    state: &State,
+    ranked_submissions: Vec<(Rank, Submission)>,
+    ranked_solutions: Vec<(Rank, Solution)>,
+) -> anyhow::Result<()> {
+    let submissions_to_update = ranked_submissions
+        .into_iter()
+        .filter(|(rank, submission)| submission.ranking.0 != Some(*rank))
+        .collect_vec();
+    let solutions_to_update = ranked_solutions
+        .into_iter()
+        .filter(|(rank, solution)| solution.ranking.0 != Some(*rank))
+        .collect_vec();
+
+    if submissions_to_update.is_empty() && solutions_to_update.is_empty() {
+        info!("[Background task] Rankings are unchanged. Nothing to update.");
+        return Ok(());
+    }
+
+    info!(
+        "[Background task] Updating rankings for {} solutions and {} submissions.",
+        solutions_to_update.len(),
+        submissions_to_update.len()
+    );
+
+    let mut db = state.db.lock().unwrap();
+    let tx = db.transaction().context("Starting transaction")?;
+
+    for (rank, solution) in solutions_to_update {
+        tx.execute(
+            "UPDATE solutions SET ranking = ?1 WHERE solution_id = ?2",
+            params![rank.0 as i64, &solution.solution_id],
+        )
+        .with_context(|| format!("Updating solution {}", solution.solution_id))?;
+    }
+
+    for (rank, submission) in submissions_to_update {
+        tx.execute(
+            "UPDATE submissions SET ranking = ?1 WHERE solution_id = ?2 AND input_id = ?3",
+            params![rank.0 as i64, &submission.solution_id, &submission.input_id],
+        )
+        .with_context(|| {
+            format!(
+                "Updating submission for solution {} on input {}",
+                submission.solution_id, submission.input_id
+            )
+        })?;
+    }
+
+    tx.commit().context("Committing transaction")?;
+    info!("[Background task] Rankings updated.");
+    Ok(())
+}
+
+pub fn update_ranking(state: &State) -> anyhow::Result<()> {
+    info!("[Background task] Updating solution and submission rankings.");
+    let (solutions, submissions) = sanitize_and_select(state)?;
+
+    info!("[Background task] Ranking...");
+    let ranked_submissions = rank_submissions(submissions);
+    let ranked_solutions = rank_solutions(solutions, &ranked_submissions);
+
+    maybe_update(state, ranked_submissions, ranked_solutions)?;
+    Ok(())
 }
