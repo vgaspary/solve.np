@@ -54,8 +54,8 @@ struct Args {
     port: u16,
 
     /// Ranking update period.
-    #[arg(long, default_value_t = 3)]
-    rerank_period: u64,
+    #[arg(long, value_parser = humantime::parse_duration, default_value = "5m")]
+    rerank_period: Duration,
 }
 
 impl TryFrom<&Args> for State {
@@ -92,7 +92,7 @@ async fn main() -> std::io::Result<()> {
     let key = BASE64_STANDARD
         .decode(args.key)
         .expect("Secret key must be base64 encoded.");
-    start_background_tasks(Duration::from_secs(args.rerank_period), Arc::clone(&state));
+    start_background_tasks(args.rerank_period, Arc::clone(&state));
     HttpServer::new(move || {
         App::new()
             .app_data(state.clone())
