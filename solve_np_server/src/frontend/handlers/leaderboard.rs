@@ -168,7 +168,7 @@ pub async fn leaderboard(
                         }
                         heap
                     })
-                    .into_vec(),
+                    .into_sorted_vec(),
                 None => vec![],
             };
             let inputs = problem_input_iter
@@ -185,7 +185,7 @@ pub async fn leaderboard(
                                 }
                                 heap
                             })
-                            .into_vec(),
+                            .into_sorted_vec(),
                         None => vec![],
                     };
                     Input { filename, ranking }
