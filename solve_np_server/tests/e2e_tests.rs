@@ -24,14 +24,24 @@ static E2E_TEST_BUILD: Lazy<()> = Lazy::new(|| {
     println!("Build successful.");
 });
 
-struct TestApp {
+struct Test {
     address: String,
     db_path: String,
     server_process: Child,
-    passed: bool,
+    client: reqwest::Client,
 }
 
-impl Drop for TestApp {
+impl Test {
+    fn pass(self) {
+        Command::new("rm")
+            .arg("-f")
+            .arg(&self.db_path)
+            .output()
+            .expect("Failed to remove passed test database");
+    }
+}
+
+impl Drop for Test {
     fn drop(&mut self) {
         println!("Stopping server (PID: {})...", self.server_process.id());
         self.server_process
@@ -40,18 +50,11 @@ impl Drop for TestApp {
         self.server_process
             .wait()
             .expect("Failed to wait for server process");
-        if self.passed {
-            Command::new("rm")
-                .arg("-f")
-                .arg(&self.db_path)
-                .output()
-                .expect("Failed to remove passed test database");
-        }
         println!("Server stopped.");
     }
 }
 
-async fn spawn_app() -> (TestApp, reqwest::Client) {
+async fn spawn_app() -> Test {
     Lazy::force(&E2E_TEST_BUILD);
 
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
@@ -85,19 +88,14 @@ async fn spawn_app() -> (TestApp, reqwest::Client) {
 
     let random_key = "YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYQ==";
     let server_binary_path = format!("{}/../target/debug/solve_np_server", manifest_dir);
-    let static_data_path = format!("{}/static_data.yaml", manifest_dir);
 
     let server_process = Command::new(&server_binary_path)
-        .arg("--static-data-path")
-        .arg(&static_data_path)
         .arg("--db-path")
         .arg(&db_path)
         .arg("--key")
         .arg(random_key)
         .arg("--port")
         .arg(port.to_string())
-        .arg("--ranking-update-period-secs")
-        .arg("3600")
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()
@@ -124,22 +122,43 @@ async fn spawn_app() -> (TestApp, reqwest::Client) {
         .build()
         .unwrap();
 
-    (
-        TestApp {
-            address,
-            db_path,
-            server_process,
-            passed: false,
-        },
+    Test {
+        address,
+        db_path,
+        server_process,
         client,
-    )
+    }
+}
+
+impl Test {
+    async fn log_in(&self) {
+        self.log_in_as("user").await;
+    }
+
+    async fn log_in_as(&self, username: &str) {
+        self.client
+            .post(&format!("{}/api/log_in", &self.address))
+            .form(&[("username", username), ("password", "pass")])
+            .send()
+            .await
+            .expect("Failed to log in as user");
+    }
+
+    async fn log_out(&self) {
+        self.client
+            .get(&format!("{}/api/log_out", &self.address))
+            .send()
+            .await
+            .expect("Failed to log out");
+    }
 }
 
 #[tokio::test]
 async fn health_check_works() {
-    let (mut app, client) = spawn_app().await;
-    let response = client
-        .get(&format!("{}/health_check", &app.address))
+    let test = spawn_app().await;
+    let response = test
+        .client
+        .get(&format!("{}/health_check", &test.address))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -147,14 +166,15 @@ async fn health_check_works() {
     assert!(response.status().is_success());
     let json: serde_json::Value = response.json().await.unwrap();
     assert!(json["uptime"].is_string());
-    app.passed = true;
+    test.pass();
 }
 
 #[tokio::test]
 async fn home_page_works() {
-    let (mut app, client) = spawn_app().await;
-    let response = client
-        .get(&format!("{}/", &app.address))
+    let test = spawn_app().await;
+    let response = test
+        .client
+        .get(&format!("{}/", &test.address))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -162,14 +182,15 @@ async fn home_page_works() {
     assert!(response.status().is_success());
     let content = response.text().await.unwrap();
     assert!(content.contains("Hello"));
-    app.passed = true;
+    test.pass();
 }
 
 #[tokio::test]
 async fn login_page_get_works() {
-    let (mut app, client) = spawn_app().await;
-    let response = client
-        .get(&format!("{}/log_in", &app.address))
+    let test = spawn_app().await;
+    let response = test
+        .client
+        .get(&format!("{}/log_in", &test.address))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -177,16 +198,17 @@ async fn login_page_get_works() {
     assert!(response.status().is_success());
     let content = response.text().await.unwrap();
     assert!(content.contains("Log In"));
-    app.passed = true;
+    test.pass();
 }
 
 #[tokio::test]
 async fn login_page_get_with_error_works() {
-    let (mut app, client) = spawn_app().await;
-    let response = client
+    let test = spawn_app().await;
+    let response = test
+        .client
         .get(&format!(
             "{}/log_in?err=Invalid%20credentials",
-            &app.address
+            &test.address
         ))
         .send()
         .await
@@ -195,14 +217,15 @@ async fn login_page_get_with_error_works() {
     assert!(response.status().is_success());
     let content = response.text().await.unwrap();
     assert!(content.contains("Invalid credentials"));
-    app.passed = true;
+    test.pass();
 }
 
 #[tokio::test]
 async fn problems_page_works() {
-    let (mut app, client) = spawn_app().await;
-    let response = client
-        .get(&format!("{}/problems", &app.address))
+    let test = spawn_app().await;
+    let response = test
+        .client
+        .get(&format!("{}/problems", &test.address))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -210,14 +233,15 @@ async fn problems_page_works() {
     assert!(response.status().is_success());
     let content = response.text().await.unwrap();
     assert!(content.contains("<title>Problems"));
-    app.passed = true;
+    test.pass();
 }
 
 #[tokio::test]
 async fn problem_statement_page_works() {
-    let (mut app, client) = spawn_app().await;
-    let response = client
-        .get(&format!("{}/problems/graph_coloring", &app.address))
+    let test = spawn_app().await;
+    let response = test
+        .client
+        .get(&format!("{}/problems/graph_coloring", &test.address))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -225,14 +249,15 @@ async fn problem_statement_page_works() {
     assert!(response.status().is_success());
     let content = response.text().await.unwrap();
     assert!(content.contains("<title>Graph Coloring - solve.NP</title>"));
-    app.passed = true;
+    test.pass();
 }
 
 #[tokio::test]
 async fn p_vs_np_page_works() {
-    let (mut app, client) = spawn_app().await;
-    let response = client
-        .get(&format!("{}/p_vs_np", &app.address))
+    let test = spawn_app().await;
+    let response = test
+        .client
+        .get(&format!("{}/p_vs_np", &test.address))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -240,24 +265,17 @@ async fn p_vs_np_page_works() {
     assert!(response.status().is_success());
     let content = response.text().await.unwrap();
     assert!(content.contains("P vs NP"));
-    app.passed = true;
+    test.pass();
 }
 
 #[tokio::test]
 async fn successful_login_works() {
-    let (mut app, client) = spawn_app().await;
+    let test = spawn_app().await;
+    test.log_in().await;
 
-    let response = client
-        .post(&format!("{}/api/log_in", &app.address))
-        .form(&[("username", "user"), ("password", "pass")])
-        .send()
-        .await
-        .expect("Failed to execute request.");
-
-    assert!(response.status().is_success());
-
-    let home_page_response = client
-        .get(&format!("{}/", &app.address))
+    let home_page_response = test
+        .client
+        .get(&format!("{}/", &test.address))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -265,15 +283,16 @@ async fn successful_login_works() {
     assert!(home_page_response.status().is_success());
     let content = home_page_response.text().await.unwrap();
     assert!(content.contains("Hello, user!"));
-    app.passed = true;
+    test.pass();
 }
 
 #[tokio::test]
 async fn failed_login_works() {
-    let (mut app, client) = spawn_app().await;
+    let test = spawn_app().await;
 
-    let response = client
-        .post(&format!("{}/api/log_in", &app.address))
+    let response = test
+        .client
+        .post(&format!("{}/api/log_in", &test.address))
         .form(&[("username", "user"), ("password", "user")])
         .send()
         .await
@@ -282,24 +301,17 @@ async fn failed_login_works() {
     assert!(response.status().is_success());
     let content = response.text().await.unwrap();
     assert!(content.contains("Invalid credentials"));
-    app.passed = true;
+    test.pass();
 }
 
 #[tokio::test]
 async fn logout_works() {
-    let (mut app, client) = spawn_app().await;
+    let test = spawn_app().await;
+    test.log_in().await;
 
-    // First, log in
-    client
-        .post(&format!("{}/api/log_in", &app.address))
-        .form(&[("username", "user"), ("password", "pass")])
-        .send()
-        .await
-        .expect("Failed to execute request.");
-
-    // Then, log out
-    let response = client
-        .get(&format!("{}/api/log_out", &app.address))
+    let response = test
+        .client
+        .get(&format!("{}/api/log_out", &test.address))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -307,8 +319,9 @@ async fn logout_works() {
     assert!(response.status().is_success());
 
     // Check home page content after logout
-    let home_page_response = client
-        .get(&format!("{}/", &app.address))
+    let home_page_response = test
+        .client
+        .get(&format!("{}/", &test.address))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -316,18 +329,19 @@ async fn logout_works() {
     assert!(home_page_response.status().is_success());
     let content = home_page_response.text().await.unwrap();
     assert!(content.contains("Hello, Unknown user!"));
-    app.passed = true;
+    test.pass();
 }
 
 #[tokio::test]
 async fn validate_sample_tsp_correct() {
-    let (mut app, client) = spawn_app().await;
+    let test = spawn_app().await;
     let tsp_solution = serde_json::json!({
         "TspSolution": [0, 1, 4, 2, 6, 5, 3, 7, 0]
     });
 
-    let response = client
-        .post(&format!("{}/api/validate_sample", &app.address))
+    let response = test
+        .client
+        .post(&format!("{}/api/validate_sample", &test.address))
         .json(&tsp_solution)
         .send()
         .await
@@ -336,18 +350,19 @@ async fn validate_sample_tsp_correct() {
     assert!(response.status().is_success());
     let json: serde_json::Value = response.json().await.unwrap();
     assert_eq!(json, serde_json::json!({"Valid": 69}));
-    app.passed = true;
+    test.pass();
 }
 
 #[tokio::test]
 async fn validate_sample_tsp_incorrect() {
-    let (mut app, client) = spawn_app().await;
+    let test = spawn_app().await;
     let tsp_solution = serde_json::json!({
         "TspSolution": [0, 1, 2, 3]
     });
 
-    let response = client
-        .post(&format!("{}/api/validate_sample", &app.address))
+    let response = test
+        .client
+        .post(&format!("{}/api/validate_sample", &test.address))
         .json(&tsp_solution)
         .send()
         .await
@@ -356,18 +371,19 @@ async fn validate_sample_tsp_incorrect() {
     assert!(response.status().is_success());
     let json: serde_json::Value = response.json().await.unwrap();
     assert!(json["Invalid"].is_string());
-    app.passed = true;
+    test.pass();
 }
 
 #[tokio::test]
 async fn validate_sample_graph_coloring_incorrect() {
-    let (mut app, client) = spawn_app().await;
+    let test = spawn_app().await;
     let gc_solution = serde_json::json!({
         "GraphColoringSolution": [0, 0, 0, 0, 0, 0, 0, 0]
     });
 
-    let response = client
-        .post(&format!("{}/api/validate_sample", &app.address))
+    let response = test
+        .client
+        .post(&format!("{}/api/validate_sample", &test.address))
         .json(&gc_solution)
         .send()
         .await
@@ -376,32 +392,27 @@ async fn validate_sample_graph_coloring_incorrect() {
     assert!(response.status().is_success());
     let json: serde_json::Value = response.json().await.unwrap();
     assert!(json["Invalid"].is_string());
-    app.passed = true;
+    test.pass();
 }
 
 #[tokio::test]
 async fn vote_works() {
-    let (mut app, client) = spawn_app().await;
-
-    // Log in as 'user'
-    client
-        .post(&format!("{}/api/log_in", &app.address))
-        .form(&[("username", "user"), ("password", "pass")])
-        .send()
-        .await
-        .expect("Failed to log in as user");
+    let test = spawn_app().await;
+    test.log_in_as("user").await;
 
     // First vote for 'user'
-    let response = client
-        .post(&format!("{}/api/vote/eq", &app.address))
+    let response = test
+        .client
+        .post(&format!("{}/api/vote/eq", &test.address))
         .send()
         .await
         .expect("Failed to cast first vote");
     assert!(response.status().is_success());
 
     // Second vote for 'user' should fail
-    let response = client
-        .post(&format!("{}/api/vote/neq", &app.address))
+    let response = test
+        .client
+        .post(&format!("{}/api/vote/neq", &test.address))
         .send()
         .await
         .expect("Failed to cast second vote");
@@ -410,68 +421,38 @@ async fn vote_works() {
         reqwest::StatusCode::INTERNAL_SERVER_ERROR
     );
 
-    // Log out
-    client
-        .get(&format!("{}/api/log_out", &app.address))
-        .send()
-        .await
-        .expect("Failed to log out");
-
-    // Log in as 'another_user'
-    client
-        .post(&format!("{}/api/log_in", &app.address))
-        .form(&[("username", "another_user"), ("password", "pass")])
-        .send()
-        .await
-        .expect("Failed to log in as another_user");
+    test.log_out().await;
+    test.log_in_as("another_user").await;
 
     // Vote for 'another_user'
-    let response = client
-        .post(&format!("{}/api/vote/neq", &app.address))
+    let response = test
+        .client
+        .post(&format!("{}/api/vote/neq", &test.address))
         .send()
         .await
         .expect("Failed to cast vote for another_user");
     assert!(response.status().is_success());
-    app.passed = true;
-}
-
-#[tokio::test]
-async fn vote_invalid_fails() {
-    let (mut app, client) = spawn_app().await;
-
-    // Log in as 'user'
-    client
-        .post(&format!("{}/api/log_in", &app.address))
-        .form(&[("username", "user"), ("password", "pass")])
-        .send()
-        .await
-        .expect("Failed to log in as user");
 
     // Invalid vote
-    let response = client
-        .post(&format!("{}/api/vote/invalid", &app.address))
+    let response = test
+        .client
+        .post(&format!("{}/api/vote/invalid", &test.address))
         .send()
         .await
         .expect("Failed to cast invalid vote");
     assert_eq!(response.status(), reqwest::StatusCode::BAD_REQUEST);
-    app.passed = true;
+    test.pass();
 }
 
 #[tokio::test]
 async fn solutions_api_works() {
-    let (mut app, client) = spawn_app().await;
-
-    // Log in as 'user'
-    client
-        .post(&format!("{}/api/log_in", &app.address))
-        .form(&[("username", "user"), ("password", "pass")])
-        .send()
-        .await
-        .expect("Failed to log in as user");
+    let test = spawn_app().await;
+    test.log_in().await;
 
     // Create a solution
-    let create_solution_response = client
-        .post(&format!("{}/api/solutions", &app.address))
+    let create_solution_response = test
+        .client
+        .post(&format!("{}/api/solutions", &test.address))
         .json(&serde_json::json!({
             "problem_id": "graph_coloring",
             "title": "My test solution",
@@ -483,8 +464,9 @@ async fn solutions_api_works() {
     assert!(create_solution_response.status().is_success());
 
     // Get the solution ID from the solutions page
-    let solutions_page_html = client
-        .get(&format!("{}/solutions", &app.address))
+    let solutions_page_html = test
+        .client
+        .get(&format!("{}/solutions", &test.address))
         .send()
         .await
         .expect("Failed to get solutions page")
@@ -499,10 +481,11 @@ async fn solutions_api_works() {
     let solution_id = &caps[1];
 
     // Check solution status
-    let status_response = client
+    let status_response = test
+        .client
         .get(&format!(
             "{}/api/solutions/{}/status",
-            &app.address, solution_id
+            &test.address, solution_id
         ))
         .send()
         .await
@@ -512,9 +495,13 @@ async fn solutions_api_works() {
     assert_eq!(status, "Untested");
 
     // Submit a solution
-    let submit_response = client
-        .post(&format!("{}/api/submit_solution/graph_coloring/{}/small_ultra_sparse", &app.address, solution_id))
-        .json(&serde_json::json!({"GraphColoringSolution":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99]}))
+    let submit_response = test
+        .client
+        .post(&format!(
+            "{}/api/submit_solution/graph_coloring/{}/small_ultra_sparse",
+            &test.address, solution_id
+        ))
+        .json(&serde_json::json!({"GraphColoringSolution": (0..100).collect::<Vec<_>>()}))
         .send()
         .await
         .expect("Failed to submit solution");
@@ -523,10 +510,11 @@ async fn solutions_api_works() {
     assert!(submit_json["Valid"].is_number());
 
     // Check submission status
-    let submission_status_response = client
+    let submission_status_response = test
+        .client
         .get(&format!(
             "{}/api/solutions/{}/input/small_ultra_sparse/status",
-            &app.address, solution_id
+            &test.address, solution_id
         ))
         .send()
         .await
@@ -536,11 +524,12 @@ async fn solutions_api_works() {
     assert_eq!(submission_status, serde_json::json!({"Solved": 100}));
 
     // Delete the solution
-    let delete_response = client
-        .delete(&format!("{}/api/solutions/{}", &app.address, solution_id))
+    let delete_response = test
+        .client
+        .delete(&format!("{}/api/solutions/{}", &test.address, solution_id))
         .send()
         .await
         .expect("Failed to delete solution");
     assert_eq!(delete_response.status(), reqwest::StatusCode::NO_CONTENT);
-    app.passed = true;
+    test.pass();
 }
