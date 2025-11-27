@@ -209,7 +209,7 @@ async fn home_page_works() {
 
     assert!(response.status().is_success());
     let content = response.text().await.unwrap();
-    assert!(content.contains("Hello"));
+    assert!(content.contains("Welcome to solve.NP"));
     test.pass();
 }
 
@@ -310,7 +310,7 @@ async fn successful_login_works() {
 
     assert!(home_page_response.status().is_success());
     let content = home_page_response.text().await.unwrap();
-    assert!(content.contains("Hello, user!"));
+    assert!(content.contains("Welcome to solve.NP, user!"));
     test.pass();
 }
 
@@ -356,7 +356,7 @@ async fn logout_works() {
 
     assert!(home_page_response.status().is_success());
     let content = home_page_response.text().await.unwrap();
-    assert!(content.contains("Hello, Unknown user!"));
+    assert!(content.contains("Welcome to solve.NP!"));
     test.pass();
 }
 

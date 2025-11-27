@@ -3,6 +3,43 @@
   {{ head | safe }}
   <body>
     {{ header | safe }}
-    <p>Hello, {{ user_name }}!</p>
+    <main>
+      <h1>Welcome to solve.NP{% if header.logged_in %}, {{ user_name }}{% endif %}!</h1>
+      <p>
+        This is a platform dedicated to tackling some of the most profound and challenging problems in computer science. Here, you can learn about, discuss, and even attempt to solve problems that have puzzled researchers for decades.
+      </p>
+
+      <article>
+        <h2>What are NP Problems?</h2>
+        <p>
+          In computer science, "NP" stands for "nondeterministic polynomial time". It represents a class of problems for which a given solution can be verified quickly (in polynomial time). However, finding the solution itself may be incredibly difficult. The "P versus NP problem," one of the seven Millennium Prize Problems, asks whether every problem whose solution can be quickly verified can also be quickly solved.
+        </p>
+        <p>
+          This platform hosts a collection of <strong>NP-hard</strong> problems. These are problems that are at least as hard as the hardest problems in NP. They are famous for their computational complexity, and no efficient (polynomial-time) algorithm is known for solving them.
+        </p>
+      </article>
+
+      <article>
+        <h2>Our Problems</h2>
+        <p>We currently feature the following NP-hard problems:</p>
+        <ul>
+          <li><strong><a href="/problems/travelling_salesman">Travelling Salesman Problem (TSP)</a>:</strong> Given a list of cities and the distances between each pair, what is the shortest possible route that visits each city exactly once and returns to the origin city?</li>
+          <li><strong><a href="/problems/graph_coloring">Graph Coloring</a>:</strong> What is the minimum number of colors needed to color the vertices of a graph such that no two adjacent vertices share the same color?</li>
+        </ul>
+        <p>
+        Unlike some variations of these classical NP problems that focus on finding a single correct solution (e.g., solving a Sudoku or coloring a graph with a given number of colors), our platform emphasizes <strong>optimization</strong>. Your goal is not just to find <strong>a</strong> solution, but to continuosly <strong>improve</strong> one.
+        </p>
+        <p>
+        Think you have a great approach? The top 10 solutions for each problem are showcased in a global <a href="/leaderboard">leaderboard</a>!
+        </p>
+      </article>
+
+      <article>
+          <h2>P vs NP</h2>
+          <p>The P versus NP problem is a major unsolved problem in theoretical computer science. Informally, it asks whether every problem whose solution can be quickly verified can also be quickly solved.</p>
+          <p>It is one of the seven <em>Millennium Prize Problems</em> selected by the Clay Mathematics Institute, each of which carries a <em>$1,000,000 prize</em> for the first correct solution.</p>
+          <p>What do you think? <a href="/p_vs_np">Cast your vote!</a></p>
+      </article>
+    </main>
   </body>
 </html>
