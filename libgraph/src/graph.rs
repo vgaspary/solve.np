@@ -68,10 +68,8 @@ impl Graph<()> {
         if num_vertices <= 1 {
             return Self::new(num_vertices);
         }
-        let mut vertices: Vec<_> = (0..num_vertices).collect();
-        vertices.shuffle(rng);
         (1..num_vertices)
-            .map(|i| (vertices[i - 1], vertices[i]))
+            .map(|i| (i, rng.random_range(0..i)))
             .fold(Self::new(num_vertices), |graph, edge| graph.add_edge(edge))
     }
 
