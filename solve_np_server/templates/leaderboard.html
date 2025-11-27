@@ -23,12 +23,13 @@
           </tr>
           {% endfor %}
         </table>
+        {% if !problem.overall_ranking.is_empty() %}
         <details>
           <summary>Rankings per input</summary>
           <div class="details-content">
             {% for input in problem.inputs %}
             <div class="input-ranking-card">
-              <span>{{ input.filename }}</span>
+              <span style="color: #9ece6a">{{ input.filename }}</span>
               <table>
                 <tr>
                   <th>Rank</th>
@@ -51,6 +52,7 @@
             {% endfor %}
           </div>
         </details>
+        {% endif %}
       </div>
     {% endfor %}
   </body>
