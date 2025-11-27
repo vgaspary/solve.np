@@ -1,9 +1,15 @@
+use nix::sys::signal;
+use nix::sys::signal::Signal;
+use nix::unistd::Pid;
 use once_cell::sync::Lazy;
 use reqwest::cookie::Jar;
+use rusqlite::params;
 use std::env;
 use std::io::Write;
 use std::net::TcpListener;
-use std::process::{Child, Command, Stdio};
+use std::process::Child;
+use std::process::Command;
+use std::process::Stdio;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -39,6 +45,27 @@ impl Test {
             .output()
             .expect("Failed to remove passed test database");
     }
+
+    async fn log_in(&self) {
+        self.log_in_as("user").await;
+    }
+
+    async fn log_in_as(&self, username: &str) {
+        self.client
+            .post(&format!("{}/api/log_in", &self.address))
+            .form(&[("username", username), ("password", "pass")])
+            .send()
+            .await
+            .expect("Failed to log in as user");
+    }
+
+    async fn log_out(&self) {
+        self.client
+            .get(&format!("{}/api/log_out", &self.address))
+            .send()
+            .await
+            .expect("Failed to log out");
+    }
 }
 
 impl Drop for Test {
@@ -55,6 +82,10 @@ impl Drop for Test {
 }
 
 async fn spawn_app() -> Test {
+    spawn_app_with_rerank_period("5m").await
+}
+
+async fn spawn_app_with_rerank_period(rerank_period: &str) -> Test {
     Lazy::force(&E2E_TEST_BUILD);
 
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
@@ -96,6 +127,8 @@ async fn spawn_app() -> Test {
         .arg(random_key)
         .arg("--port")
         .arg(port.to_string())
+        .arg("--rerank-period")
+        .arg(rerank_period)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()
@@ -130,27 +163,22 @@ async fn spawn_app() -> Test {
     }
 }
 
-impl Test {
-    async fn log_in(&self) {
-        self.log_in_as("user").await;
-    }
+async fn get_solution_id(test: &Test) -> String {
+    let solutions_page_html = test
+        .client
+        .get(&format!("{}/solutions", &test.address))
+        .send()
+        .await
+        .expect("Failed to get solutions page")
+        .text()
+        .await
+        .unwrap();
 
-    async fn log_in_as(&self, username: &str) {
-        self.client
-            .post(&format!("{}/api/log_in", &self.address))
-            .form(&[("username", username), ("password", "pass")])
-            .send()
-            .await
-            .expect("Failed to log in as user");
-    }
-
-    async fn log_out(&self) {
-        self.client
-            .get(&format!("{}/api/log_out", &self.address))
-            .send()
-            .await
-            .expect("Failed to log out");
-    }
+    let re = regex::Regex::new(r"'([a-f0-9]{32})'").unwrap();
+    let caps = re
+        .captures(&solutions_page_html)
+        .expect("Could not find solution ID with regex");
+    caps[1].to_owned()
 }
 
 #[tokio::test]
@@ -464,21 +492,7 @@ async fn solutions_api_works() {
     assert!(create_solution_response.status().is_success());
 
     // Get the solution ID from the solutions page
-    let solutions_page_html = test
-        .client
-        .get(&format!("{}/solutions", &test.address))
-        .send()
-        .await
-        .expect("Failed to get solutions page")
-        .text()
-        .await
-        .unwrap();
-
-    let re = regex::Regex::new(r"'([a-f0-9]{32})'").unwrap();
-    let caps = re
-        .captures(&solutions_page_html)
-        .expect("Could not find solution ID with regex");
-    let solution_id = &caps[1];
+    let solution_id = get_solution_id(&test).await;
 
     // Check solution status
     let status_response = test
@@ -531,5 +545,105 @@ async fn solutions_api_works() {
         .await
         .expect("Failed to delete solution");
     assert_eq!(delete_response.status(), reqwest::StatusCode::NO_CONTENT);
+    test.pass();
+}
+
+#[tokio::test]
+async fn leaderboard_works() {
+    let test = spawn_app_with_rerank_period("100ms").await;
+    let mut solution_ids = Vec::new();
+    for user_idx in 0..20 {
+        let user_name = format!("user_{user_idx}");
+        test.log_in_as(&user_name).await;
+        test.client
+            .post(&format!("{}/api/solutions", &test.address))
+            .json(&serde_json::json!({
+                "problem_id": "graph_coloring",
+                "title": "My best solution.",
+                "description": format!("Best solution {user_name} has to offer."),
+            }))
+            .send()
+            .await
+            .expect("Failed to create solution");
+        let solution_id = get_solution_id(&test).await;
+        solution_ids.push(solution_id);
+        test.log_out().await;
+    }
+
+    let pid = Pid::from_raw(test.server_process.id() as i32);
+    signal::kill(pid, Signal::SIGTSTP).expect("Failed to suspend the server.");
+
+    // Mock 'submit_solution' calls by adding DB records in 'submissions' table.
+    let mut conn =
+        rusqlite::Connection::open(&test.db_path).expect("Failed to connect to the database");
+    let tx = conn.transaction().unwrap();
+    for user_idx in 0..20 {
+        let user_name = format!("user_{user_idx}");
+        let solution_id = solution_ids[user_idx].clone();
+        let user_id: String = tx
+            .query_row(
+                "SELECT user_id FROM solutions WHERE solution_id = ?",
+                [&solution_id],
+                |row| row.get(0),
+            )
+            .expect("Failed to get user_id from solutions table");
+
+        for input_id in [
+            "small_ultra_sparse",
+            "small_sparse",
+            "small_dense",
+            "medium_ultra_sparse",
+            "medium_sparse",
+            "medium_dense",
+            "large_ultra_sparse",
+            "large_sparse",
+            "large_dense",
+        ] {
+            let score = 100 + user_idx;
+            tx.execute(
+                    "INSERT INTO submissions (user_id, user_name, problem_id, solution_id, input_id, solution, hash_digest, status, invalid_message) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    params![
+                        &user_id,
+                        &user_name,
+                        "graph_coloring",
+                        &solution_id,
+                        input_id,
+                        "",
+                        0, // hash_digest
+                        0,
+                        ""
+                    ],
+                )
+                .expect("Failed to insert submission");
+            tx.execute(
+                    "UPDATE submissions SET status = ? WHERE user_id = ? AND problem_id = ? and solution_id = ? and input_id = ?;",
+                    params![
+                        score,
+                        &user_id,
+                        "graph_coloring",
+                        &solution_id,
+                        input_id,
+                    ],
+                )
+                .expect("Failed to update submission");
+        }
+    }
+    tx.commit().unwrap();
+    signal::kill(pid, Signal::SIGCONT).expect("Failed to resume the server.");
+
+    tokio::time::sleep(Duration::from_millis(200)).await;
+    let leaderboard_page_html = test
+        .client
+        .get(&format!("{}/leaderboard", &test.address))
+        .send()
+        .await
+        .expect("Failed to get leaderboard page")
+        .text()
+        .await
+        .unwrap();
+    let re = regex::Regex::new("<td>user_[0-9]+</td>").unwrap();
+    let matches = re.find_iter(&leaderboard_page_html).count();
+    assert_eq!(matches, 100, "Leaderboard should contain 10 users.");
+
     test.pass();
 }
