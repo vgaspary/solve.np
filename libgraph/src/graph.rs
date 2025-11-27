@@ -1,6 +1,7 @@
 use itertools::Itertools;
 use rand::prelude::*;
-use std::collections::HashMap;
+use std::collections::{BinaryHeap, HashMap};
+use std::iter;
 
 pub type Vertex = usize;
 pub type Edge = (Vertex, Vertex);
@@ -65,11 +66,41 @@ impl Graph<()> {
     }
 
     pub fn minimum_spanning_tree(num_vertices: usize, rng: &mut impl Rng) -> Self {
-        if num_vertices <= 1 {
-            return Self::new(num_vertices);
+        if num_vertices <= 2 {
+            return Self::full(num_vertices);
         }
-        (1..num_vertices)
-            .map(|i| (i, rng.random_range(0..i)))
+        let prufer_seq = iter::repeat_with(|| rng.random_range(0..num_vertices))
+            .take(num_vertices - 2)
+            .collect_vec();
+        let mut degrees = prufer_seq
+            .iter()
+            .fold(vec![0; num_vertices], |mut degrees, &node| {
+                degrees[node] += 1;
+                degrees
+            });
+        let mut leaves = degrees.iter().enumerate().filter(|(_, d)| **d == 0).fold(
+            BinaryHeap::new(),
+            |mut heap, (node, _)| {
+                heap.push(node);
+                heap
+            },
+        );
+        let mut edges = Vec::new();
+        for v in prufer_seq {
+            let Some(u) = leaves.pop() else {
+                continue;
+            };
+            edges.push((u, v));
+            degrees[v] -= 1;
+            if degrees[v] == 0 {
+                leaves.push(v);
+            }
+        }
+        let u = leaves.pop().unwrap();
+        let v = leaves.pop().unwrap();
+        edges.push((u, v));
+        edges
+            .into_iter()
             .fold(Self::new(num_vertices), |graph, edge| graph.add_edge(edge))
     }
 
