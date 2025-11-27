@@ -254,3 +254,16 @@ export function choose_solution(problem_id: string, input_id: string) {
     };
   })();
 }
+
+export function maybe_expand() {
+  const queryParams = new URLSearchParams(window.location.search);
+  const input = queryParams.get('input_id');
+  if (!input) {
+    return;
+  }
+  const details = document.getElementById(input) as HTMLDetailsElement | null;
+  if (!details) {
+    return;
+  }
+  details.open = true;
+}

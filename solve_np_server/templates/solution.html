@@ -64,20 +64,7 @@
     </div>
     {% endfor %}
     <script>
-      function maybe_expand() {
-        const queryParams = new URLSearchParams(window.location.search);
-        const input = queryParams.get('input_id');
-        if (!input) {
-          return;
-        }
-        const details = document.getElementById(input);
-        if (!details) {
-          return;
-        }
-        details.open = true;
-      }
-
-      maybe_expand();
+      solve_np.maybe_expand();
     </script>
   </body>
 </html>
