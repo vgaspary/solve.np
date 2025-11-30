@@ -1,3 +1,4 @@
+use crate::auth::SessionId;
 use crate::state::State;
 use crate::types::SolutionId;
 use crate::types::Status;
@@ -17,7 +18,8 @@ pub async fn solution_status(
 ) -> Result<impl Responder, HttpError> {
     let solution_id = path.into_inner();
     let user_id = session
-        .get::<String>("user_id")?
+        .get::<SessionId>("session_id")?
+        .and_then(|session_id| state.session_registry.get_user_id(session_id))
         .ok_or(ErrorInternalServerError("Internal error #24"))?;
     let status: Status = state
         .db

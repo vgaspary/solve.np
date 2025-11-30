@@ -5,7 +5,7 @@ pub mod log_in;
 pub use log_in::log_in;
 
 pub mod google_auth;
-pub use google_auth::log_in_via_google;
+pub use google_auth::google_auth;
 pub use google_auth::google_auth_callback;
 
 pub mod log_out;

@@ -1,3 +1,4 @@
+use crate::auth::SessionId;
 use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::handlers::header::HeaderTemplate;
 use crate::state::State;
@@ -54,7 +55,8 @@ pub async fn solution(
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let user_id = session
-        .get::<String>("user_id")?
+        .get::<SessionId>("session_id")?
+        .and_then(|session_id| state.session_registry.get_user_id(session_id))
         .ok_or(ErrorInternalServerError("Internal error #9"))?;
     let solution_id = path.into_inner();
     let db = state.db.lock().unwrap();
@@ -118,7 +120,7 @@ pub async fn solution(
         head: HeadTemplate {
             title: "My Solutions - solve.NP".into(),
         },
-        header: HeaderTemplate::try_from(&session)?,
+        header: HeaderTemplate::try_from(&session, state.clone())?,
         solution,
         problem,
         inputs,

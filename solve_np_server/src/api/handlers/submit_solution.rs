@@ -1,3 +1,4 @@
+use crate::auth::SessionId;
 use crate::state::State;
 use crate::types::InputId;
 use crate::types::ProblemId;
@@ -55,11 +56,16 @@ pub async fn submit_solution(
     path: web::Path<(ProblemId, SolutionId, InputId)>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let user_id = session
-        .get::<String>("user_id")?
+    let session_id = session
+        .get::<SessionId>("session_id")?
+        .ok_or(ErrorInternalServerError("Internal error #38"))?;
+    let user_id = state
+        .session_registry
+        .get_user_id(session_id)
         .ok_or(ErrorInternalServerError("Internal error #14"))?;
-    let user_name = session
-        .get::<String>("username")?
+    let user_name = state
+        .session_registry
+        .get_user_name(session_id)
         .ok_or(ErrorInternalServerError("Internal error #33"))?;
     let solution = solution.into_inner();
     let (problem_id, solution_id, input_id) = path.into_inner();

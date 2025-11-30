@@ -310,6 +310,7 @@ async fn successful_login_works() {
 
     assert!(home_page_response.status().is_success());
     let content = home_page_response.text().await.unwrap();
+    println!("{content}");
     assert!(content.contains("Welcome to solve.NP, user!"));
     test.pass();
 }

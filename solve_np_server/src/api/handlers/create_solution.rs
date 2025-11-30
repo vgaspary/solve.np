@@ -1,3 +1,4 @@
+use crate::auth::SessionId;
 use crate::state::State;
 use crate::types::Status;
 use actix_session::Session;
@@ -24,11 +25,16 @@ pub async fn create_solution(
     body: web::Json<CreateSolutionBody>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let user_id = session
-        .get::<String>("user_id")?
+    let session_id = session
+        .get::<SessionId>("session_id")?
         .ok_or(ErrorInternalServerError("Internal error #5"))?;
-    let user_name = session
-        .get::<String>("username")?
+    let user_id = state
+        .session_registry
+        .get_user_id(session_id)
+        .ok_or(ErrorInternalServerError("Internal error #37"))?;
+    let user_name = state
+        .session_registry
+        .get_user_name(session_id)
         .ok_or(ErrorInternalServerError("Internal error #32"))?;
     let problem_id = &body.problem_id;
     let solution_id = Uuid::new_v4().as_simple().to_string();

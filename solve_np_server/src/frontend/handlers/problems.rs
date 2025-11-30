@@ -44,7 +44,7 @@ pub async fn problems(
         head: HeadTemplate {
             title: "Problems - solve.NP".into(),
         },
-        header: HeaderTemplate::try_from(&session)?.with_active(Page::Problems),
+        header: HeaderTemplate::try_from(&session, state)?.with_active(Page::Problems),
         problems,
     }
     .render()

@@ -1,3 +1,4 @@
+use crate::auth::SessionId;
 use crate::state::State;
 use actix_session::Session;
 use actix_web::Responder;
@@ -14,7 +15,8 @@ pub async fn vote(
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let user_id = session
-        .get::<String>("user_id")?
+        .get::<SessionId>("session_id")?
+        .and_then(|session_id| state.session_registry.get_user_id(session_id))
         .ok_or(ErrorInternalServerError("Internal error #4"))?;
     let vote = match path.into_inner().as_str() {
         "eq" => true,

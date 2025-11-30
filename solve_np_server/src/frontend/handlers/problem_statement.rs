@@ -114,7 +114,7 @@ pub async fn problem_statement(
         head: HeadTemplate {
             title: format!("{} - solve.NP", problem.name),
         },
-        header: HeaderTemplate::try_from(&session)?,
+        header: HeaderTemplate::try_from(&session, state)?,
         problem,
         solution_table: SolutionTable {
             solutions,

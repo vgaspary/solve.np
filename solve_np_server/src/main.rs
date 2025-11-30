@@ -1,12 +1,10 @@
 mod api;
+mod auth;
 mod frontend;
 mod ranking;
 mod state;
 mod types;
 
-use crate::ranking::update_ranking;
-use crate::state::GAuthClientId;
-use crate::state::GAuthClientSecret;
 use actix_files::Files;
 use actix_session::SessionMiddleware;
 use actix_session::config::PersistentSession;
@@ -20,10 +18,13 @@ use actix_web::web::get;
 use actix_web::web::post;
 use actix_web::web::scope;
 use api::handlers as api_handlers;
+use auth::gauth::GAuthClientId;
+use auth::gauth::GAuthClientSecret;
 use base64::prelude::*;
 use clap::Parser;
 use frontend::handlers as frontend_handlers;
 use log::error;
+use ranking::update_ranking;
 use rusqlite::Connection;
 use state::State;
 use state::StaticData;
@@ -36,6 +37,8 @@ use std::time::Duration;
 use std::time::SystemTime;
 use tokio::task;
 use tokio::time::sleep;
+
+use crate::auth::session_registry::SessionRegistry;
 
 #[derive(Parser)]
 struct Args {
@@ -77,6 +80,7 @@ impl TryFrom<&Args> for State {
             serde_yaml::from_reader(BufReader::new(File::open(&args.static_data_path)?))
                 .map_err(std::io::Error::other)?;
         let db = Mutex::new(Connection::open(&args.db_path).map_err(std::io::Error::other)?);
+        let session_registry = SessionRegistry::default();
         let gauth_client_id_secret = match (&args.gauth_client_id, &args.gauth_client_secret) {
             (Some(client_id), Some(client_secret)) => Some((
                 GAuthClientId(client_id.clone()),
@@ -88,6 +92,7 @@ impl TryFrom<&Args> for State {
             start_time,
             static_data,
             db,
+            session_registry,
             gauth_client_id_secret,
         })
     }
@@ -146,9 +151,9 @@ async fn main() -> std::io::Result<()> {
                     .route("/validate_sample", post().to(api_handlers::validate_sample))
                     .route("/vote/{vote}", post().to(api_handlers::vote))
                     .route("/log_in", post().to(api_handlers::log_in))
-                    .route("/log_in/google", get().to(api_handlers::log_in_via_google))
+                    .route("/google_auth", get().to(api_handlers::google_auth))
                     .route(
-                        "/log_in/google/callback",
+                        "/google_auth_callback",
                         get().to(api_handlers::google_auth_callback),
                     )
                     .route("/log_out", get().to(api_handlers::log_out))

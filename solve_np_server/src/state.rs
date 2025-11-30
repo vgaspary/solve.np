@@ -1,3 +1,6 @@
+use crate::auth::gauth::GAuthClientId;
+use crate::auth::gauth::GAuthClientSecret;
+use crate::auth::session_registry::SessionRegistry;
 use crate::types::InputId;
 use crate::types::ProblemId;
 use rusqlite::Connection;
@@ -6,13 +9,11 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::SystemTime;
 
-pub struct GAuthClientId(pub String);
-pub struct GAuthClientSecret(pub String);
-
 pub struct State {
     pub start_time: SystemTime,
     pub static_data: StaticData,
     pub db: Mutex<Connection>,
+    pub session_registry: SessionRegistry,
     pub gauth_client_id_secret: Option<(GAuthClientId, GAuthClientSecret)>,
 }
 

@@ -203,7 +203,7 @@ pub async fn leaderboard(
         head: HeadTemplate {
             title: "Leaderboard - solve.NP".into(),
         },
-        header: HeaderTemplate::try_from(&session)?.with_active(Page::Leaderboard),
+        header: HeaderTemplate::try_from(&session, state)?.with_active(Page::Leaderboard),
         problems,
     }
     .render()

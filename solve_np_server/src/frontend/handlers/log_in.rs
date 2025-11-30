@@ -37,7 +37,7 @@ pub async fn log_in(
         head: HeadTemplate {
             title: "Log In - solve.NP".into(),
         },
-        header: HeaderTemplate::try_from(&session)?.with_active(Page::LogIn),
+        header: HeaderTemplate::try_from(&session, state.clone())?.with_active(Page::LogIn),
         redirect: query.redirect.clone(),
         error_msg: query.err.clone().unwrap_or_default(),
         test_auth: state.gauth_client_id_secret.is_none(),

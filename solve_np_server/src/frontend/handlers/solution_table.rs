@@ -1,3 +1,4 @@
+use crate::auth::SessionId;
 use crate::state::State;
 use crate::types::InputId;
 use crate::types::ProblemId;
@@ -43,7 +44,8 @@ pub async fn solution_table(
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let user_id = session
-        .get::<String>("user_id")?
+        .get::<SessionId>("session_id")?
+        .and_then(|session_id| state.session_registry.get_user_id(session_id))
         .ok_or(ErrorInternalServerError("Internal error #9"))?;
     let problem_id = path.into_inner();
 

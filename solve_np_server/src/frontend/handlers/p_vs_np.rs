@@ -1,3 +1,4 @@
+use crate::auth::SessionId;
 use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::handlers::header::HeaderTemplate;
 use crate::frontend::handlers::header::Page;
@@ -28,7 +29,10 @@ fn get_vote_data(
     session: &Session,
     state: &web::Data<State>,
 ) -> Result<Option<(PEqualsNP, i64, i64)>, HttpError> {
-    let Some(user_id) = session.get::<String>("user_id")? else {
+    let Some(user_id) = session
+        .get::<SessionId>("session_id")?
+        .and_then(|session_id| state.session_registry.get_user_id(session_id))
+    else {
         return Ok(None);
     };
     let db = state.db.lock().unwrap();
@@ -79,7 +83,7 @@ pub async fn p_vs_np(
     let head = HeadTemplate {
         title: "P vs NP - solve.NP".into(),
     };
-    let header = HeaderTemplate::try_from(&session)?.with_active(Page::PvsNP);
+    let header = HeaderTemplate::try_from(&session, state.clone())?.with_active(Page::PvsNP);
     let eq_neq_text = if header.logged_in {
         get_vote_data(&session, &state)?.and_then(|(vote, num_eq, num_neq)| {
             Some((
