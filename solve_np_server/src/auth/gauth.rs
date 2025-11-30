@@ -12,7 +12,6 @@ const GAUTH_CERTS_ENDPOINT: &str = "https://www.googleapis.com/oauth2/v3/certs";
 pub const GAUTH_AUTH_ENDPOINT: &str = "https://accounts.google.com/o/oauth2/v2/auth";
 pub const GAUTH_TOKEN_ENDPOINT: &str = "https://oauth2.googleapis.com/token";
 pub const GAUTH_ISSUER: &str = "https://accounts.google.com";
-pub const GAUTH_REDIRECT_URI: &str = "http://127.0.0.1:3333/api/google_auth_callback";
 pub const GAUTH_SCOPE: &str = "https://www.googleapis.com/auth/userinfo.profile";
 
 pub struct GAuthClientId(pub String);
@@ -68,4 +67,8 @@ pub async fn validate_id_token(
     let token_data = decode::<IdTokenClaims>(id_token, &decoding_key, &validation)
         .context("Failed decoding ID token.")?;
     Ok(token_data.claims)
+}
+
+pub fn redirect_uri(address: &str) -> String {
+    format!("{address}/api/google_auth_callback")
 }

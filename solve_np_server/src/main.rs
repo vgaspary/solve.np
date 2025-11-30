@@ -54,6 +54,10 @@ struct Args {
     #[arg(long, default_value = "solve_np.db3")]
     db_path: PathBuf,
 
+    /// Address.
+    #[arg(long, default_value = "http://127.0.0.1:3333")]
+    address: String,
+
     /// Port.
     #[arg(long, default_value_t = 3333)]
     port: u16,
@@ -92,6 +96,7 @@ impl TryFrom<&Args> for State {
             start_time,
             static_data,
             db,
+            address: args.address.clone(),
             session_registry,
             gauth_client_id_secret,
         })

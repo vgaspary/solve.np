@@ -1,8 +1,8 @@
 use crate::auth::gauth::GAUTH_AUTH_ENDPOINT;
-use crate::auth::gauth::GAUTH_REDIRECT_URI;
 use crate::auth::gauth::GAUTH_SCOPE;
 use crate::auth::gauth::GAUTH_TOKEN_ENDPOINT;
 use crate::auth::gauth::GAuthClientId;
+use crate::auth::gauth::redirect_uri;
 use crate::auth::gauth::validate_id_token;
 use crate::state::State;
 use actix_session::Session;
@@ -40,7 +40,8 @@ pub async fn google_auth(
     let Some((GAuthClientId(client_id), _)) = &state.gauth_client_id_secret else {
         return Err(ErrorNotImplemented("Internal error #34"));
     };
-    let redirect_uri = utf8_percent_encode(GAUTH_REDIRECT_URI, NON_ALPHANUMERIC);
+    let redirect_uri = redirect_uri(&state.address);
+    let redirect_uri = utf8_percent_encode(&redirect_uri, NON_ALPHANUMERIC);
     let scope = utf8_percent_encode(GAUTH_SCOPE, NON_ALPHANUMERIC);
     let source = query.into_inner().redirect.unwrap_or(String::from("/"));
     Ok(web::Redirect::to(format!(
@@ -63,7 +64,7 @@ pub async fn google_auth_callback(
             ("code", query.code.as_str()),
             ("client_id", &client_id.0),
             ("client_secret", &client_secret.0),
-            ("redirect_uri", GAUTH_REDIRECT_URI),
+            ("redirect_uri", &redirect_uri(&state.address)),
             ("grant_type", "authorization_code"),
         ])
         .send()
@@ -88,6 +89,5 @@ pub async fn google_auth_callback(
         .map_err(ErrorUnauthorized)?;
     let session_id = state.session_registry.create_session(claims);
     session.insert("session_id", session_id)?;
-    // TODO! redirect to home, p_vs_np, or some problem page.
     Ok(web::Redirect::to(query.state))
 }

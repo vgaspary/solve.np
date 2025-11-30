@@ -12,6 +12,7 @@ use std::time::SystemTime;
 pub struct State {
     pub start_time: SystemTime,
     pub static_data: StaticData,
+    pub address: String,
     pub db: Mutex<Connection>,
     pub session_registry: SessionRegistry,
     pub gauth_client_id_secret: Option<(GAuthClientId, GAuthClientSecret)>,
