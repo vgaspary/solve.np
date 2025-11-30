@@ -39,20 +39,20 @@
           {% match input.status %}
             {% when Status::Untested %}
               {% if input.solution == "" %}
-                <textarea id="{{ input.id }}_solution" rows=10 cols=70></textarea>
+                <textarea id="{{ input.id }}_solution" rows=5 cols=70></textarea>
                 <br>
                 <p id="{{ input.id }}_status"></p>
               {% else %}
-                <textarea id="{{ input.id }}_solution" rows=10 cols=70>{{ input.solution }}</textarea>
+                <textarea id="{{ input.id }}_solution" rows=5 cols=70>{{ input.solution }}</textarea>
                 <br>
                 <p id="{{ input.id }}_status"><i>Validation in progress. Refresh the page later to see the results.</i></p>
               {% endif %}
             {% when Status::Attempted %}
-              <textarea id="{{ input.id }}_solution" rows=10 cols=70 class="error">{{ input.solution }}</textarea>
+              <textarea id="{{ input.id }}_solution" rows=5 cols=70 class="error">{{ input.solution }}</textarea>
               <br>
               <p id="{{ input.id }}_status">{{ input.invalid_message }}</p>
             {% when Status::Solved(score) %}
-              <textarea id="{{ input.id }}_solution" rows=10 cols=70 class="success">{{ input.solution }}</textarea>
+              <textarea id="{{ input.id }}_solution" rows=5 cols=70 class="success">{{ input.solution }}</textarea>
               <br>
               <p id="{{ input.id }}_status">Score: {{ score }}</p>
           {% endmatch %}
