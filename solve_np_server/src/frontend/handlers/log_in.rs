@@ -1,6 +1,7 @@
 use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::handlers::header::HeaderTemplate;
 use crate::frontend::handlers::header::Page;
+use crate::state::State;
 use actix_session::Session;
 use actix_web::HttpResponse;
 use actix_web::Responder;
@@ -18,6 +19,7 @@ struct LogInTemplate {
     header: HeaderTemplate,
     redirect: Option<String>,
     error_msg: String,
+    test_auth: bool,
 }
 
 #[derive(Deserialize)]
@@ -27,6 +29,7 @@ pub struct LogInQueryParams {
 }
 
 pub async fn log_in(
+    state: web::Data<State>,
     query: web::Query<LogInQueryParams>,
     session: Session,
 ) -> Result<impl Responder, HttpError> {
@@ -37,6 +40,7 @@ pub async fn log_in(
         header: HeaderTemplate::try_from(&session)?.with_active(Page::LogIn),
         redirect: query.redirect.clone(),
         error_msg: query.err.clone().unwrap_or_default(),
+        test_auth: state.gauth_client_id_secret.is_none(),
     }
     .render()
     .map_err(ErrorInternalServerError)?;

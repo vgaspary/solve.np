@@ -5,6 +5,8 @@ mod state;
 mod types;
 
 use crate::ranking::update_ranking;
+use crate::state::GAuthClientId;
+use crate::state::GAuthClientSecret;
 use actix_files::Files;
 use actix_session::SessionMiddleware;
 use actix_session::config::PersistentSession;
@@ -56,6 +58,14 @@ struct Args {
     /// Ranking update period.
     #[arg(long, value_parser = humantime::parse_duration, default_value = "5m")]
     rerank_period: Duration,
+
+    /// Google Auth Client ID.
+    #[arg(long)]
+    gauth_client_id: Option<String>,
+
+    /// Google Auth Client secret.
+    #[arg(long)]
+    gauth_client_secret: Option<String>,
 }
 
 impl TryFrom<&Args> for State {
@@ -67,10 +77,18 @@ impl TryFrom<&Args> for State {
             serde_yaml::from_reader(BufReader::new(File::open(&args.static_data_path)?))
                 .map_err(std::io::Error::other)?;
         let db = Mutex::new(Connection::open(&args.db_path).map_err(std::io::Error::other)?);
+        let gauth_client_id_secret = match (&args.gauth_client_id, &args.gauth_client_secret) {
+            (Some(client_id), Some(client_secret)) => Some((
+                GAuthClientId(client_id.clone()),
+                GAuthClientSecret(client_secret.clone()),
+            )),
+            _ => None,
+        };
         Ok(Self {
             start_time,
             static_data,
             db,
+            gauth_client_id_secret,
         })
     }
 }
@@ -128,6 +146,11 @@ async fn main() -> std::io::Result<()> {
                     .route("/validate_sample", post().to(api_handlers::validate_sample))
                     .route("/vote/{vote}", post().to(api_handlers::vote))
                     .route("/log_in", post().to(api_handlers::log_in))
+                    .route("/log_in/google", get().to(api_handlers::log_in_via_google))
+                    .route(
+                        "/log_in/google/callback",
+                        get().to(api_handlers::google_auth_callback),
+                    )
                     .route("/log_out", get().to(api_handlers::log_out))
                     .route(
                         "/solutions/{solution_id}",

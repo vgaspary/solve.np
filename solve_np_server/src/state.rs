@@ -6,10 +6,14 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::SystemTime;
 
+pub struct GAuthClientId(pub String);
+pub struct GAuthClientSecret(pub String);
+
 pub struct State {
     pub start_time: SystemTime,
     pub static_data: StaticData,
     pub db: Mutex<Connection>,
+    pub gauth_client_id_secret: Option<(GAuthClientId, GAuthClientSecret)>,
 }
 
 #[derive(Deserialize)]

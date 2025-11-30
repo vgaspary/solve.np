@@ -3,6 +3,7 @@
   {{ head | safe }}
   <body>
     {{ header | safe }}
+    {% if test_auth %}
     <div>
       <form action="/api/log_in{% if let Some(url) = redirect %}?redirect={{ url }}{% endif %}" method="post">
         <label for="username">Username:</label><br>
@@ -15,5 +16,10 @@
         <input type="submit" value="Log In">
       </form>
     </div>
+    {% else %}
+    <div>
+      Log in with <a href="/api/log_in/google">[Google]</a> or <a>[GitHub]</a>.
+    </div>
+    {% endif %}
   </body>
 </html>

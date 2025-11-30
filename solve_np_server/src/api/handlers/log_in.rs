@@ -1,6 +1,8 @@
+use crate::state::State;
 use actix_session::Session;
 use actix_web::Responder;
 use actix_web::error::Error as HttpError;
+use actix_web::error::ErrorNotImplemented;
 use actix_web::web;
 
 #[derive(serde::Deserialize)]
@@ -15,10 +17,14 @@ pub struct LogInForm {
 }
 
 pub async fn log_in(
+    state: web::Data<State>,
     session: Session,
     query: web::Query<LogInQueryParams>,
     form: web::Form<LogInForm>,
 ) -> Result<impl Responder, HttpError> {
+    if state.gauth_client_id_secret.is_some() {
+        return Err(ErrorNotImplemented("Internal error #36"));
+    }
     let LogInForm { username, password } = form.into_inner();
     Ok(if username == password {
         web::Redirect::to("/log_in?err=Invalid%20credentials").see_other()
