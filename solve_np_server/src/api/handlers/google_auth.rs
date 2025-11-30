@@ -20,6 +20,7 @@ use serde::Deserialize;
 #[derive(Deserialize, Debug)]
 pub struct GoogleAuthParams {
     code: String,
+    state: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -27,14 +28,23 @@ struct GoogleAuthTokenResponse {
     id_token: String,
 }
 
-pub async fn google_auth(state: web::Data<State>) -> Result<impl Responder, HttpError> {
+#[derive(serde::Deserialize)]
+pub struct GoogleAuthQueryParams {
+    redirect: Option<String>,
+}
+
+pub async fn google_auth(
+    state: web::Data<State>,
+    query: web::Query<GoogleAuthQueryParams>,
+) -> Result<impl Responder, HttpError> {
     let Some((GAuthClientId(client_id), _)) = &state.gauth_client_id_secret else {
         return Err(ErrorNotImplemented("Internal error #34"));
     };
     let redirect_uri = utf8_percent_encode(GAUTH_REDIRECT_URI, NON_ALPHANUMERIC);
     let scope = utf8_percent_encode(GAUTH_SCOPE, NON_ALPHANUMERIC);
+    let source = query.into_inner().redirect.unwrap_or(String::from("/"));
     Ok(web::Redirect::to(format!(
-        "{GAUTH_AUTH_ENDPOINT}?client_id={client_id}&response_type=code&redirect_uri={redirect_uri}&scope={scope}"
+        "{GAUTH_AUTH_ENDPOINT}?client_id={client_id}&response_type=code&redirect_uri={redirect_uri}&scope={scope}&state={source}"
     )))
 }
 
@@ -46,6 +56,7 @@ pub async fn google_auth_callback(
     let Some((client_id, client_secret)) = &state.gauth_client_id_secret else {
         return Err(ErrorNotImplemented("Internal error #35"));
     };
+    let query = query.into_inner();
     let response = reqwest::Client::new()
         .post(GAUTH_TOKEN_ENDPOINT)
         .form(&[
@@ -78,5 +89,5 @@ pub async fn google_auth_callback(
     let session_id = state.session_registry.create_session(claims);
     session.insert("session_id", session_id)?;
     // TODO! redirect to home, p_vs_np, or some problem page.
-    Ok(web::Redirect::to("/"))
+    Ok(web::Redirect::to(query.state))
 }
