@@ -23,6 +23,12 @@ pub struct State {
     pub github_auth_client_secret: Option<GithubAuthClientSecret>,
 }
 
+impl State {
+    pub fn test_auth(&self) -> bool {
+        self.google_auth_client_id.is_none()
+    }
+}
+
 #[derive(Deserialize)]
 pub struct StaticData {
     pub problems: Vec<Problem>,

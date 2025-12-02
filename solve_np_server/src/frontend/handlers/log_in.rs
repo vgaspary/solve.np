@@ -40,7 +40,7 @@ pub async fn log_in(
         header: HeaderTemplate::try_from(&session, state.clone())?.with_active(Page::LogIn),
         redirect: query.redirect.clone(),
         error_msg: query.err.clone().unwrap_or_default(),
-        test_auth: state.google_auth_client_id.is_none(),
+        test_auth: state.test_auth(),
     }
     .render()
     .map_err(ErrorInternalServerError)?;

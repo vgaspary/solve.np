@@ -23,7 +23,7 @@ pub async fn log_in(
     query: web::Query<LogInQueryParams>,
     form: web::Form<LogInForm>,
 ) -> Result<impl Responder, HttpError> {
-    if state.google_auth_client_id.is_some() {
+    if !state.test_auth() {
         return Err(ErrorNotImplemented("Internal error #36"));
     }
     let LogInForm { username, password } = form.into_inner();
