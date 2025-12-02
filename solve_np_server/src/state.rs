@@ -5,8 +5,13 @@ use crate::auth::github_auth::GithubAuthClientSecret;
 use crate::auth::session_registry::SessionRegistry;
 use crate::types::InputId;
 use crate::types::ProblemId;
+use itertools::Itertools;
 use rusqlite::Connection;
 use serde::Deserialize;
+use std::fs::File;
+use std::fs::read_to_string;
+use std::io::BufRead;
+use std::io::BufReader;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::SystemTime;
@@ -30,11 +35,50 @@ impl State {
 }
 
 #[derive(Deserialize)]
-pub struct StaticData {
-    pub problems: Vec<Problem>,
+pub struct LazyInput {
+    pub id: InputId,
+    pub path: PathBuf,
+}
+
+pub struct Input {
+    pub id: InputId,
+    pub path: PathBuf,
+    pub filename: String,
+    pub preview: String,
+}
+
+impl From<LazyInput> for Input {
+    fn from(input: LazyInput) -> Self {
+        let LazyInput { id, path } = input;
+        let filename = (&path)
+            .file_name()
+            .expect("Path must have a filename.")
+            .to_owned()
+            .into_string()
+            .expect("Failed to convert OsString to String.");
+        let preview = BufReader::new(File::open(&path).expect("Input file presence"))
+            .lines()
+            .filter_map(Result::ok)
+            .take(20)
+            .join("\n");
+        Self {
+            id,
+            path,
+            filename,
+            preview,
+        }
+    }
 }
 
 #[derive(Deserialize)]
+pub struct LazyProblem {
+    pub id: ProblemId,
+    pub name: String,
+    pub description: String,
+    pub problem_statement: PathBuf,
+    pub inputs: Vec<LazyInput>,
+}
+
 pub struct Problem {
     pub id: ProblemId,
     pub name: String,
@@ -44,12 +88,48 @@ pub struct Problem {
     pub inputs: Vec<Input>,
 }
 
+impl From<LazyProblem> for Problem {
+    fn from(problem: LazyProblem) -> Self {
+        let LazyProblem {
+            id,
+            name,
+            description,
+            problem_statement,
+            inputs,
+        } = problem;
+        let mut sample_input_path = problem_statement.clone();
+        sample_input_path.pop();
+        sample_input_path.push("inputs");
+        sample_input_path.push("sample.txt");
+        let sample_input = read_to_string(sample_input_path).expect("Failed to read sample input.");
+        let inputs = inputs.into_iter().map(Input::from).collect();
+        Problem {
+            id,
+            name,
+            description,
+            problem_statement,
+            sample_input,
+            inputs,
+        }
+    }
+}
+
 #[derive(Deserialize)]
-pub struct Input {
-    pub id: InputId,
-    pub path: PathBuf,
-    pub filename: String,
-    #[serde(alias = "cmd")]
-    _cmd: String,
-    pub preview: String,
+pub struct LazyStaticData {
+    pub problems: Vec<LazyProblem>,
+}
+
+pub struct StaticData {
+    pub problems: Vec<Problem>,
+}
+
+impl From<LazyStaticData> for StaticData {
+    fn from(static_data: LazyStaticData) -> Self {
+        let problems = static_data
+            .problems
+            .into_iter()
+            .map(Problem::from)
+            .collect();
+        Self { problems }
+    }
 }

@@ -22,12 +22,14 @@ use auth::gauth::GoogleAuthClientId;
 use auth::gauth::GoogleAuthClientSecret;
 use auth::github_auth::GithubAuthClientId;
 use auth::github_auth::GithubAuthClientSecret;
+use auth::session_registry::SessionRegistry;
 use base64::prelude::*;
 use clap::Parser;
 use frontend::handlers as frontend_handlers;
 use log::error;
 use ranking::update_ranking;
 use rusqlite::Connection;
+use state::LazyStaticData;
 use state::State;
 use state::StaticData;
 use std::fs::File;
@@ -39,8 +41,6 @@ use std::time::Duration;
 use std::time::SystemTime;
 use tokio::task;
 use tokio::time::sleep;
-
-use crate::auth::session_registry::SessionRegistry;
 
 #[derive(Parser)]
 struct Args {
@@ -96,9 +96,11 @@ impl TryFrom<&Args> for State {
 
     fn try_from(args: &Args) -> Result<Self, Self::Error> {
         let start_time = SystemTime::now();
-        let static_data: StaticData =
-            serde_yaml::from_reader(BufReader::new(File::open(&args.static_data_path)?))
-                .map_err(std::io::Error::other)?;
+        let static_data: StaticData = serde_yaml::from_reader::<_, LazyStaticData>(BufReader::new(
+            File::open(&args.static_data_path)?,
+        ))
+        .map_err(std::io::Error::other)?
+        .into();
         let db = Mutex::new(Connection::open(&args.db_path).map_err(std::io::Error::other)?);
         let session_registry = SessionRegistry::default();
         let google_auth_client_id = args
@@ -194,7 +196,10 @@ async fn main() -> std::io::Result<()> {
                         get().to(api_handlers::google_auth_callback),
                     )
                     .route("/github_auth", get().to(api_handlers::github_auth))
-                    .route("/github_auth_callback", get().to(api_handlers::github_auth_callback))
+                    .route(
+                        "/github_auth_callback",
+                        get().to(api_handlers::github_auth_callback),
+                    )
                     .route("/log_out", get().to(api_handlers::log_out))
                     .route(
                         "/solutions/{solution_id}",
