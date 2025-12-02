@@ -57,8 +57,8 @@ struct Args {
     db_path: PathBuf,
 
     /// Address.
-    #[arg(long, default_value = "http://127.0.0.1:3333")]
-    address: String,
+    #[arg(long, default_value = "http://127.0.0.1")]
+    host: String,
 
     /// Port.
     #[arg(long, default_value_t = 3333)]
@@ -69,26 +69,27 @@ struct Args {
     rerank_period: Duration,
 
     #[command(flatten)]
-    auth_args: Option<AuthArgs>,
+    auth_args: AuthArgs,
 }
 
 #[derive(clap::Args)]
+#[group(id = "auth", required = false, multiple = true)]
 struct AuthArgs {
     /// Google Auth Client ID.
-    #[arg(long)]
-    google_auth_client_id: String,
+    #[arg(long, requires = "auth")]
+    google_auth_client_id: Option<String>,
 
     /// Google Auth Client secret.
-    #[arg(long)]
-    google_auth_client_secret: String,
+    #[arg(long, requires = "auth")]
+    google_auth_client_secret: Option<String>,
 
     /// GitHub Auth Client ID.
-    #[arg(long)]
-    github_auth_client_id: String,
+    #[arg(long, requires = "auth")]
+    github_auth_client_id: Option<String>,
 
     /// GitHub Auth Client secret.
-    #[arg(long)]
-    github_auth_client_secret: String,
+    #[arg(long, requires = "auth")]
+    github_auth_client_secret: Option<String>,
 }
 
 impl TryFrom<&Args> for State {
@@ -105,29 +106,29 @@ impl TryFrom<&Args> for State {
         let session_registry = SessionRegistry::default();
         let google_auth_client_id = args
             .auth_args
-            .as_ref()
-            .map(|args| args.google_auth_client_id.clone())
+            .google_auth_client_id
+            .clone()
             .map(GoogleAuthClientId);
         let google_auth_client_secret = args
             .auth_args
-            .as_ref()
-            .map(|args| args.google_auth_client_secret.clone())
+            .google_auth_client_secret
+            .clone()
             .map(GoogleAuthClientSecret);
         let github_auth_client_id = args
             .auth_args
-            .as_ref()
-            .map(|args| args.github_auth_client_id.clone())
+            .github_auth_client_id
+            .clone()
             .map(GithubAuthClientId);
         let github_auth_client_secret = args
             .auth_args
-            .as_ref()
-            .map(|args| args.github_auth_client_secret.clone())
+            .github_auth_client_secret
+            .clone()
             .map(GithubAuthClientSecret);
         Ok(Self {
             start_time,
             static_data,
             db,
-            address: args.address.clone(),
+            address: format!("{}:{}", args.host, args.port),
             session_registry,
             google_auth_client_id,
             google_auth_client_secret,

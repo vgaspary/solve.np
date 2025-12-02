@@ -1,10 +1,15 @@
 use itertools::Itertools;
 use rand::prelude::*;
-use std::collections::{BinaryHeap, HashMap};
+use serde::Deserialize;
+use serde::Serialize;
+use std::collections::BinaryHeap;
+use std::collections::HashMap;
 use std::iter;
 
 pub type Vertex = usize;
 pub type Edge = (Vertex, Vertex);
+
+#[derive(Serialize, Deserialize)]
 pub struct Graph<Metadata = ()> {
     pub adj_list: Vec<HashMap<usize, Metadata>>,
 }

@@ -129,8 +129,6 @@ async fn spawn_app_with_rerank_period(rerank_period: &str) -> Test {
         .arg(port.to_string())
         .arg("--rerank-period")
         .arg(rerank_period)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
         .spawn()
         .expect("Failed to start solve_np_server");
 
