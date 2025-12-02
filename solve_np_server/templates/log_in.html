@@ -18,7 +18,7 @@
     </div>
     {% else %}
     <div>
-      Log in with <a href="/api/google_auth{% if let Some(url) = redirect %}?redirect={{ url }}{% endif %}">[Google]</a>.
+      Log in with <a href="/api/google_auth{% if let Some(url) = redirect %}?redirect={{ url }}{% endif %}">[Google]</a> or <a href="/api/github_auth{% if let Some(url) = redirect %}?redirect={{ url }}{% endif %}">[GitHub]</a>.
     </div>
     {% endif %}
   </body>

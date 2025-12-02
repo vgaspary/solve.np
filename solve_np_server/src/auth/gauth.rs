@@ -8,14 +8,14 @@ use jsonwebtoken::decode_header;
 use serde::Deserialize;
 use tokio::sync::OnceCell;
 
-const GAUTH_CERTS_ENDPOINT: &str = "https://www.googleapis.com/oauth2/v3/certs";
-pub const GAUTH_AUTH_ENDPOINT: &str = "https://accounts.google.com/o/oauth2/v2/auth";
-pub const GAUTH_TOKEN_ENDPOINT: &str = "https://oauth2.googleapis.com/token";
-pub const GAUTH_ISSUER: &str = "https://accounts.google.com";
-pub const GAUTH_SCOPE: &str = "https://www.googleapis.com/auth/userinfo.profile";
+const GOOGLE_AUTH_CERTS_ENDPOINT: &str = "https://www.googleapis.com/oauth2/v3/certs";
+pub const GOOGLE_AUTH_AUTHZ_ENDPOINT: &str = "https://accounts.google.com/o/oauth2/v2/auth";
+pub const GOOGLE_AUTH_TOKEN_ENDPOINT: &str = "https://oauth2.googleapis.com/token";
+pub const GOOGLE_AUTH_ISSUER: &str = "https://accounts.google.com";
+pub const GOOGLE_AUTH_SCOPE: &str = "https://www.googleapis.com/auth/userinfo.profile";
 
-pub struct GAuthClientId(pub String);
-pub struct GAuthClientSecret(pub String);
+pub struct GoogleAuthClientId(pub String);
+pub struct GoogleAuthClientSecret(pub String);
 
 #[derive(Debug, Deserialize, Clone)]
 struct GooglePublicKey {
@@ -33,7 +33,7 @@ static KEYS: OnceCell<GooglePublicKeys> = OnceCell::const_new();
 
 async fn get_google_public_keys() -> anyhow::Result<&'static GooglePublicKeys> {
     KEYS.get_or_try_init(|| async {
-        let response = reqwest::get(GAUTH_CERTS_ENDPOINT)
+        let response = reqwest::get(GOOGLE_AUTH_CERTS_ENDPOINT)
             .await
             .context("Failed to fetch Google public keys")?;
         response
@@ -46,7 +46,7 @@ async fn get_google_public_keys() -> anyhow::Result<&'static GooglePublicKeys> {
 
 pub async fn validate_id_token(
     id_token: &str,
-    client_id: &GAuthClientId,
+    client_id: &GoogleAuthClientId,
 ) -> anyhow::Result<IdTokenClaims> {
     let kid = decode_header(id_token)
         .context("Invalid token header")?
@@ -63,7 +63,7 @@ pub async fn validate_id_token(
 
     let mut validation = Validation::new(Algorithm::RS256);
     validation.set_audience(&[&client_id.0]);
-    validation.set_issuer(&[GAUTH_ISSUER]);
+    validation.set_issuer(&[GOOGLE_AUTH_ISSUER]);
     let token_data = decode::<IdTokenClaims>(id_token, &decoding_key, &validation)
         .context("Failed decoding ID token.")?;
     Ok(token_data.claims)

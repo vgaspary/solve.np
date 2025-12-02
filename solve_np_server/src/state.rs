@@ -1,5 +1,7 @@
-use crate::auth::gauth::GAuthClientId;
-use crate::auth::gauth::GAuthClientSecret;
+use crate::auth::gauth::GoogleAuthClientId;
+use crate::auth::gauth::GoogleAuthClientSecret;
+use crate::auth::github_auth::GithubAuthClientId;
+use crate::auth::github_auth::GithubAuthClientSecret;
 use crate::auth::session_registry::SessionRegistry;
 use crate::types::InputId;
 use crate::types::ProblemId;
@@ -15,7 +17,10 @@ pub struct State {
     pub address: String,
     pub db: Mutex<Connection>,
     pub session_registry: SessionRegistry,
-    pub gauth_client_id_secret: Option<(GAuthClientId, GAuthClientSecret)>,
+    pub google_auth_client_id: Option<GoogleAuthClientId>,
+    pub google_auth_client_secret: Option<GoogleAuthClientSecret>,
+    pub github_auth_client_id: Option<GithubAuthClientId>,
+    pub github_auth_client_secret: Option<GithubAuthClientSecret>,
 }
 
 #[derive(Deserialize)]

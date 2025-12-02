@@ -8,6 +8,10 @@ pub mod google_auth;
 pub use google_auth::google_auth;
 pub use google_auth::google_auth_callback;
 
+pub mod github_auth;
+pub use github_auth::github_auth;
+pub use github_auth::github_auth_callback;
+
 pub mod log_out;
 pub use log_out::log_out;
 

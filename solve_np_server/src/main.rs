@@ -18,8 +18,10 @@ use actix_web::web::get;
 use actix_web::web::post;
 use actix_web::web::scope;
 use api::handlers as api_handlers;
-use auth::gauth::GAuthClientId;
-use auth::gauth::GAuthClientSecret;
+use auth::gauth::GoogleAuthClientId;
+use auth::gauth::GoogleAuthClientSecret;
+use auth::github_auth::GithubAuthClientId;
+use auth::github_auth::GithubAuthClientSecret;
 use base64::prelude::*;
 use clap::Parser;
 use frontend::handlers as frontend_handlers;
@@ -66,13 +68,27 @@ struct Args {
     #[arg(long, value_parser = humantime::parse_duration, default_value = "5m")]
     rerank_period: Duration,
 
+    #[command(flatten)]
+    auth_args: Option<AuthArgs>,
+}
+
+#[derive(clap::Args)]
+struct AuthArgs {
     /// Google Auth Client ID.
     #[arg(long)]
-    gauth_client_id: Option<String>,
+    google_auth_client_id: String,
 
     /// Google Auth Client secret.
     #[arg(long)]
-    gauth_client_secret: Option<String>,
+    google_auth_client_secret: String,
+
+    /// GitHub Auth Client ID.
+    #[arg(long)]
+    github_auth_client_id: String,
+
+    /// GitHub Auth Client secret.
+    #[arg(long)]
+    github_auth_client_secret: String,
 }
 
 impl TryFrom<&Args> for State {
@@ -85,20 +101,36 @@ impl TryFrom<&Args> for State {
                 .map_err(std::io::Error::other)?;
         let db = Mutex::new(Connection::open(&args.db_path).map_err(std::io::Error::other)?);
         let session_registry = SessionRegistry::default();
-        let gauth_client_id_secret = match (&args.gauth_client_id, &args.gauth_client_secret) {
-            (Some(client_id), Some(client_secret)) => Some((
-                GAuthClientId(client_id.clone()),
-                GAuthClientSecret(client_secret.clone()),
-            )),
-            _ => None,
-        };
+        let google_auth_client_id = args
+            .auth_args
+            .as_ref()
+            .map(|args| args.google_auth_client_id.clone())
+            .map(GoogleAuthClientId);
+        let google_auth_client_secret = args
+            .auth_args
+            .as_ref()
+            .map(|args| args.google_auth_client_secret.clone())
+            .map(GoogleAuthClientSecret);
+        let github_auth_client_id = args
+            .auth_args
+            .as_ref()
+            .map(|args| args.github_auth_client_id.clone())
+            .map(GithubAuthClientId);
+        let github_auth_client_secret = args
+            .auth_args
+            .as_ref()
+            .map(|args| args.github_auth_client_secret.clone())
+            .map(GithubAuthClientSecret);
         Ok(Self {
             start_time,
             static_data,
             db,
             address: args.address.clone(),
             session_registry,
-            gauth_client_id_secret,
+            google_auth_client_id,
+            google_auth_client_secret,
+            github_auth_client_id,
+            github_auth_client_secret,
         })
     }
 }
@@ -161,6 +193,8 @@ async fn main() -> std::io::Result<()> {
                         "/google_auth_callback",
                         get().to(api_handlers::google_auth_callback),
                     )
+                    .route("/github_auth", get().to(api_handlers::github_auth))
+                    .route("/github_auth_callback", get().to(api_handlers::github_auth_callback))
                     .route("/log_out", get().to(api_handlers::log_out))
                     .route(
                         "/solutions/{solution_id}",

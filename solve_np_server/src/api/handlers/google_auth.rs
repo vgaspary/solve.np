@@ -1,7 +1,6 @@
-use crate::auth::gauth::GAUTH_AUTH_ENDPOINT;
-use crate::auth::gauth::GAUTH_SCOPE;
-use crate::auth::gauth::GAUTH_TOKEN_ENDPOINT;
-use crate::auth::gauth::GAuthClientId;
+use crate::auth::gauth::GOOGLE_AUTH_AUTHZ_ENDPOINT;
+use crate::auth::gauth::GOOGLE_AUTH_SCOPE;
+use crate::auth::gauth::GOOGLE_AUTH_TOKEN_ENDPOINT;
 use crate::auth::gauth::redirect_uri;
 use crate::auth::gauth::validate_id_token;
 use crate::state::State;
@@ -17,17 +16,6 @@ use percent_encoding::NON_ALPHANUMERIC;
 use percent_encoding::utf8_percent_encode;
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug)]
-pub struct GoogleAuthParams {
-    code: String,
-    state: String,
-}
-
-#[derive(Deserialize, Debug)]
-struct GoogleAuthTokenResponse {
-    id_token: String,
-}
-
 #[derive(serde::Deserialize)]
 pub struct GoogleAuthQueryParams {
     redirect: Option<String>,
@@ -37,29 +25,48 @@ pub async fn google_auth(
     state: web::Data<State>,
     query: web::Query<GoogleAuthQueryParams>,
 ) -> Result<impl Responder, HttpError> {
-    let Some((GAuthClientId(client_id), _)) = &state.gauth_client_id_secret else {
-        return Err(ErrorNotImplemented("Internal error #34"));
-    };
+    let client_id = state
+        .google_auth_client_id
+        .as_ref()
+        .ok_or(ErrorNotImplemented("Internal error #35"))?
+        .0
+        .as_str();
     let redirect_uri = redirect_uri(&state.address);
     let redirect_uri = utf8_percent_encode(&redirect_uri, NON_ALPHANUMERIC);
-    let scope = utf8_percent_encode(GAUTH_SCOPE, NON_ALPHANUMERIC);
+    let scope = utf8_percent_encode(GOOGLE_AUTH_SCOPE, NON_ALPHANUMERIC);
     let source = query.into_inner().redirect.unwrap_or(String::from("/"));
     Ok(web::Redirect::to(format!(
-        "{GAUTH_AUTH_ENDPOINT}?client_id={client_id}&response_type=code&redirect_uri={redirect_uri}&scope={scope}&state={source}"
+        "{GOOGLE_AUTH_AUTHZ_ENDPOINT}?client_id={client_id}&response_type=code&redirect_uri={redirect_uri}&scope={scope}&state={source}",
     )))
+}
+
+#[derive(Deserialize, Debug)]
+pub struct GoogleAuthCallbackQueryParams {
+    code: String,
+    state: String,
+}
+
+#[derive(Deserialize, Debug)]
+struct GoogleAuthTokenResponse {
+    id_token: String,
 }
 
 pub async fn google_auth_callback(
     state: web::Data<State>,
     session: Session,
-    query: web::Query<GoogleAuthParams>,
+    query: web::Query<GoogleAuthCallbackQueryParams>,
 ) -> Result<impl Responder, HttpError> {
-    let Some((client_id, client_secret)) = &state.gauth_client_id_secret else {
-        return Err(ErrorNotImplemented("Internal error #35"));
-    };
+    let client_id = state
+        .google_auth_client_id
+        .as_ref()
+        .ok_or(ErrorNotImplemented("Internal error #35"))?;
+    let client_secret = state
+        .google_auth_client_secret
+        .as_ref()
+        .ok_or(ErrorNotImplemented("Internal error #35"))?;
     let query = query.into_inner();
     let response = reqwest::Client::new()
-        .post(GAUTH_TOKEN_ENDPOINT)
+        .post(GOOGLE_AUTH_TOKEN_ENDPOINT)
         .form(&[
             ("code", query.code.as_str()),
             ("client_id", &client_id.0),
