@@ -70,6 +70,10 @@ struct Args {
 
     #[command(flatten)]
     auth_args: AuthArgs,
+
+    /// Disable TLS.
+    #[arg(long, default_value_t = false)]
+    no_tls: bool,
 }
 
 #[derive(clap::Args)]
@@ -228,10 +232,9 @@ async fn main() -> std::io::Result<()> {
                     CookieSessionStore::default(),
                     actix_web::cookie::Key::from(&key),
                 )
-                .cookie_secure(false)
                 .session_lifecycle(
                     PersistentSession::default()
-                        .session_ttl(actix_web::cookie::time::Duration::days(5)),
+                        .session_ttl(actix_web::cookie::time::Duration::days(90)),
                 )
                 .build(),
             )
