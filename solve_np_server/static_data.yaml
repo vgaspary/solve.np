@@ -6,31 +6,31 @@ problems:
     inputs:
       - id: small_sparse
         path: ../problems/travelling_salesman/inputs/small_sparse.txt
-        cmd: tsp_gen -v 100 -d 0.3 -m 100 -s 20
+        cmd: tsp_gen -v 100 -d 0.3 -m 100 -s 20 -o small_sparse
       - id: small_dense
         path: ../problems/travelling_salesman/inputs/small_dense.txt
-        cmd: tsp_gen -v 100 -d 0.8 -m 100 -s 30
+        cmd: tsp_gen -v 100 -d 0.8 -m 100 -s 30 -o small_dense
       - id: small_full
         path: ../problems/travelling_salesman/inputs/small_full.txt
-        cmd: tsp_gen -v 100 -d 1.0 -m 100 -s 10
+        cmd: tsp_gen -v 100 -d 1.0 -m 100 -s 10 -o small_full
       - id: medium_sparse
         path: ../problems/travelling_salesman/inputs/medium_sparse.txt
-        cmd: tsp_gen -v 1000 -d 0.3 -m 100 -s 20
+        cmd: tsp_gen -v 1000 -d 0.3 -m 100 -s 20 -o medium_sparse
       - id: medium_dense
         path: ../problems/travelling_salesman/inputs/medium_dense.txt
-        cmd: tsp_gen -v 1000 -d 0.8 -m 100 -s 30
+        cmd: tsp_gen -v 1000 -d 0.8 -m 100 -s 30 -o medium_dense
       - id: medium_full
         path: ../problems/travelling_salesman/inputs/medium_full.txt
-        cmd: tsp_gen -v 1000 -d 1.0 -m 100 -s 10
+        cmd: tsp_gen -v 1000 -d 1.0 -m 100 -s 10 -o medium_full
       - id: large_sparse
         path: ../problems/travelling_salesman/inputs/large_sparse.txt
-        cmd: tsp_gen -v 10000 -d 0.3 -m 100 -s 20
+        cmd: tsp_gen -v 10000 -d 0.3 -m 100 -s 20 -o large_sparse
       - id: large_dense
         path: ../problems/travelling_salesman/inputs/large_dense.txt
-        cmd: tsp_gen -v 10000 -d 0.8 -m 100 -s 30
+        cmd: tsp_gen -v 10000 -d 0.8 -m 100 -s 30 -o large_dense
       - id: large_full
         path: ../problems/travelling_salesman/inputs/large_full.txt
-        cmd: tsp_gen -v 10000 -d 1.0 -m 100 -s 10
+        cmd: tsp_gen -v 10000 -d 1.0 -m 100 -s 10 -o large_full
   - id: graph_coloring
     name: Graph Coloring
     description: Color the nodes of a graph with as few colors as possible such that connected nodes don't have the same color.
@@ -38,28 +38,28 @@ problems:
     inputs:
       - id: small_ultra_sparse
         path: ../problems/graph_coloring/inputs/small_ultra_sparse.txt
-        cmd: graph_coloring_gen -v 100 -d 0.1
+        cmd: graph_coloring_gen -v 100 -d 0.1 -o small_ultra_sparse
       - id: small_sparse
         path: ../problems/graph_coloring/inputs/small_sparse.txt
-        cmd: graph_coloring_gen -v 100 -d 0.3
+        cmd: graph_coloring_gen -v 100 -d 0.3 -o small_sparse
       - id: small_dense
         path: ../problems/graph_coloring/inputs/small_dense.txt
-        cmd: graph_coloring_gen -v 100 -d 0.6
+        cmd: graph_coloring_gen -v 100 -d 0.6 -o small_dense
       - id: medium_ultra_sparse
         path: ../problems/graph_coloring/inputs/medium_ultra_sparse.txt
-        cmd: graph_coloring_gen -v 1000 -d 0.1
+        cmd: graph_coloring_gen -v 1000 -d 0.1 -o medium_ultra_sparse
       - id: medium_sparse
         path: ../problems/graph_coloring/inputs/medium_sparse.txt
-        cmd: graph_coloring_gen -v 1000 -d 0.3
+        cmd: graph_coloring_gen -v 1000 -d 0.3 -o medium_sparse
       - id: medium_dense
         path: ../problems/graph_coloring/inputs/medium_dense.txt
-        cmd: graph_coloring_gen -v 1000 -d 0.6
+        cmd: graph_coloring_gen -v 1000 -d 0.6 -o medium_dense
       - id: large_ultra_sparse
         path: ../problems/graph_coloring/inputs/large_ultra_sparse.txt
-        cmd: graph_coloring_gen -v 10000 -d 0.1
+        cmd: graph_coloring_gen -v 10000 -d 0.1 -o large_ultra_sparse
       - id: large_sparse
         path: ../problems/graph_coloring/inputs/large_sparse.txt
-        cmd: graph_coloring_gen -v 10000 -d 0.3
+        cmd: graph_coloring_gen -v 10000 -d 0.3 -o large_sparse
       - id: large_dense
         path: ../problems/graph_coloring/inputs/large_dense.txt
-        cmd: graph_coloring_gen -v 10000 -d 0.6
+        cmd: graph_coloring_gen -v 10000 -d 0.6 -o large_dense

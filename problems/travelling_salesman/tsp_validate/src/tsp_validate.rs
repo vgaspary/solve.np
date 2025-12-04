@@ -1,5 +1,7 @@
 use libgraph::Graph;
 use std::collections::HashSet;
+use std::fs::File;
+use std::path::PathBuf;
 use thiserror::Error;
 
 type Weight = usize;
@@ -91,11 +93,8 @@ pub fn parse_input(input: &str) -> Option<Graph<Weight>> {
     )
 }
 
-pub fn parse_input_and_validate(input: &str, solution: Vec<usize>) -> Result<Score, Error> {
-    match parse_input(input) {
-        Some(input) => validate(&input, solution),
-        None => Err(Error::Internal),
-    }
+pub fn parse_input_from(path: PathBuf) -> Option<Graph<Weight>> {
+    ciborium::from_reader(File::open(path).ok()?).ok()
 }
 
 #[cfg(test)]

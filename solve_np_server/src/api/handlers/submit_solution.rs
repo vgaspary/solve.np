@@ -16,7 +16,6 @@ use log::error;
 use rusqlite::params;
 use serde::Deserialize;
 use serde::Serialize;
-use std::fs;
 use std::hash::DefaultHasher;
 use std::hash::Hash;
 use std::hash::Hasher;
@@ -126,11 +125,14 @@ pub async fn submit_solution(
                     .iter()
                     .find(|input| input.id == input_id_clone)
             })
-            .and_then(|input| fs::read_to_string(&input.path).ok());
+            .and_then(|input| Some(input.path.clone()));
         match solution {
             Solution::TspSolution(path) => {
                 let graph = input
-                    .and_then(|input| tsp_validate::parse_input(&input))
+                    .and_then(|input| {
+                        let graph = input.with_extension("cbor");
+                        tsp_validate::parse_input_from(graph)
+                    })
                     .ok_or("Internal error #12")?;
                 Ok(tsp_validate::validate(&graph, path)
                     .map(|score| ValidateSolutionResult::Valid(score))
@@ -138,7 +140,10 @@ pub async fn submit_solution(
             }
             Solution::GraphColoringSolution(coloring) => {
                 let graph = input
-                    .and_then(|input| graph_coloring_validate::parse_input(&input))
+                    .and_then(|input| {
+                        let graph = input.with_extension("cbor");
+                        graph_coloring_validate::parse_input_from(graph)
+                    })
                     .ok_or("Internal error #13")?;
                 Ok(graph_coloring_validate::validate(&graph, coloring)
                     .map(|score| ValidateSolutionResult::Valid(score))

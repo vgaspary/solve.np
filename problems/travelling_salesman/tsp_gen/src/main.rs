@@ -1,9 +1,10 @@
 use clap::Parser;
 use libgraph::Graph;
-use log::debug;
 use rand::prelude::*;
 use rand_distr::Normal;
 use std::collections::HashSet;
+use std::io::Write;
+use std::{fs::File, io::BufWriter};
 
 /// Generate input for the Travelling Salesman problem.
 #[derive(Parser, Debug)]
@@ -24,33 +25,50 @@ struct Args {
     /// Standard deviation of edge weights. Edge weights have normal distribution.
     #[arg(short('s'), default_value_t = 3)]
     weight_sd: usize,
+
+    /// Output files' name.
+    #[arg(short('o'), default_value = "sample")]
+    output: String,
 }
 
 fn main() {
     env_logger::init();
     let mut rng = rand::rng();
-    let args = Args::parse();
-    debug!("Generating a random graph with the following parameters:\n{args:?}.");
+    let Args {
+        num_vertices,
+        graph_density,
+        weight_mean,
+        weight_sd,
+        output,
+    } = Args::parse();
 
-    let base_edges: HashSet<_> = Graph::hamiltonian_cycle(args.num_vertices, &mut rng)
+    let base_edges: HashSet<_> = Graph::hamiltonian_cycle(num_vertices, &mut rng)
         .edges()
         .collect();
-    let mut extra_edges: Vec<_> = Graph::full(args.num_vertices)
+    let mut extra_edges: Vec<_> = Graph::full(num_vertices)
         .edges()
         .filter(|edge| !base_edges.contains(edge))
         .collect();
-    let target_extra_edges = (extra_edges.len() as f64 * args.graph_density) as usize;
+    let target_extra_edges = (extra_edges.len() as f64 * graph_density) as usize;
     extra_edges.shuffle(&mut rng);
     extra_edges.truncate(target_extra_edges);
     extra_edges.extend(base_edges.into_iter());
     let mut edges = extra_edges;
     edges.shuffle(&mut rng);
-    edges.into_iter().for_each(|(u, v)| {
-        println!(
-            "{u} {v} {}",
-            random_weight(args.weight_mean, args.weight_sd, &mut rng)
-        )
-    });
+
+    let mut input_file = BufWriter::new(File::create(format!("{output}.txt")).unwrap());
+    let graph = edges
+        .into_iter()
+        .map(|(u, v)| {
+            let w = random_weight(weight_mean, weight_sd, &mut rng);
+            writeln!(&mut input_file, "{u} {v} {w}").unwrap();
+            (u, v, w)
+        })
+        .fold(Graph::new(num_vertices), |graph, (u, v, w)| {
+            graph.add_edge_with_metadata((u, v), w)
+        });
+    let graph_file = BufWriter::new(File::create(format!("{output}.cbor")).unwrap());
+    ciborium::into_writer(&graph, graph_file).unwrap();
 }
 
 fn random_weight(mean: usize, sd: usize, rng: &mut impl Rng) -> usize {

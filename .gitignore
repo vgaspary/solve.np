@@ -1,6 +1,7 @@
 **/target/*
 **/Cargo.lock
 **/inputs/*.txt
+**/inputs/*.cbor
 !**/inputs/sample.txt
 test.log
 *.db3

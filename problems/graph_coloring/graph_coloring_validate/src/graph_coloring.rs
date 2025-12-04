@@ -1,5 +1,7 @@
 use libgraph::Graph;
 use std::collections::HashSet;
+use std::fs::File;
+use std::path::PathBuf;
 use thiserror::Error;
 
 type Score = usize;
@@ -56,6 +58,10 @@ pub fn parse_input(input: &str) -> Option<Graph> {
             .into_iter()
             .fold(Graph::new(num_vertices), |graph, edge| graph.add_edge(edge)),
     )
+}
+
+pub fn parse_input_from(path: PathBuf) -> Option<Graph> {
+    ciborium::from_reader(File::open(path).ok()?).ok()
 }
 
 #[cfg(test)]
