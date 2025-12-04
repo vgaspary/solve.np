@@ -29,6 +29,9 @@ use frontend::handlers as frontend_handlers;
 use log::error;
 use ranking::update_ranking;
 use rusqlite::Connection;
+use rustls::ServerConfig;
+use rustls_pemfile::certs;
+use rustls_pemfile::private_key;
 use state::LazyStaticData;
 use state::State;
 use state::StaticData;
@@ -71,9 +74,8 @@ struct Args {
     #[command(flatten)]
     auth_args: AuthArgs,
 
-    /// Disable TLS.
-    #[arg(long, default_value_t = false)]
-    no_tls: bool,
+    #[command(flatten)]
+    tls_args: TlsArgs,
 }
 
 #[derive(clap::Args)]
@@ -94,6 +96,18 @@ struct AuthArgs {
     /// GitHub Auth Client secret.
     #[arg(long, requires = "auth")]
     github_auth_client_secret: Option<String>,
+}
+
+#[derive(clap::Args)]
+#[group(id = "tls", required = false, multiple = true)]
+struct TlsArgs {
+    /// Cert file path.
+    #[arg(long, requires = "tls")]
+    tls_cert: Option<PathBuf>,
+
+    /// Key file path.
+    #[arg(long, requires = "tls")]
+    tls_key: Option<PathBuf>,
 }
 
 impl TryFrom<&Args> for State {
@@ -142,6 +156,26 @@ impl TryFrom<&Args> for State {
     }
 }
 
+impl TryFrom<&TlsArgs> for ServerConfig {
+    type Error = std::io::Error;
+    fn try_from(tls_args: &TlsArgs) -> std::io::Result<ServerConfig> {
+        let mut key_file = BufReader::new(File::open(
+            tls_args.tls_key.as_ref().expect("Invalid args"),
+        )?);
+        let pkey = private_key(&mut key_file)?.expect("Private key");
+        let mut cert_file = BufReader::new(File::open(
+            tls_args.tls_cert.as_ref().expect("Invalid args"),
+        )?);
+        let cert_chain = certs(&mut cert_file).collect::<Result<_, _>>()?;
+        let tls_config = rustls::ServerConfig::builder()
+            .with_no_client_auth()
+            .with_single_cert(cert_chain, pkey)
+            .inspect_err(|e| error!("{e}"))
+            .map_err(|_| std::io::ErrorKind::Other)?;
+        Ok(tls_config)
+    }
+}
+
 fn start_background_tasks(rerank_period: Duration, state: Arc<State>) {
     task::spawn(async move {
         loop {
@@ -160,7 +194,7 @@ async fn main() -> std::io::Result<()> {
         .decode(args.key)
         .expect("Secret key must be base64 encoded.");
     start_background_tasks(args.rerank_period, Arc::clone(&state));
-    HttpServer::new(move || {
+    let server = HttpServer::new(move || {
         App::new()
             .app_data(state.clone())
             /* --- Frontend scope --- */
@@ -238,8 +272,14 @@ async fn main() -> std::io::Result<()> {
                 )
                 .build(),
             )
-    })
-    .bind(("0.0.0.0", args.port))?
-    .run()
-    .await
+    });
+    let server = if args.tls_args.tls_cert.is_none() {
+        server.bind(("0.0.0.0", args.port))?
+    } else {
+        server.bind_rustls_0_23(
+            ("0.0.0.0", args.port),
+            ServerConfig::try_from(&args.tls_args)?,
+        )?
+    };
+    server.run().await
 }
