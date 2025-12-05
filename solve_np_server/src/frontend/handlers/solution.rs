@@ -118,7 +118,7 @@ pub async fn solution(
 
     let body = SolutionTemplate {
         head: HeadTemplate {
-            title: "My Solutions - solve.NP".into(),
+            title: "My Solutions - solveNP".into(),
         },
         header: HeaderTemplate::try_from(&session, state.clone())?,
         solution,

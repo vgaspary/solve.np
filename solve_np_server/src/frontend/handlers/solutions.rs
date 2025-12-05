@@ -105,7 +105,7 @@ pub async fn solutions(
         .collect();
     let body = SolutionsTemplate {
         head: HeadTemplate {
-            title: "My Solutions - solve.NP".into(),
+            title: "My Solutions - solveNP".into(),
         },
         header: HeaderTemplate::try_from(&session, state)?.with_active(Page::Solutions),
         problems,

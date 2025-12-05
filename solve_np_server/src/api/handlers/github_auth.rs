@@ -107,7 +107,7 @@ pub async fn github_auth_callback(
     let response = reqwest::Client::new()
         .get(GITHUB_AUTH_USER_ENDPOINT)
         .header(AUTHORIZATION, bearer_token)
-        .header(USER_AGENT, "solve.np")
+        .header(USER_AGENT, "solvenp.now")
         .send()
         .await
         .map_err(|_| ErrorInternalServerError("Failed to fetch user data with access token."))?;

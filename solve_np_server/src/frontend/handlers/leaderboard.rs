@@ -201,7 +201,7 @@ pub async fn leaderboard(
         .collect();
     let body = LeaderboardTemplate {
         head: HeadTemplate {
-            title: "Leaderboard - solve.NP".into(),
+            title: "Leaderboard - solveNP".into(),
         },
         header: HeaderTemplate::try_from(&session, state)?.with_active(Page::Leaderboard),
         problems,

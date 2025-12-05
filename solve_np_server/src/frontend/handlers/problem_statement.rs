@@ -112,7 +112,7 @@ pub async fn problem_statement(
     };
     let body = ProblemStatementTemplate {
         head: HeadTemplate {
-            title: format!("{} - solve.NP", problem.name),
+            title: format!("{} - solveNP", problem.name),
         },
         header: HeaderTemplate::try_from(&session, state)?,
         problem,

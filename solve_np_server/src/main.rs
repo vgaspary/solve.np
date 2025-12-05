@@ -60,8 +60,8 @@ struct Args {
     db_path: PathBuf,
 
     /// Address.
-    #[arg(long, default_value = "http://127.0.0.1")]
-    host: String,
+    #[arg(long, default_value = "http://127.0.0.1:3333")]
+    address: String,
 
     /// Port.
     #[arg(long, default_value_t = 3333)]
@@ -121,6 +121,7 @@ impl TryFrom<&Args> for State {
         .map_err(std::io::Error::other)?
         .into();
         let db = Mutex::new(Connection::open(&args.db_path).map_err(std::io::Error::other)?);
+        let address = args.address.clone();
         let session_registry = SessionRegistry::default();
         let google_auth_client_id = args
             .auth_args
@@ -146,7 +147,7 @@ impl TryFrom<&Args> for State {
             start_time,
             static_data,
             db,
-            address: format!("{}:{}", args.host, args.port),
+            address,
             session_registry,
             google_auth_client_id,
             google_auth_client_secret,

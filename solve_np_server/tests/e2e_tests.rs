@@ -274,7 +274,7 @@ async fn problem_statement_page_works() {
 
     assert!(response.status().is_success());
     let content = response.text().await.unwrap();
-    assert!(content.contains("<title>Graph Coloring - solve.NP</title>"));
+    assert!(content.contains("<title>Graph Coloring - solveNP</title>"));
     test.pass();
 }
 

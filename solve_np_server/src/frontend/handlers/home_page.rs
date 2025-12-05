@@ -29,7 +29,7 @@ pub async fn home_page(
         .unwrap_or_default();
     let body = HomePageTemplate {
         head: HeadTemplate {
-            title: "solve.NP".into(),
+            title: "solveNP".into(),
         },
         header: HeaderTemplate::try_from(&session, state)?,
         user_name,
