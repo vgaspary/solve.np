@@ -363,7 +363,7 @@ async fn logout_works() {
 async fn validate_sample_tsp_correct() {
     let test = spawn_app().await;
     let tsp_solution = serde_json::json!({
-        "TspSolution": [0, 4, 3, 7, 1, 5, 2, 6, 0]
+        "TspSolution": [0, 1, 4, 2, 6, 5, 3, 7, 0]
     });
 
     let response = test
@@ -376,7 +376,7 @@ async fn validate_sample_tsp_correct() {
 
     assert!(response.status().is_success());
     let json: serde_json::Value = response.json().await.unwrap();
-    assert_eq!(json, serde_json::json!({"Valid": 74}));
+    assert_eq!(json, serde_json::json!({"Valid": 69}));
     test.pass();
 }
 
