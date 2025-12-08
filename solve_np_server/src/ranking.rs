@@ -11,6 +11,7 @@ use anyhow::Context;
 use itertools::Itertools;
 use librank::Rank;
 use librank::RankedExt;
+use log::debug;
 use log::info;
 use rusqlite::params;
 use rusqlite::types::FromSql;
@@ -183,7 +184,7 @@ fn maybe_update(
         .collect_vec();
 
     if submissions_to_update.is_empty() && solutions_to_update.is_empty() {
-        info!("[Background task] Rankings are unchanged. Nothing to update.");
+        debug!("[Background task] Rankings are unchanged. Nothing to update.");
         return Ok(());
     }
 
@@ -218,15 +219,15 @@ fn maybe_update(
     }
 
     tx.commit().context("Committing transaction")?;
-    info!("[Background task] Rankings updated.");
+    debug!("[Background task] Rankings updated.");
     Ok(())
 }
 
 pub fn update_ranking(state: &State) -> anyhow::Result<()> {
-    info!("[Background task] Updating solution and submission rankings.");
+    debug!("[Background task] Updating solution and submission rankings.");
     let (solutions, submissions) = sanitize_and_select(state)?;
 
-    info!("[Background task] Ranking...");
+    debug!("[Background task] Ranking...");
     let ranked_submissions = rank_submissions(submissions);
     let ranked_solutions = rank_solutions(solutions, &ranked_submissions);
 

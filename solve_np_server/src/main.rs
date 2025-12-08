@@ -222,7 +222,7 @@ fn start_background_tasks(args: &Args, state: Arc<State>) {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    env_logger::init_from_env(env_logger::Env::default().default_filter_or("debug"));
+    env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
     let args = Args::parse();
     let state = Data::new(State::try_from(&args)?);
     let key = BASE64_STANDARD
