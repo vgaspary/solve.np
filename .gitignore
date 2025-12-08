@@ -8,3 +8,4 @@ test.log
 /solve_np_server/js/node_modules/
 /solve_np_server/js/dist/
 /solve_np_server/start.sh
+/solve_np_server/sessions.yaml

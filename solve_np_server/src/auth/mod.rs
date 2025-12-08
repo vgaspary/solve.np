@@ -8,7 +8,7 @@ use serde::Serialize;
 #[derive(Clone, Copy, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct SessionId(u128);
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, Hash, Eq, PartialEq)]
 pub struct IdTokenClaims {
     pub sub: String,
     pub name: String,

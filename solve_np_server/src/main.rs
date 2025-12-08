@@ -23,10 +23,13 @@ use auth::gauth::GoogleAuthClientSecret;
 use auth::github_auth::GithubAuthClientId;
 use auth::github_auth::GithubAuthClientSecret;
 use auth::session_registry::SessionRegistry;
+use auth::session_registry::save_to_file;
 use base64::prelude::*;
 use clap::Parser;
 use frontend::handlers as frontend_handlers;
+use log::debug;
 use log::error;
+use log::info;
 use ranking::update_ranking;
 use rusqlite::Connection;
 use rustls::ServerConfig;
@@ -70,6 +73,14 @@ struct Args {
     /// Ranking update period.
     #[arg(long, value_parser = humantime::parse_duration, default_value = "5m")]
     rerank_period: Duration,
+
+    /// Session store.
+    #[arg(long, default_value = "sessions.yaml")]
+    session_store: PathBuf,
+
+    /// Session cleanup and saving period.
+    #[arg(long, value_parser = humantime::parse_duration, default_value = "10s")]
+    session_cleanup_period: Duration,
 
     #[command(flatten)]
     auth_args: AuthArgs,
@@ -122,7 +133,7 @@ impl TryFrom<&Args> for State {
         .into();
         let db = Mutex::new(Connection::open(&args.db_path).map_err(std::io::Error::other)?);
         let address = args.address.clone();
-        let session_registry = SessionRegistry::default();
+        let session_registry = SessionRegistry::load_from_file_or_default(&args.session_store);
         let google_auth_client_id = args
             .auth_args
             .google_auth_client_id
@@ -177,13 +188,36 @@ impl TryFrom<&TlsArgs> for ServerConfig {
     }
 }
 
-fn start_background_tasks(rerank_period: Duration, state: Arc<State>) {
-    task::spawn(async move {
-        loop {
-            sleep(rerank_period).await;
-            let _ = update_ranking(state.as_ref()).inspect_err(|err| error!("{err}"));
-        }
-    });
+fn start_background_tasks(args: &Args, state: Arc<State>) {
+    let rerank_period = args.rerank_period;
+    let session_cleanup_period = args.session_cleanup_period;
+    let session_store = args.session_store.clone();
+    {
+        let state = Arc::clone(&state);
+        task::spawn(async move {
+            loop {
+                sleep(rerank_period).await;
+                let _ = update_ranking(state.as_ref()).inspect_err(|err| error!("{err}"));
+            }
+        });
+    }
+    {
+        let state = Arc::clone(&state);
+        task::spawn(async move {
+            let mut sessions = state.session_registry.valid_sessions();
+            loop {
+                sleep(session_cleanup_period).await;
+                let new_sessions = state.session_registry.valid_sessions();
+                if sessions == new_sessions {
+                    debug!("Sessions have not changed.");
+                    continue;
+                }
+                sessions = new_sessions;
+                info!("Saving new session set");
+                let _ = save_to_file(&session_store, &sessions).inspect_err(|err| error!("{err}"));
+            }
+        });
+    }
 }
 
 #[actix_web::main]
@@ -192,9 +226,9 @@ async fn main() -> std::io::Result<()> {
     let args = Args::parse();
     let state = Data::new(State::try_from(&args)?);
     let key = BASE64_STANDARD
-        .decode(args.key)
+        .decode(&args.key)
         .expect("Secret key must be base64 encoded.");
-    start_background_tasks(args.rerank_period, Arc::clone(&state));
+    start_background_tasks(&args, Arc::clone(&state));
     let server = HttpServer::new(move || {
         App::new()
             .app_data(state.clone())
