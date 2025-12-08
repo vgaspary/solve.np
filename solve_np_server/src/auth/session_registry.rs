@@ -54,6 +54,10 @@ impl SessionRegistry {
         session_id
     }
 
+    pub fn remove_session(&self, session_id: SessionId) {
+        self.sessions.lock().unwrap().remove(&session_id);
+    }
+
     pub fn valid_sessions(&self) -> Sessions {
         let now = SystemTime::now();
         self.sessions
