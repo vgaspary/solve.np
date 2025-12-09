@@ -30,20 +30,28 @@ static E2E_TEST_BUILD: Lazy<()> = Lazy::new(|| {
     println!("Build successful.");
 });
 
-struct Test {
+struct TestApp {
     address: String,
     db_path: String,
     server_process: Child,
     client: reqwest::Client,
+    session_store_path: Option<String>,
 }
 
-impl Test {
+impl TestApp {
     fn pass(self) {
         Command::new("rm")
             .arg("-f")
             .arg(&self.db_path)
             .output()
             .expect("Failed to remove passed test database");
+        if let Some(path) = &self.session_store_path {
+            Command::new("rm")
+                .arg("-f")
+                .arg(path)
+                .output()
+                .expect("Failed to remove session store file");
+        }
     }
 
     async fn log_in(&self) {
@@ -68,7 +76,7 @@ impl Test {
     }
 }
 
-impl Drop for Test {
+impl Drop for TestApp {
     fn drop(&mut self) {
         println!("Stopping server (PID: {})...", self.server_process.id());
         self.server_process
@@ -81,11 +89,7 @@ impl Drop for Test {
     }
 }
 
-async fn spawn_app() -> Test {
-    spawn_app_with_rerank_period("5m").await
-}
-
-async fn spawn_app_with_rerank_period(rerank_period: &str) -> Test {
+async fn spawn_app(extra_args: &[&str]) -> TestApp {
     Lazy::force(&E2E_TEST_BUILD);
 
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
@@ -120,17 +124,23 @@ async fn spawn_app_with_rerank_period(rerank_period: &str) -> Test {
     let random_key = "YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYQ==";
     let server_binary_path = format!("{}/../target/debug/solve_np_server", manifest_dir);
 
-    let server_process = Command::new(&server_binary_path)
+    let mut command = Command::new(&server_binary_path);
+    command
         .arg("--db-path")
         .arg(&db_path)
         .arg("--key")
         .arg(random_key)
         .arg("--port")
-        .arg(port.to_string())
-        .arg("--rerank-period")
-        .arg(rerank_period)
-        .spawn()
-        .expect("Failed to start solve_np_server");
+        .arg(port.to_string());
+
+    command.args(extra_args);
+
+    let session_store_path = extra_args
+        .windows(2)
+        .find(|w| w[0] == "--session-store")
+        .map(|w| w[1].to_string());
+
+    let server_process = command.spawn().expect("Failed to start solve_np_server");
 
     let address = format!("http://127.0.0.1:{}", port);
 
@@ -153,15 +163,16 @@ async fn spawn_app_with_rerank_period(rerank_period: &str) -> Test {
         .build()
         .unwrap();
 
-    Test {
+    TestApp {
         address,
         db_path,
         server_process,
         client,
+        session_store_path,
     }
 }
 
-async fn get_solution_id(test: &Test) -> String {
+async fn get_solution_id(test: &TestApp) -> String {
     let solutions_page_html = test
         .client
         .get(&format!("{}/solutions", &test.address))
@@ -181,7 +192,7 @@ async fn get_solution_id(test: &Test) -> String {
 
 #[tokio::test]
 async fn health_check_works() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
     let response = test
         .client
         .get(&format!("{}/health_check", &test.address))
@@ -197,7 +208,7 @@ async fn health_check_works() {
 
 #[tokio::test]
 async fn home_page_works() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
     let response = test
         .client
         .get(&format!("{}/", &test.address))
@@ -213,7 +224,7 @@ async fn home_page_works() {
 
 #[tokio::test]
 async fn login_page_get_works() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
     let response = test
         .client
         .get(&format!("{}/log_in", &test.address))
@@ -229,7 +240,7 @@ async fn login_page_get_works() {
 
 #[tokio::test]
 async fn login_page_get_with_error_works() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
     let response = test
         .client
         .get(&format!(
@@ -248,7 +259,7 @@ async fn login_page_get_with_error_works() {
 
 #[tokio::test]
 async fn problems_page_works() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
     let response = test
         .client
         .get(&format!("{}/problems", &test.address))
@@ -264,7 +275,7 @@ async fn problems_page_works() {
 
 #[tokio::test]
 async fn problem_statement_page_works() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
     let response = test
         .client
         .get(&format!("{}/problems/graph_coloring", &test.address))
@@ -280,7 +291,7 @@ async fn problem_statement_page_works() {
 
 #[tokio::test]
 async fn p_vs_np_page_works() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
     let response = test
         .client
         .get(&format!("{}/p_vs_np", &test.address))
@@ -296,7 +307,7 @@ async fn p_vs_np_page_works() {
 
 #[tokio::test]
 async fn successful_login_works() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
     test.log_in().await;
 
     let home_page_response = test
@@ -315,7 +326,7 @@ async fn successful_login_works() {
 
 #[tokio::test]
 async fn failed_login_works() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
 
     let response = test
         .client
@@ -333,7 +344,7 @@ async fn failed_login_works() {
 
 #[tokio::test]
 async fn logout_works() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
     test.log_in().await;
 
     let response = test
@@ -361,7 +372,7 @@ async fn logout_works() {
 
 #[tokio::test]
 async fn validate_sample_tsp_correct() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
     let tsp_solution = serde_json::json!({
         "TspSolution": [0, 1, 4, 2, 6, 5, 3, 7, 0]
     });
@@ -382,7 +393,7 @@ async fn validate_sample_tsp_correct() {
 
 #[tokio::test]
 async fn validate_sample_tsp_incorrect() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
     let tsp_solution = serde_json::json!({
         "TspSolution": [0, 1, 2, 3]
     });
@@ -403,7 +414,7 @@ async fn validate_sample_tsp_incorrect() {
 
 #[tokio::test]
 async fn validate_sample_graph_coloring_incorrect() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
     let gc_solution = serde_json::json!({
         "GraphColoringSolution": [0, 0, 0, 0, 0, 0, 0, 0]
     });
@@ -424,7 +435,7 @@ async fn validate_sample_graph_coloring_incorrect() {
 
 #[tokio::test]
 async fn vote_works() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
     test.log_in_as("user").await;
 
     // First vote for 'user'
@@ -473,7 +484,7 @@ async fn vote_works() {
 
 #[tokio::test]
 async fn solutions_api_works() {
-    let test = spawn_app().await;
+    let test = spawn_app(&[]).await;
     test.log_in().await;
 
     // Create a solution
@@ -549,7 +560,7 @@ async fn solutions_api_works() {
 
 #[tokio::test]
 async fn leaderboard_works() {
-    let test = spawn_app_with_rerank_period("100ms").await;
+    let test = spawn_app(&["--rerank-period", "100ms"]).await;
     let mut solution_ids = Vec::new();
     for user_idx in 0..20 {
         let user_name = format!("user_{user_idx}");
@@ -645,4 +656,84 @@ async fn leaderboard_works() {
     assert_eq!(matches, 100, "Leaderboard should contain 10 users.");
 
     test.pass();
+}
+
+#[tokio::test]
+async fn session_persistence_works() {
+    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let session_store_path = format!("{}/test_session_persistence.yaml", manifest_dir);
+
+    // Cleanup before test, just in case
+    let _ = std::fs::remove_file(&session_store_path);
+
+    let test1 = spawn_app(&[
+        "--session-store",
+        &session_store_path,
+        "--session-cleanup-period",
+        "1s",
+    ])
+    .await;
+
+    test1.log_in().await;
+
+    // check home page to make sure we are logged in
+    let home_page_html = test1
+        .client
+        .get(format!("{}/", test1.address))
+        .send()
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap();
+    assert!(home_page_html.contains("Welcome to solveNP.now, user!"));
+
+    // Wait for session to be written
+    tokio::time::sleep(Duration::from_secs(2)).await;
+
+    // Check session file content
+    let session_content =
+        std::fs::read_to_string(&session_store_path).expect("session file should exist");
+    assert!(session_content.contains("user"));
+
+    let client_with_cookie = test1.client.clone();
+
+    // Drop test1 to stop the server
+    drop(test1);
+
+    // Spawn a new app instance. It will load from the session file.
+    let test2 = spawn_app(&[
+        "--session-store",
+        &session_store_path,
+        "--session-cleanup-period",
+        "1s",
+    ])
+    .await;
+
+    // Use the client from the old app, which has the session cookie
+    let home_page_html_2 = client_with_cookie
+        .get(format!("{}/", test2.address))
+        .send()
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap();
+    assert!(home_page_html_2.contains("Welcome to solveNP.now, user!"));
+
+    // Now test logout
+    client_with_cookie
+        .get(format!("{}/api/log_out", test2.address))
+        .send()
+        .await
+        .unwrap();
+
+    // wait for session file to be updated
+    tokio::time::sleep(Duration::from_secs(2)).await;
+
+    let session_content_after_logout =
+        std::fs::read_to_string(&session_store_path).unwrap_or_default();
+    assert!(!session_content_after_logout.contains("user"));
+
+    test2.pass();
 }
