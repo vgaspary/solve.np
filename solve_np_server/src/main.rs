@@ -6,6 +6,7 @@ mod state;
 mod types;
 
 use actix_files::Files;
+use actix_session::SessionExt;
 use actix_session::SessionMiddleware;
 use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
@@ -47,6 +48,8 @@ use std::time::Duration;
 use std::time::SystemTime;
 use tokio::task;
 use tokio::time::sleep;
+
+use crate::auth::SessionId;
 
 #[derive(Parser)]
 struct Args {
@@ -295,7 +298,20 @@ async fn main() -> std::io::Result<()> {
             )
             /* ----------------- */
             .route("/health_check", get().to(api_handlers::health_check))
-            .wrap(actix_web::middleware::Logger::default())
+            .wrap(
+                actix_web::middleware::Logger::new(
+                    r#"%{session_id}xi %a "%r" %s %b "%{Referer}i" "%{User-Agent}i" %T"#,
+                )
+                .custom_request_replace("session_id", |req| {
+                    req.get_session()
+                        .get::<SessionId>("session_id")
+                        .ok()
+                        .flatten()
+                        .map(SessionId::short)
+                        .map(|id| id.to_string())
+                        .unwrap_or_default()
+                }),
+            )
             .wrap(
                 SessionMiddleware::builder(
                     CookieSessionStore::default(),

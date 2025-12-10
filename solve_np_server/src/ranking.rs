@@ -105,7 +105,7 @@ fn rank_solutions(
 
 fn sanitize_and_select(state: &State) -> anyhow::Result<(Vec<Solution>, Vec<Submission>)> {
     let db = state.db.lock().unwrap();
-    info!("[Background task] Sanitizing...");
+    debug!("[Background task] Sanitizing...");
     db.execute(
         "UPDATE solutions SET
                 ranking = NULL
@@ -124,7 +124,7 @@ fn sanitize_and_select(state: &State) -> anyhow::Result<(Vec<Solution>, Vec<Subm
         [],
     )
     .context("Sanitizing submissions")?;
-    info!("[Background task] Selecting...");
+    debug!("[Background task] Selecting...");
     let solutions = db
         .prepare(
             "SELECT solution_id, problem_id, ranking
