@@ -6,6 +6,7 @@ mod state;
 mod types;
 
 use actix_files::Files;
+use actix_files::NamedFile;
 use actix_session::SessionExt;
 use actix_session::SessionMiddleware;
 use actix_session::config::PersistentSession;
@@ -223,6 +224,14 @@ fn start_background_tasks(args: &Args, state: Arc<State>) {
     }
 }
 
+use actix_web::Responder;
+async fn robots_txt() -> impl Responder {
+    NamedFile::open_async("./static/robots.txt").await
+}
+async fn sitemap_xml() -> impl Responder {
+    NamedFile::open_async("./static/sitemap.xml").await
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
@@ -238,6 +247,8 @@ async fn main() -> std::io::Result<()> {
             /* --- Frontend scope --- */
             .service(Files::new("/static", "./static"))
             .service(Files::new("/js/dist", "./js/dist"))
+            .route("/robots.txt", get().to(robots_txt))
+            .route("/sitemap.xml", get().to(sitemap_xml))
             .route("/", get().to(frontend_handlers::home_page))
             .route("/log_in", get().to(frontend_handlers::log_in))
             .route("/leaderboard", get().to(frontend_handlers::leaderboard))
