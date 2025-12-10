@@ -1,4 +1,5 @@
 mod api;
+mod args;
 mod auth;
 mod frontend;
 mod ranking;
@@ -6,7 +7,6 @@ mod state;
 mod types;
 
 use actix_files::Files;
-use actix_files::NamedFile;
 use actix_session::SessionExt;
 use actix_session::SessionMiddleware;
 use actix_session::config::PersistentSession;
@@ -20,177 +20,23 @@ use actix_web::web::get;
 use actix_web::web::post;
 use actix_web::web::scope;
 use api::handlers as api_handlers;
-use auth::gauth::GoogleAuthClientId;
-use auth::gauth::GoogleAuthClientSecret;
-use auth::github_auth::GithubAuthClientId;
-use auth::github_auth::GithubAuthClientSecret;
-use auth::session_registry::SessionRegistry;
+use args::Args;
+use auth::SessionId;
 use auth::session_registry::save_to_file;
 use base64::prelude::*;
 use clap::Parser;
 use frontend::handlers as frontend_handlers;
+use frontend::public_files::robots_txt;
+use frontend::public_files::sitemap_xml;
 use log::debug;
 use log::error;
 use log::info;
 use ranking::update_ranking;
-use rusqlite::Connection;
 use rustls::ServerConfig;
-use rustls_pemfile::certs;
-use rustls_pemfile::private_key;
-use state::LazyStaticData;
 use state::State;
-use state::StaticData;
-use std::fs::File;
-use std::io::BufReader;
-use std::path::PathBuf;
 use std::sync::Arc;
-use std::sync::Mutex;
-use std::time::Duration;
-use std::time::SystemTime;
 use tokio::task;
 use tokio::time::sleep;
-
-use crate::auth::SessionId;
-
-#[derive(Parser)]
-struct Args {
-    /// Static data path.
-    #[arg(long, default_value = "static_data.yaml")]
-    static_data_path: PathBuf,
-
-    /// Session cookie key.
-    #[arg(long)]
-    key: String,
-
-    /// DB path.
-    #[arg(long, default_value = "solve_np.db3")]
-    db_path: PathBuf,
-
-    /// Address.
-    #[arg(long, default_value = "http://127.0.0.1:3333")]
-    address: String,
-
-    /// Port.
-    #[arg(long, default_value_t = 3333)]
-    port: u16,
-
-    /// Ranking update period.
-    #[arg(long, value_parser = humantime::parse_duration, default_value = "5m")]
-    rerank_period: Duration,
-
-    /// Session store.
-    #[arg(long, default_value = "sessions.yaml")]
-    session_store: PathBuf,
-
-    /// Session cleanup and saving period.
-    #[arg(long, value_parser = humantime::parse_duration, default_value = "10s")]
-    session_cleanup_period: Duration,
-
-    #[command(flatten)]
-    auth_args: AuthArgs,
-
-    #[command(flatten)]
-    tls_args: TlsArgs,
-}
-
-#[derive(clap::Args)]
-#[group(id = "auth", required = false, multiple = true)]
-struct AuthArgs {
-    /// Google Auth Client ID.
-    #[arg(long, requires = "auth")]
-    google_auth_client_id: Option<String>,
-
-    /// Google Auth Client secret.
-    #[arg(long, requires = "auth")]
-    google_auth_client_secret: Option<String>,
-
-    /// GitHub Auth Client ID.
-    #[arg(long, requires = "auth")]
-    github_auth_client_id: Option<String>,
-
-    /// GitHub Auth Client secret.
-    #[arg(long, requires = "auth")]
-    github_auth_client_secret: Option<String>,
-}
-
-#[derive(clap::Args)]
-#[group(id = "tls", required = false, multiple = true)]
-struct TlsArgs {
-    /// Cert file path.
-    #[arg(long, requires = "tls")]
-    tls_cert: Option<PathBuf>,
-
-    /// Key file path.
-    #[arg(long, requires = "tls")]
-    tls_key: Option<PathBuf>,
-}
-
-impl TryFrom<&Args> for State {
-    type Error = std::io::Error;
-
-    fn try_from(args: &Args) -> Result<Self, Self::Error> {
-        let start_time = SystemTime::now();
-        let static_data: StaticData = serde_yaml::from_reader::<_, LazyStaticData>(BufReader::new(
-            File::open(&args.static_data_path)?,
-        ))
-        .map_err(std::io::Error::other)?
-        .into();
-        let db = Mutex::new(Connection::open(&args.db_path).map_err(std::io::Error::other)?);
-        let address = args.address.clone();
-        let session_registry = SessionRegistry::load_from_file_or_default(&args.session_store);
-        let google_auth_client_id = args
-            .auth_args
-            .google_auth_client_id
-            .clone()
-            .map(GoogleAuthClientId);
-        let google_auth_client_secret = args
-            .auth_args
-            .google_auth_client_secret
-            .clone()
-            .map(GoogleAuthClientSecret);
-        let github_auth_client_id = args
-            .auth_args
-            .github_auth_client_id
-            .clone()
-            .map(GithubAuthClientId);
-        let github_auth_client_secret = args
-            .auth_args
-            .github_auth_client_secret
-            .clone()
-            .map(GithubAuthClientSecret);
-        Ok(Self {
-            start_time,
-            static_data,
-            db,
-            address,
-            session_registry,
-            google_auth_client_id,
-            google_auth_client_secret,
-            github_auth_client_id,
-            github_auth_client_secret,
-        })
-    }
-}
-
-impl TryFrom<&TlsArgs> for ServerConfig {
-    type Error = std::io::Error;
-    fn try_from(tls_args: &TlsArgs) -> std::io::Result<ServerConfig> {
-        let mut key_file = BufReader::new(File::open(
-            tls_args.tls_key.as_ref().expect("Invalid args"),
-        )?);
-        let pkey = private_key(&mut key_file)?.expect("Private key");
-        let mut cert_file = BufReader::new(File::open(
-            tls_args.tls_cert.as_ref().expect("Invalid args"),
-        )?);
-        let cert_chain = certs(&mut cert_file).collect::<Result<_, _>>()?;
-        let tls_config = rustls::ServerConfig::builder()
-            .with_no_client_auth()
-            .with_single_cert(cert_chain, pkey)
-            .inspect_err(|e| error!("{e}"))
-            .map_err(|_| std::io::ErrorKind::Other)?;
-        Ok(tls_config)
-    }
-}
 
 fn start_background_tasks(args: &Args, state: Arc<State>) {
     let rerank_period = args.rerank_period;
@@ -222,14 +68,6 @@ fn start_background_tasks(args: &Args, state: Arc<State>) {
             }
         });
     }
-}
-
-use actix_web::Responder;
-async fn robots_txt() -> impl Responder {
-    NamedFile::open_async("./static/robots.txt").await
-}
-async fn sitemap_xml() -> impl Responder {
-    NamedFile::open_async("./static/sitemap.xml").await
 }
 
 #[actix_web::main]
