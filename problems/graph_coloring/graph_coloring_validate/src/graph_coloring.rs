@@ -1,6 +1,7 @@
 use libgraph::Graph;
 use std::collections::HashSet;
 use std::fs::File;
+use std::io::BufReader;
 use std::path::PathBuf;
 use thiserror::Error;
 
@@ -61,7 +62,7 @@ pub fn parse_input(input: &str) -> Option<Graph> {
 }
 
 pub fn parse_input_from(path: PathBuf) -> Option<Graph> {
-    ciborium::from_reader(File::open(path).ok()?).ok()
+    ciborium::from_reader(BufReader::new(File::open(path).ok()?)).ok()
 }
 
 #[cfg(test)]
