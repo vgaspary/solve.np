@@ -2,6 +2,7 @@ use rusqlite::types::FromSql;
 use rusqlite::types::ToSql;
 use serde::Deserialize;
 use serde::Serialize;
+use std::convert::AsRef;
 use std::fmt;
 
 pub type Score = usize;
@@ -57,6 +58,12 @@ impl FromSql for ProblemId {
 impl ToSql for ProblemId {
     fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
         self.0.to_sql()
+    }
+}
+
+impl AsRef<str> for ProblemId {
+    fn as_ref(&self) -> &str {
+        self.0.as_ref()
     }
 }
 

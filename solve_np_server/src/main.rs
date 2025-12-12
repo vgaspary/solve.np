@@ -5,6 +5,7 @@ mod frontend;
 mod ranking;
 mod state;
 mod types;
+mod validate;
 
 use actix_files::Files;
 use actix_session::SessionExt;
@@ -37,6 +38,8 @@ use state::State;
 use std::sync::Arc;
 use tokio::task;
 use tokio::time::sleep;
+use validate::untested_submissions;
+use validate::validate;
 
 fn start_background_tasks(args: &Args, state: Arc<State>) {
     let rerank_period = args.rerank_period;
@@ -66,6 +69,22 @@ fn start_background_tasks(args: &Args, state: Arc<State>) {
                 info!("Saving new session set");
                 let _ = save_to_file(&session_store, &sessions).inspect_err(|err| error!("{err}"));
             }
+        });
+    }
+    {
+        let state = Arc::clone(&state);
+        task::spawn(async move {
+            let submission_ids = untested_submissions(Arc::clone(&state))
+                .inspect_err(|err| error!("{err}"))
+                .unwrap_or_default();
+            if submission_ids.is_empty() {
+                return;
+            }
+            info!("Re-validating {} submissions.", submission_ids.len());
+            submission_ids.into_iter().for_each(|submission_id| {
+                let _ =
+                    validate(submission_id, Arc::clone(&state)).inspect_err(|err| error!("{err}"));
+            });
         });
     }
 }
