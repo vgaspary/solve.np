@@ -10,25 +10,41 @@ use actix_web::error::ErrorInternalServerError;
 use actix_web::http::header::ContentType;
 use actix_web::web;
 use askama::Template;
+use serde::Deserialize;
 
 #[derive(Template)]
 #[template(path = "feedback.html")]
 struct FeedbackTemplate {
     head: HeadTemplate,
     header: HeaderTemplate,
+    status: Option<Result<(), String>>,
+}
+
+#[derive(Deserialize)]
+pub struct FeedbackQuery {
+    status: Option<String>,
 }
 
 pub async fn feedback(
     session: Session,
     state: web::Data<State>,
+    query: web::Query<FeedbackQuery>,
 ) -> Result<impl Responder, HttpError> {
     let head = HeadTemplate {
         title: "Feedback - solveNP".into(),
     };
     let header = HeaderTemplate::try_from(&session, state.clone())?.with_active(Page::Feedback);
-    let body = FeedbackTemplate { head, header }
-        .render()
-        .map_err(ErrorInternalServerError)?;
+    let status = query.status.as_ref().map(|status| match status.as_str() {
+        "success" => Ok(()),
+        err_msg => Err(err_msg.to_owned()),
+    });
+    let body = FeedbackTemplate {
+        head,
+        header,
+        status,
+    }
+    .render()
+    .map_err(ErrorInternalServerError)?;
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(body))

@@ -2,6 +2,21 @@
 <html lang="en">
   {{ head | safe }}
   <body>
+    {% match status %}
+    {% when Some(Ok(())) %}
+    <div class="popup" id="feedback-popup"><p>Feedback sent. Thank you!</p></div>
+    {% when Some(Err(msg)) %}
+    <div class="popup" id="feedback-popup"><p>Failed to send feedback: {{ msg }}</p></div>
+    {% when _ %}
+    {% endmatch %}
+    <script>
+      setTimeout(function() {
+        var popup = document.getElementById('feedback-popup');
+        if (popup) {
+          popup.style.display = 'none';
+        }
+      }, 5000);
+    </script>
     {{ header | safe }}
     <main>
       <article>

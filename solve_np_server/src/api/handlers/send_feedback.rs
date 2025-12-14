@@ -1,8 +1,7 @@
 use crate::mailer::FROM_EMAIL;
+use crate::mailer::TO_EMAIL;
 use crate::state::State;
 use actix_web::Responder;
-use actix_web::error::Error as HttpError;
-use actix_web::error::ErrorInternalServerError;
 use actix_web::web;
 use lettre::AsyncTransport;
 use lettre::message::Mailbox;
@@ -21,7 +20,17 @@ pub struct FeedbackForm {
 pub async fn send_feedback(
     state: web::Data<State>,
     form: web::Form<FeedbackForm>,
-) -> Result<impl Responder, HttpError> {
+) -> impl Responder {
+    match send_feedback_helper(state, form).await {
+        Ok(()) => web::Redirect::to("/feedback?status=success").see_other(),
+        Err(msg) => web::Redirect::to(format!("/feedback?status={msg}")).see_other(),
+    }
+}
+
+async fn send_feedback_helper(
+    state: web::Data<State>,
+    form: web::Form<FeedbackForm>,
+) -> Result<(), String> {
     let FeedbackForm {
         title,
         content,
@@ -35,14 +44,14 @@ pub async fn send_feedback(
         .from(
             FROM_EMAIL
                 .parse::<Mailbox>()
-                .map_err(ErrorInternalServerError)?,
+                .expect("Failed parsing the FROM_EMAIL"),
         )
-        .to("feedback@solvenp.now"
+        .to(TO_EMAIL
             .parse::<Mailbox>()
-            .map_err(ErrorInternalServerError)?)
+            .expect("Failed parsing the TO_EMAIL"))
         .subject(title)
         .singlepart(SinglePart::plain(content))
-        .map_err(ErrorInternalServerError)?;
+        .map_err(|_| "bad content".to_string())?;
     match state.mail_client.as_ref() {
         None => {
             info!(
@@ -54,8 +63,8 @@ pub async fn send_feedback(
             mail_client
                 .send(email)
                 .await
-                .map_err(ErrorInternalServerError)?;
+                .map_err(|_| "failed sending the feedback to feedback@solvenp.now".to_string())?;
         }
     };
-    Ok(web::Redirect::to("/feedback").see_other())
+    Ok(())
 }

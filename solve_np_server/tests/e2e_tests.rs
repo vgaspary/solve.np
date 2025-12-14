@@ -737,3 +737,46 @@ async fn session_persistence_works() {
 
     test2.pass();
 }
+
+#[tokio::test]
+async fn feedback_works() {
+    let test = spawn_app(&[]).await;
+
+    let feedback_form = [
+        ("title", "Test Feedback"),
+        ("content", "This is a test feedback message."),
+        ("email", "test@example.com"),
+    ];
+
+    let response = test
+        .client
+        .post(&format!("{}/api/feedback", &test.address))
+        .form(&feedback_form)
+        .send()
+        .await
+        .expect("Failed to submit feedback");
+
+    assert!(response.status().is_success());
+    assert_eq!(
+        response.url().path(),
+        "/feedback",
+        "The URL should be the feedback page"
+    );
+    assert_eq!(
+        response.url().query(),
+        Some("status=success"),
+        "The URL should have the status=success query parameter"
+    );
+
+    let content = response.text().await.unwrap();
+    assert!(
+        content.contains("Feedback sent. Thank you!"),
+        "The feedback success message was not found on the page"
+    );
+    assert!(
+        content.contains("<title>Feedback - solveNP</title>"),
+        "The title of the feedback page is incorrect"
+    );
+
+    test.pass();
+}
