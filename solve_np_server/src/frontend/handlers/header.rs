@@ -12,6 +12,7 @@ pub enum Page {
     PvsNP,
     Solutions,
     LogIn,
+    Feedback,
 }
 
 #[derive(Template)]

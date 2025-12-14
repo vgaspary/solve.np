@@ -197,7 +197,7 @@ header nav a {
   outline: none;
 }
 
-input[type="text"], input[type="password"], textarea {
+input[type="text"], input[type="password"], input[type="email"], textarea {
   background: #24283b;
   color: inherit;
   border: 1px solid #414868;
@@ -688,4 +688,11 @@ details[open] > summary {
     color: #c0caf5;
     display: block;
     margin-bottom: 1em;
+}
+
+.feedback-form input[type="text"],
+.feedback-form input[type="email"],
+.feedback-form textarea {
+  width: 100%;
+  box-sizing: border-box;
 }

@@ -35,3 +35,6 @@ pub use submission_status::submission_status;
 
 pub mod solution_status;
 pub use solution_status::solution_status;
+
+pub mod send_feedback;
+pub use send_feedback::send_feedback;

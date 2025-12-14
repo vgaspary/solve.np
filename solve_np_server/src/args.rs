@@ -3,6 +3,7 @@ use crate::auth::gauth::GoogleAuthClientSecret;
 use crate::auth::github_auth::GithubAuthClientId;
 use crate::auth::github_auth::GithubAuthClientSecret;
 use crate::auth::session_registry::SessionRegistry;
+use crate::mailer::create_mailer;
 use crate::state::LazyStaticData;
 use crate::state::State;
 use crate::state::StaticData;
@@ -52,6 +53,10 @@ pub struct Args {
     /// Session cleanup and saving period.
     #[arg(long, value_parser = humantime::parse_duration, default_value = "10s")]
     pub session_cleanup_period: Duration,
+
+    /// SMTP password.
+    #[arg(long)]
+    pub smtp_pass: Option<String>,
 
     #[command(flatten)]
     pub auth_args: AuthArgs,
@@ -125,6 +130,11 @@ impl TryFrom<&Args> for State {
             .github_auth_client_secret
             .clone()
             .map(GithubAuthClientSecret);
+        let mail_client = args.smtp_pass.as_ref().and_then(|smtp_pass| {
+            create_mailer(&smtp_pass)
+                .inspect_err(|err| error!("{err}"))
+                .ok()
+        });
         Ok(Self {
             start_time,
             static_data,
@@ -135,6 +145,7 @@ impl TryFrom<&Args> for State {
             google_auth_client_secret,
             github_auth_client_id,
             github_auth_client_secret,
+            mail_client,
         })
     }
 }

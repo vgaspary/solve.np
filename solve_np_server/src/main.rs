@@ -3,6 +3,7 @@ mod args;
 mod auth;
 mod frontend;
 mod ranking;
+mod mailer;
 mod state;
 mod types;
 mod validate;
@@ -124,6 +125,7 @@ async fn main() -> std::io::Result<()> {
                 "/solution_table/{problem_id}",
                 get().to(frontend_handlers::solution_table),
             )
+            .route("/feedback", get().to(frontend_handlers::feedback))
             /* ---------------------- */
             /* --- API scope --- */
             .service(
@@ -162,7 +164,8 @@ async fn main() -> std::io::Result<()> {
                     .route(
                         "/solutions/{solution_id}/input/{input_id}/status",
                         get().to(api_handlers::submission_status),
-                    ),
+                    )
+                    .route("/feedback", post().to(api_handlers::send_feedback)),
             )
             /* ----------------- */
             .route("/health_check", get().to(api_handlers::health_check))

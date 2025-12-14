@@ -6,6 +6,8 @@ use crate::auth::session_registry::SessionRegistry;
 use crate::types::InputId;
 use crate::types::ProblemId;
 use itertools::Itertools;
+use lettre::AsyncSmtpTransport;
+use lettre::Tokio1Executor;
 use rusqlite::Connection;
 use serde::Deserialize;
 use std::fs::File;
@@ -26,6 +28,7 @@ pub struct State {
     pub google_auth_client_secret: Option<GoogleAuthClientSecret>,
     pub github_auth_client_id: Option<GithubAuthClientId>,
     pub github_auth_client_secret: Option<GithubAuthClientSecret>,
+    pub mail_client: Option<AsyncSmtpTransport<Tokio1Executor>>,
 }
 
 impl State {
