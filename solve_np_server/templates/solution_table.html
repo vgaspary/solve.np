@@ -3,6 +3,7 @@
     {% for solution in solutions %}
     <tr>
       <td><a onclick="solve_np.maybe_delete('{{ solution.id }}', '{{ problem_id }}', {% if let Some(input_id) = input_id %}'{{ input_id }}'{% else %}null{% endif %}, '{{ solution.title }}')">[🗑]</a></td>
+      <td><a onclick="solve_np.edit_solution(this, '{{ solution.id }}', '{{ problem_id }}')">[🖉]</a></td>
       <td>{% match solution.status %}
         {% when Status::Untested %}
         <span style="color: grey;">Untested</span>
@@ -16,7 +17,7 @@
     </tr>
     {% endfor %}
     <tr id="new_attempt_row" >
-      <td colspan="2"><a onclick="solve_np.new_attempt(this)"><i>[New attempt]</i></a></td>
+      <td colspan="3"><a onclick="solve_np.new_attempt(this)"><i>[New attempt]</i></a></td>
     </tr>
     <tr id="create_cancel_row" style="display: none">
       <td colspan="2"><a id="create_button" onclick="solve_np.create_solution(this, '{{ problem_id }}')"><i>[Create]</i></a></td>

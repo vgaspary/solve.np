@@ -2,8 +2,8 @@ mod api;
 mod args;
 mod auth;
 mod frontend;
-mod ranking;
 mod mailer;
+mod ranking;
 mod state;
 mod types;
 mod validate;
@@ -20,6 +20,7 @@ use actix_web::web::Data;
 use actix_web::web::delete;
 use actix_web::web::get;
 use actix_web::web::post;
+use actix_web::web::put;
 use actix_web::web::scope;
 use api::handlers as api_handlers;
 use args::Args;
@@ -151,6 +152,14 @@ async fn main() -> std::io::Result<()> {
                     .route(
                         "/solutions/{solution_id}",
                         delete().to(api_handlers::delete_solution),
+                    )
+                    .route(
+                        "/solutions/{solution_id}",
+                        get().to(api_handlers::get_solution),
+                    )
+                    .route(
+                        "/solutions/{solution_id}",
+                        put().to(api_handlers::update_solution),
                     )
                     .route("/solutions", post().to(api_handlers::create_solution))
                     .route(

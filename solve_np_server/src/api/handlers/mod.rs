@@ -21,8 +21,14 @@ pub use validate_sample::validate_sample;
 pub mod vote;
 pub use vote::vote;
 
+pub mod get_solution;
+pub use get_solution::get_solution;
+
 pub mod delete_solution;
 pub use delete_solution::delete_solution;
+
+pub mod update_solution;
+pub use update_solution::update_solution;
 
 pub mod create_solution;
 pub use create_solution::create_solution;

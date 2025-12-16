@@ -2,6 +2,100 @@ import { global_event_listener_stack } from "./event_listener_stack";
 import { parse_solution } from "./problem_utils";
 
 type CancellationToken = { stop: boolean };
+type Solution = {
+  title: string,
+  description: string,
+}
+
+async function maybe_edit_solution(solution_id: string, problemId: string, titleInput: HTMLInputElement, descriptionInput: HTMLInputElement): Promise<void> {
+  if (titleInput.value.trim() === '') {
+    throw `'Title' field is mandatory.`;
+  }
+  const updateResponse = await fetch(
+    `/api/solutions/${solution_id}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: titleInput.value.trim(), description: descriptionInput.value.trim() })
+    });
+  if (!updateResponse.ok) {
+    throw await updateResponse.text();
+  }
+  await reload_solution_table(problemId);
+}
+
+async function reload_solution_table(problemId: string): Promise<void> {
+  const solutionTable = document.getElementById(`${problemId}_solution_table`) as HTMLElement;
+  const response = await fetch(`/solution_table/${problemId}`);
+  const content = await response.text();
+  solutionTable.innerHTML = content;
+}
+
+export function edit_solution(button: HTMLElement, solutionId: string, problemId: string): void {
+  const solutionTable = button.closest('table');
+  if (!solutionTable) return;
+  const currentRow = button.closest('tr');
+  if (!currentRow) return;
+  const rowIdx = currentRow.rowIndex;
+
+  (async () => {
+    const response: Response = await fetch(`/api/solutions/${solutionId}`);
+    if (!response.ok) return;
+    const solution: Solution = JSON.parse(await response.text());
+
+    solutionTable.deleteRow(rowIdx);
+    const editRow = solutionTable.insertRow(rowIdx);
+    editRow.innerHTML = `
+    <td></td>
+    <td></td>
+    <td></td>
+    <td><input type="text" autocomplete="off" placeholder="Title" value="${solution.title}" /></td>
+    <td><input type="text" autocomplete="off" placeholder="Description (optional)" value="${solution.description}" /></td>
+    `;
+    const titleInput = editRow.cells[3]?.firstChild! as HTMLInputElement;
+    const descriptionInput = editRow.cells[4]?.firstChild! as HTMLInputElement;
+
+    const saveCancelRow = solutionTable.insertRow(rowIdx + 1);
+    saveCancelRow.innerHTML = `
+    <td colspan="2"><a><i>[Save]</i></a></td>
+    <td><a><i>[Cancel]</i></a></td>
+    <td><span class="error-message"></span></td>
+    `;
+    const saveButton = saveCancelRow.cells[0]?.firstChild! as HTMLAnchorElement;
+    const cancelButton = saveCancelRow.cells[1]?.firstChild! as HTMLAnchorElement;
+    const errorMsgLabel = saveCancelRow.cells[2]?.firstChild! as HTMLSpanElement;
+
+    global_event_listener_stack.push((event: Event): void => {
+      if (event instanceof KeyboardEvent) {
+        switch (event.key) {
+          case 'Enter':
+            saveButton.click();
+            break;
+          case 'Escape':
+            cancelButton.click();
+            break;
+        }
+      }
+    });
+
+    saveButton.onclick = () => {
+      (async () => {
+        try {
+          await maybe_edit_solution(solutionId, problemId, titleInput, descriptionInput);
+          global_event_listener_stack.pop();
+        } catch (err) {
+          errorMsgLabel.innerHTML = `${err}`;
+        }
+      })();
+    };
+    cancelButton.onclick = () => {
+      (async () => {
+        await reload_solution_table(problemId);
+        global_event_listener_stack.pop();
+      })();
+    };
+  })();
+}
 
 export function maybe_delete(solution_id: string, problem_id: string, input_id: string, solution_title: string): void {
   const dialog = document.getElementById('confirm-dialog');
@@ -69,8 +163,9 @@ export function new_attempt(button: HTMLElement): void {
   new_row.innerHTML = `
     <td></td>
     <td></td>
-    <td><input type="text" autocomplete="off" placeholder="Title" id="new_title"/></td>
-    <td><input type="text" autocomplete="off" placeholder="Description (optional)" id="new_description"/></td>
+    <td></td>
+    <td><input type="text" autocomplete="off" placeholder="Title" /></td>
+    <td><input type="text" autocomplete="off" placeholder="Description (optional)" /></td>
   `;
 
   const title_input = new_row.querySelector("#new_title") as HTMLElement;
@@ -107,7 +202,6 @@ export function create_solution(button: HTMLElement, problemId: string): void {
   const title = table.querySelector('#new_title') as HTMLInputElement;
   const description = table.querySelector('#new_description') as HTMLInputElement;
   const error_msg = table.querySelector('#create_attempt_error_message') as HTMLElement;
-  const solution_table = document.getElementById(`${problemId}_solution_table`) as HTMLElement;
 
   if (title.value.trim() === '') {
     error_msg.innerHTML = '\'Title\' field is mandatory.';
@@ -128,9 +222,7 @@ export function create_solution(button: HTMLElement, problemId: string): void {
         throw await create_response.text();
       }
 
-      const response = await fetch(`/solution_table/${problemId}`);
-      const content = await response.text();
-      solution_table.innerHTML = content;
+      await reload_solution_table(problemId);
       global_event_listener_stack.pop();
     } catch (err) {
       error_msg.innerHTML = `${err}`;
