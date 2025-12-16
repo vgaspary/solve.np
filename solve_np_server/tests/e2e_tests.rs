@@ -559,6 +559,68 @@ async fn solutions_api_works() {
 }
 
 #[tokio::test]
+async fn update_solution_works() {
+    let test = spawn_app(&[]).await;
+    test.log_in().await;
+
+    // Create a solution
+    let create_solution_response = test
+        .client
+        .post(&format!("{}/api/solutions", &test.address))
+        .json(&serde_json::json!({
+            "problem_id": "graph_coloring",
+            "title": "Original title",
+            "description": "Original description"
+        }))
+        .send()
+        .await
+        .expect("Failed to create solution");
+    assert!(create_solution_response.status().is_success());
+
+    // Get the solution ID from the solutions page
+    let solution_id = get_solution_id(&test).await;
+
+    // Update the solution
+    let updated_title = "Updated title";
+    let updated_description = "Updated description";
+    let update_solution_response = test
+        .client
+        .put(&format!("{}/api/solutions/{}", &test.address, solution_id))
+        .json(&serde_json::json!({
+            "title": updated_title,
+            "description": updated_description
+        }))
+        .send()
+        .await
+        .expect("Failed to update solution");
+    assert!(update_solution_response.status().is_success());
+
+    // Verify the update by fetching the solution page and checking its content
+    let solution_page_html = test
+        .client
+        .get(&format!("{}/solutions/{}", &test.address, solution_id))
+        .send()
+        .await
+        .expect("Failed to get solution page")
+        .text()
+        .await
+        .unwrap();
+
+    assert!(solution_page_html.contains(updated_title));
+    assert!(solution_page_html.contains(updated_description));
+
+    // Delete the solution
+    let delete_response = test
+        .client
+        .delete(&format!("{}/api/solutions/{}", &test.address, solution_id))
+        .send()
+        .await
+        .expect("Failed to delete solution");
+    assert_eq!(delete_response.status(), reqwest::StatusCode::NO_CONTENT);
+    test.pass();
+}
+
+#[tokio::test]
 async fn leaderboard_works() {
     let test = spawn_app(&["--rerank-period", "100ms"]).await;
     let mut solution_ids = Vec::new();

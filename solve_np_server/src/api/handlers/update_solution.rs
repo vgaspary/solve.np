@@ -29,8 +29,7 @@ pub async fn update_solution(
         .and_then(|session_id| state.session_registry.get_user_id(session_id))
         .ok_or(ErrorInternalServerError("Internal error #6"))?;
     let solution_id = path.into_inner();
-    let title = &body.title;
-    let description = &body.description;
+    let UpdateSolutionBody { title, description } = body.into_inner();
 
     state
         .db
