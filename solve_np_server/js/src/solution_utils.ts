@@ -164,8 +164,8 @@ export function new_attempt(button: HTMLElement): void {
     <td></td>
     <td></td>
     <td></td>
-    <td><input type="text" autocomplete="off" placeholder="Title" /></td>
-    <td><input type="text" autocomplete="off" placeholder="Description (optional)" /></td>
+    <td><input type="text" autocomplete="off" placeholder="Title" id="new_title" /></td>
+    <td><input type="text" autocomplete="off" placeholder="Description (optional)" id="new_title" /></td>
   `;
 
   const title_input = new_row.querySelector("#new_title") as HTMLElement;
