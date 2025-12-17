@@ -15,12 +15,13 @@ pub async fn delete_solution(
     path: web::Path<SolutionId>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let user_id = session
+    let Some(user_id) = session
         .get::<SessionId>("session_id")?
         .and_then(|session_id| state.session_registry.get_user_id(session_id))
-        .ok_or(ErrorInternalServerError("Internal error #6"))?;
+    else {
+        return Ok(HttpResponse::NoContent().finish());
+    };
     let solution_id = path.into_inner();
-
     state
         .db
         .lock()

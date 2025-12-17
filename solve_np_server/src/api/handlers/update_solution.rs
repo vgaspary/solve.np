@@ -6,7 +6,6 @@ use actix_web::HttpResponse;
 use actix_web::Responder;
 use actix_web::error::Error as HttpError;
 use actix_web::error::ErrorConflict;
-use actix_web::error::ErrorInternalServerError;
 use actix_web::web;
 use log::error;
 use rusqlite::params;
@@ -24,10 +23,12 @@ pub async fn update_solution(
     body: web::Json<UpdateSolutionBody>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let user_id = session
+    let Some(user_id) = session
         .get::<SessionId>("session_id")?
         .and_then(|session_id| state.session_registry.get_user_id(session_id))
-        .ok_or(ErrorInternalServerError("Internal error #6"))?;
+    else {
+        return Ok(HttpResponse::Ok());
+    };
     let solution_id = path.into_inner();
     let UpdateSolutionBody { title, description } = body.into_inner();
 

@@ -14,10 +14,12 @@ pub async fn vote(
     path: web::Path<String>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let user_id = session
+    let Some(user_id) = session
         .get::<SessionId>("session_id")?
         .and_then(|session_id| state.session_registry.get_user_id(session_id))
-        .ok_or(ErrorInternalServerError("Internal error #4"))?;
+    else {
+        return Ok(web::Redirect::to("/log_in?redirect=/p_vs_np"));
+    };
     let vote = match path.into_inner().as_str() {
         "eq" => true,
         "neq" => false,

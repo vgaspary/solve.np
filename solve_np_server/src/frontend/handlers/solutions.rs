@@ -13,6 +13,7 @@ use actix_web::Responder;
 use actix_web::error::Error as HttpError;
 use actix_web::error::ErrorInternalServerError;
 use actix_web::http::header::ContentType;
+use actix_web::http::header::LOCATION;
 use actix_web::web;
 use askama::Template;
 use itertools::Itertools;
@@ -47,10 +48,14 @@ pub async fn solutions(
         problem_id,
         input_id,
     } = query.into_inner();
-    let user_id = session
+    let Some(user_id) = session
         .get::<SessionId>("session_id")?
         .and_then(|session_id| state.session_registry.get_user_id(session_id))
-        .ok_or(ErrorInternalServerError("Internal error #4"))?;
+    else {
+        return Ok(HttpResponse::SeeOther()
+            .append_header((LOCATION, "/log_in?redirect=/solutions"))
+            .finish());
+    };
     let solutions = state
         .db
         .lock()

@@ -18,10 +18,12 @@ pub async fn submission_status(
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     let (solution_id, input_id) = path.into_inner();
-    let user_id = session
+    let Some(user_id) = session
         .get::<SessionId>("session_id")?
         .and_then(|session_id| state.session_registry.get_user_id(session_id))
-        .ok_or(ErrorInternalServerError("Internal error #26"))?;
+    else {
+        return Ok(HttpResponse::Ok().finish());
+    };
     let status: Status = state
         .db
         .lock()

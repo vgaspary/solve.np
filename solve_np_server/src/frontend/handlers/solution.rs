@@ -12,6 +12,7 @@ use actix_web::Responder;
 use actix_web::error::Error as HttpError;
 use actix_web::error::ErrorInternalServerError;
 use actix_web::http::header::ContentType;
+use actix_web::http::header::LOCATION;
 use actix_web::web;
 use askama::Template;
 use log::error;
@@ -54,11 +55,18 @@ pub async fn solution(
     path: web::Path<SolutionId>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let user_id = session
+    let solution_id = path.into_inner();
+    let Some(user_id) = session
         .get::<SessionId>("session_id")?
         .and_then(|session_id| state.session_registry.get_user_id(session_id))
-        .ok_or(ErrorInternalServerError("Internal error #9"))?;
-    let solution_id = path.into_inner();
+    else {
+        return Ok(HttpResponse::SeeOther()
+            .append_header((
+                LOCATION,
+                format!("/log_in?redirect=/solutions/{solution_id}"),
+            ))
+            .finish());
+    };
     let db = state.db.lock().unwrap();
 
     let solution = db
