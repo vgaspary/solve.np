@@ -5,3 +5,11 @@ use askama::Template;
 pub struct HeadTemplate {
     pub title: String,
 }
+
+impl HeadTemplate {
+    pub fn with_title(title: &str) -> Self {
+        Self {
+            title: title.into(),
+        }
+    }
+}

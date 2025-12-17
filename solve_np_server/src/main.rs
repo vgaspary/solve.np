@@ -15,7 +15,9 @@ use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
 use actix_web::App;
 use actix_web::HttpServer;
+use actix_web::http::StatusCode;
 use actix_web::http::header::DispositionType;
+use actix_web::middleware::ErrorHandlers;
 use actix_web::web::Data;
 use actix_web::web::delete;
 use actix_web::web::get;
@@ -29,6 +31,7 @@ use auth::session_registry::save_to_file;
 use base64::prelude::*;
 use clap::Parser;
 use frontend::handlers as frontend_handlers;
+use frontend::handlers::error::handle_internal_error;
 use frontend::public_files::robots_txt;
 use frontend::public_files::sitemap_xml;
 use log::debug;
@@ -102,6 +105,10 @@ async fn main() -> std::io::Result<()> {
     start_background_tasks(&args, Arc::clone(&state));
     let server = HttpServer::new(move || {
         App::new()
+            .wrap(
+                ErrorHandlers::new()
+                    .handler(StatusCode::INTERNAL_SERVER_ERROR, handle_internal_error),
+            )
             .app_data(state.clone())
             /* --- Frontend scope --- */
             .service(Files::new("/static", "./static"))

@@ -25,15 +25,15 @@ pub async fn submit_solution(
 ) -> Result<impl Responder, HttpError> {
     let session_id = session
         .get::<SessionId>("session_id")?
-        .ok_or(ErrorInternalServerError("Internal error #38"))?;
+        .ok_or(ErrorInternalServerError("Error code: 38"))?;
     let user_id = state
         .session_registry
         .get_user_id(session_id)
-        .ok_or(ErrorInternalServerError("Internal error #14"))?;
+        .ok_or(ErrorInternalServerError("Error code: 14"))?;
     let user_name = state
         .session_registry
         .get_user_name(session_id)
-        .ok_or(ErrorInternalServerError("Internal error #33"))?;
+        .ok_or(ErrorInternalServerError("Error code: 33"))?;
     let solution = solution.into_inner();
     let (problem_id, solution_id, input_id) = path.into_inner();
 
@@ -55,7 +55,7 @@ pub async fn submit_solution(
             |row| row.get(0),
         )
         .inspect_err(|err| error!("{err}"))
-        .map_err(|_| ErrorInternalServerError("Internal error #15"))?;
+        .map_err(|_| ErrorInternalServerError("Error code: 15"))?;
     if same_hash_digest {
         return Ok(HttpResponse::NoContent().finish());
     }
@@ -76,7 +76,7 @@ pub async fn submit_solution(
             params![user_id, user_name, problem_id, solution_id, input_id, solution.to_string(), hash_digest, Status::Untested, ""],
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
-        .map_err(|_| ErrorInternalServerError("Internal error #16"))?;
+        .map_err(|_| ErrorInternalServerError("Error code: 16"))?;
 
     let validation_result = task::spawn_blocking(move || {
         validate(
@@ -85,8 +85,8 @@ pub async fn submit_solution(
         )
     })
     .await
-    .map_err(|_| ErrorInternalServerError("Internal error #17"))?
+    .map_err(|_| ErrorInternalServerError("Error code: 17"))?
     .inspect_err(|err| error!("{err}"))
-    .map_err(|_| ErrorInternalServerError("Internal error #18"))?;
+    .map_err(|_| ErrorInternalServerError("Error code: 18"))?;
     Ok(HttpResponse::Ok().json(validation_result))
 }

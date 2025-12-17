@@ -1,5 +1,6 @@
 pub mod head;
 pub mod header;
+pub mod error;
 
 pub mod home_page;
 pub use home_page::home_page;

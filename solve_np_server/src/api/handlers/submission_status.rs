@@ -38,6 +38,6 @@ pub async fn submission_status(
             |row| row.get(0),
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
-        .map_err(|_| ErrorInternalServerError("Internal error #27"))?;
+        .map_err(|_| ErrorInternalServerError("Error code: 27"))?;
     Ok(HttpResponse::Ok().json(status))
 }

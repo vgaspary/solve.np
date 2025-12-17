@@ -35,6 +35,6 @@ pub async fn vote(
             params![user_id, vote],
         )
         .inspect_err(|err| debug!("SQL query failed: {err}"))
-        .map_err(|_| ErrorInternalServerError("Internal error #1"))?;
+        .map_err(|_| ErrorInternalServerError("Error code: 1"))?;
     Ok(web::Redirect::to("/p_vs_np").see_other())
 }

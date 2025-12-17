@@ -22,8 +22,8 @@
       <article>
         <h2>Send feedback to solveNP</h2>
         <form action="/api/feedback" method="post" class="feedback-form">
-          <p><input type="text" id="title" name="title" required placeholder="Title"></p>
-          <p><textarea id="content" name="content" required rows="10" placeholder="Feedback"></textarea></p>
+          <p><input type="text" id="title" name="title" required placeholder="Title" value="{{ title }}"></p>
+          <p><textarea id="content" name="content" required rows="10" placeholder="Feedback">{{ content }}</textarea></p>
           <p><input type="email" id="email" name="email" placeholder="Email (optional)"></p>
           <p><input type="submit" value="Send"></p>
         </form>

@@ -31,7 +31,7 @@ pub async fn github_auth(
     let client_id = state
         .github_auth_client_id
         .as_ref()
-        .ok_or(ErrorNotImplemented("Internal error #39"))?
+        .ok_or(ErrorNotImplemented("Error code: 39"))?
         .0
         .as_str();
     let redirect_uri = format!(
@@ -72,11 +72,11 @@ pub async fn github_auth_callback(
     let GithubAuthClientId(client_id) = state
         .github_auth_client_id
         .as_ref()
-        .ok_or(ErrorNotImplemented("Internal error #40"))?;
+        .ok_or(ErrorNotImplemented("Error code: 40"))?;
     let GithubAuthClientSecret(client_secret) = state
         .github_auth_client_secret
         .as_ref()
-        .ok_or(ErrorNotImplemented("Internal error #41"))?;
+        .ok_or(ErrorNotImplemented("Error code: 41"))?;
     let GithubAuthCallbackQueryParams { redirect, code } = query.into_inner();
     let response = reqwest::Client::new()
         .post(GITHUB_AUTH_TOKEN_ENDPOINT)

@@ -80,9 +80,7 @@ pub async fn p_vs_np(
     session: Session,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let head = HeadTemplate {
-        title: "P vs NP - solveNP".into(),
-    };
+    let head = HeadTemplate::with_title("P vs NP - solveNP");
     let header = HeaderTemplate::try_from(&session, state.clone())?.with_active(Page::PvsNP);
     let eq_neq_text = if header.logged_in {
         get_vote_data(&session, &state)?.and_then(|(vote, num_eq, num_neq)| {

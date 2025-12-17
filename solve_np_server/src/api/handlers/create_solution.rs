@@ -27,15 +27,15 @@ pub async fn create_solution(
 ) -> Result<impl Responder, HttpError> {
     let session_id = session
         .get::<SessionId>("session_id")?
-        .ok_or(ErrorInternalServerError("Internal error #5"))?;
+        .ok_or(ErrorInternalServerError("Error code: 5"))?;
     let user_id = state
         .session_registry
         .get_user_id(session_id)
-        .ok_or(ErrorInternalServerError("Internal error #37"))?;
+        .ok_or(ErrorInternalServerError("Error code: 37"))?;
     let user_name = state
         .session_registry
         .get_user_name(session_id)
-        .ok_or(ErrorInternalServerError("Internal error #32"))?;
+        .ok_or(ErrorInternalServerError("Error code: 32"))?;
     let problem_id = &body.problem_id;
     let solution_id = Uuid::new_v4().as_simple().to_string();
     let title = &body.title;

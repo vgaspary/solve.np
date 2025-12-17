@@ -62,7 +62,7 @@ pub async fn solutions(
         .unwrap()
         .prepare("SELECT solution_id, problem_id, title, description, status FROM solutions WHERE user_id = ?1")
         .inspect_err(|err| error!("{err}"))
-        .map_err(|_| ErrorInternalServerError("Internal error #7"))?
+        .map_err(|_| ErrorInternalServerError("Error code: 7"))?
         .query_map(
             [user_id],
             |row| Ok(
@@ -77,7 +77,7 @@ pub async fn solutions(
                 )
                 )
             )
-        .map_err(|_| ErrorInternalServerError("Internal error #8"))?
+        .map_err(|_| ErrorInternalServerError("Error code: 8"))?
         .filter_map(Result::ok)
         .collect_vec();
     let problems = state
@@ -109,9 +109,7 @@ pub async fn solutions(
         })
         .collect();
     let body = SolutionsTemplate {
-        head: HeadTemplate {
-            title: "My Solutions - solveNP".into(),
-        },
+        head: HeadTemplate::with_title("My Solutions - solveNP"),
         header: HeaderTemplate::try_from(&session, state)?.with_active(Page::Solutions),
         problems,
     }

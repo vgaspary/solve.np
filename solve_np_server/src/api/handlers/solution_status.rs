@@ -36,6 +36,6 @@ pub async fn solution_status(
             |row| row.get(0),
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
-        .map_err(|_| ErrorInternalServerError("Internal error #25"))?;
+        .map_err(|_| ErrorInternalServerError("Error code: 25"))?;
     Ok(HttpResponse::Ok().json(status))
 }

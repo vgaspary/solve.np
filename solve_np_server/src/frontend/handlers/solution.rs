@@ -82,7 +82,7 @@ pub async fn solution(
             })
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
-        .map_err(|_| ErrorInternalServerError("Internal error #10"))?;
+        .map_err(|_| ErrorInternalServerError("Error code: 10"))?;
     let (problem, inputs) = state
         .static_data
         .problems
@@ -122,12 +122,10 @@ pub async fn solution(
                     .collect(),
             )
         })
-        .ok_or(ErrorInternalServerError("Internal error #11"))?;
+        .ok_or(ErrorInternalServerError("Error code: 11"))?;
 
     let body = SolutionTemplate {
-        head: HeadTemplate {
-            title: "My Solutions - solveNP".into(),
-        },
+        head: HeadTemplate::with_title("My Solutions - solveNP"),
         header: HeaderTemplate::try_from(&session, state.clone())?,
         solution,
         problem,

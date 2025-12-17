@@ -68,9 +68,7 @@ pre.wrap {
 .quiet {
   opacity: .6;
 }
-p.wrap {
-  width: 45em;
-}
+
 
 .hidden-until-hover {
   border: 1px dashed #414868;

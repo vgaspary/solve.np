@@ -61,7 +61,7 @@ pub async fn solution_table(
                 problem_id = ?2;",
         )
         .inspect_err(|err| error!("{err}"))
-        .map_err(|_| ErrorInternalServerError("Internal error #22"))?
+        .map_err(|_| ErrorInternalServerError("Error code: 22"))?
         .query_map(params![user_id, problem_id], |row| {
             Ok(Solution {
                 id: row.get(0)?,
@@ -70,7 +70,7 @@ pub async fn solution_table(
                 status: row.get(3)?,
             })
         })
-        .map_err(|_| ErrorInternalServerError("Internal error #23"))?
+        .map_err(|_| ErrorInternalServerError("Error code: 23"))?
         .filter_map(Result::ok)
         .collect_vec();
     let body = SolutionTable {

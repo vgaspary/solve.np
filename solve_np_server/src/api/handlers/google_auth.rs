@@ -28,7 +28,7 @@ pub async fn google_auth(
     let client_id = state
         .google_auth_client_id
         .as_ref()
-        .ok_or(ErrorNotImplemented("Internal error #35"))?
+        .ok_or(ErrorNotImplemented("Error code: 26"))?
         .0
         .as_str();
     let redirect_uri = redirect_uri(&state.address);
@@ -59,11 +59,11 @@ pub async fn google_auth_callback(
     let client_id = state
         .google_auth_client_id
         .as_ref()
-        .ok_or(ErrorNotImplemented("Internal error #35"))?;
+        .ok_or(ErrorNotImplemented("Error code: 34"))?;
     let client_secret = state
         .google_auth_client_secret
         .as_ref()
-        .ok_or(ErrorNotImplemented("Internal error #35"))?;
+        .ok_or(ErrorNotImplemented("Error code: 35"))?;
     let query = query.into_inner();
     let response = reqwest::Client::new()
         .post(GOOGLE_AUTH_TOKEN_ENDPOINT)

@@ -31,6 +31,6 @@ pub async fn delete_solution(
             params![solution_id, user_id],
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
-        .map_err(|_| ErrorInternalServerError("Internal error #7"))?;
+        .map_err(|_| ErrorInternalServerError("Error code: 4"))?;
     Ok(HttpResponse::NoContent().finish())
 }

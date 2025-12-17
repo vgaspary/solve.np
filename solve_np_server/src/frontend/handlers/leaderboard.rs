@@ -91,7 +91,7 @@ pub async fn leaderboard(
                 ranking IS NOT NULL",
         )
         .inspect_err(|err| error!("{err}"))
-        .map_err(|_| ErrorInternalServerError("Internal error #28"))?
+        .map_err(|_| ErrorInternalServerError("Error code: 28"))?
         .query_map(params![], |row| {
             let problem_id = row.get(1)?;
             let rank = row.get(4)?;
@@ -102,7 +102,7 @@ pub async fn leaderboard(
             };
             Ok((problem_id, Ranked(rank, solution)))
         })
-        .map_err(|_| ErrorInternalServerError("Internal error #29"))?
+        .map_err(|_| ErrorInternalServerError("Error code: 29"))?
         .filter_map(Result::ok)
         .into_group_map::<ProblemId, Ranked<Solution>>();
     let mut rankings_per_problem_input = state
@@ -126,7 +126,7 @@ pub async fn leaderboard(
                 submissions.ranking IS NOT NULL",
         )
         .inspect_err(|err| error!("{err}"))
-        .map_err(|_| ErrorInternalServerError("Internal error #30"))?
+        .map_err(|_| ErrorInternalServerError("Error code: 30"))?
         .query_map(params![], |row| {
             let problem_id = row.get(1)?;
             let input_id = row.get(2)?;
@@ -139,7 +139,7 @@ pub async fn leaderboard(
             };
             Ok(((problem_id, input_id), Ranked(rank, submission)))
         })
-        .map_err(|_| ErrorInternalServerError("Internal error #31"))?
+        .map_err(|_| ErrorInternalServerError("Error code: 31"))?
         .filter_map(Result::ok)
         .into_group_map::<(ProblemId, InputId), Ranked<Submission>>();
     let problem_input_iter = state
@@ -200,9 +200,7 @@ pub async fn leaderboard(
         })
         .collect();
     let body = LeaderboardTemplate {
-        head: HeadTemplate {
-            title: "Leaderboard - solveNP".into(),
-        },
+        head: HeadTemplate::with_title("Leaderboard - solveNP"),
         header: HeaderTemplate::try_from(&session, state)?.with_active(Page::Leaderboard),
         problems,
     }

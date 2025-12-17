@@ -56,7 +56,7 @@ pub async fn problem_statement(
         .problems
         .iter()
         .find(|problem| problem.id == problem_id)
-        .ok_or_else(|| ErrorInternalServerError("No problem found with ID"))
+        .ok_or_else(|| ErrorInternalServerError("Error code: 42"))
         .and_then(|problem| {
             let md_content = fs::read_to_string(&problem.problem_statement)?;
             let parser = Parser::new(&md_content);
@@ -78,7 +78,7 @@ pub async fn problem_statement(
                                     input.path
                                 )
                             })
-                            .map_err(|_| ErrorInternalServerError("Internal error #3"))?;
+                            .map_err(|_| ErrorInternalServerError("Error code: 3"))?;
                         Ok::<Input, HttpError>(Input {
                             id: input.id.clone(),
                             filename,
@@ -95,7 +95,7 @@ pub async fn problem_statement(
             .unwrap()
             .prepare("SELECT solution_id, title, description, status FROM solutions WHERE user_id = ?1 AND problem_id = ?2")
             .inspect_err(|err| error!("{err}"))
-            .map_err(|_| ErrorInternalServerError("Internal error #20"))?
+            .map_err(|_| ErrorInternalServerError("Error code: 20"))?
             .query_map(params![user_id, problem_id],
                 |row| Ok(
                     Solution {
@@ -104,16 +104,14 @@ pub async fn problem_statement(
                         description: row.get(2)?,
                         status: row.get(3)?,
                     }))
-            .map_err(|_| ErrorInternalServerError("Internal error #21"))?
+            .map_err(|_| ErrorInternalServerError("Error code: 21"))?
             .filter_map(Result::ok)
             .collect_vec()
     } else {
         vec![]
     };
     let body = ProblemStatementTemplate {
-        head: HeadTemplate {
-            title: format!("{} - solveNP", problem.name),
-        },
+        head: HeadTemplate::with_title(&format!("{} - solveNP", problem.name)),
         header: HeaderTemplate::try_from(&session, state)?,
         problem,
         solution_table: SolutionTable {

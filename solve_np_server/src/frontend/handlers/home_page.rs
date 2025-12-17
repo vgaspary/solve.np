@@ -28,9 +28,7 @@ pub async fn home_page(
         .and_then(|session_id| state.session_registry.get_user_name(session_id))
         .unwrap_or_default();
     let body = HomePageTemplate {
-        head: HeadTemplate {
-            title: "solveNP".into(),
-        },
+        head: HeadTemplate::with_title("solveNP"),
         header: HeaderTemplate::try_from(&session, state)?,
         user_name,
     }

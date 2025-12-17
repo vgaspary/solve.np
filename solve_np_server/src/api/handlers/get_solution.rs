@@ -45,6 +45,6 @@ pub async fn get_solution(
             },
         )
         .inspect_err(|err| error!("SQL query failed: {err}"))
-        .map_err(|_| ErrorInternalServerError("Internal error #7"))?;
+        .map_err(|_| ErrorInternalServerError("Error code: 6"))?;
     Ok(HttpResponse::Ok().json(solution))
 }

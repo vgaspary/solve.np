@@ -18,11 +18,15 @@ struct FeedbackTemplate {
     head: HeadTemplate,
     header: HeaderTemplate,
     status: Option<Result<(), String>>,
+    title: String,
+    content: String,
 }
 
 #[derive(Deserialize)]
 pub struct FeedbackQuery {
     status: Option<String>,
+    title: Option<String>,
+    content: Option<String>,
 }
 
 pub async fn feedback(
@@ -30,9 +34,7 @@ pub async fn feedback(
     state: web::Data<State>,
     query: web::Query<FeedbackQuery>,
 ) -> Result<impl Responder, HttpError> {
-    let head = HeadTemplate {
-        title: "Feedback - solveNP".into(),
-    };
+    let head = HeadTemplate::with_title("Feedback - solveNP");
     let header = HeaderTemplate::try_from(&session, state.clone())?.with_active(Page::Feedback);
     let status = query.status.as_ref().map(|status| match status.as_str() {
         "success" => Ok(()),
@@ -42,6 +44,8 @@ pub async fn feedback(
         head,
         header,
         status,
+        title: query.title.clone().unwrap_or("".to_string()),
+        content: query.content.clone().unwrap_or("".to_string()),
     }
     .render()
     .map_err(ErrorInternalServerError)?;

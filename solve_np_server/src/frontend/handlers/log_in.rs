@@ -34,9 +34,7 @@ pub async fn log_in(
     session: Session,
 ) -> Result<impl Responder, HttpError> {
     let body = LogInTemplate {
-        head: HeadTemplate {
-            title: "Log In - solveNP".into(),
-        },
+        head: HeadTemplate::with_title("Log In - solveNP"),
         header: HeaderTemplate::try_from(&session, state.clone())?.with_active(Page::LogIn),
         redirect: query.redirect.clone(),
         error_msg: query.err.clone().unwrap_or_default(),

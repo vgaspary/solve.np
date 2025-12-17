@@ -15,7 +15,7 @@ pub enum Page {
     Feedback,
 }
 
-#[derive(Template)]
+#[derive(Template, Default)]
 #[template(path = "header.html")]
 pub struct HeaderTemplate {
     pub logged_in: bool,

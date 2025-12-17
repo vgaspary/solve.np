@@ -24,7 +24,7 @@ pub async fn log_in(
     form: web::Form<LogInForm>,
 ) -> Result<impl Responder, HttpError> {
     if !state.test_auth() {
-        return Err(ErrorNotImplemented("Internal error #36"));
+        return Err(ErrorNotImplemented("Error code: 36"));
     }
     let LogInForm { username, password } = form.into_inner();
     Ok(if username == password {
