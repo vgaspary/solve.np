@@ -2,7 +2,7 @@
 
 The travelling salesman, starting from a certain city, wants to visit all the other cities exactly once and return. Given a map of the cities and the roads connecting them, he wants to make the trip as short as possible.
 
-Find the shortest path in the graph that starts and ends in a specific vertex and visits **all** other vertices **exactly once**. This kind of a path is also known as a Hamiltonian cycle.
+Find a path in the graph that starts and ends in a specific vertex and visits **all** other vertices **exactly once**. This kind of a path is also known as a Hamiltonian cycle.
 
 ## Input
 
