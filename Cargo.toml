@@ -6,6 +6,8 @@ members = [
   "problems/graph_coloring/graph_coloring_validate",
   "problems/travelling_salesman/tsp_gen",
   "problems/travelling_salesman/tsp_validate",
+  "problems/vertex_cover/vertex_cover_gen",
+  "problems/vertex_cover/vertex_cover_validate",
   "solve_np_server",
 ]
 resolver = "3"
