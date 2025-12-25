@@ -25,7 +25,6 @@ struct Args {
 }
 
 fn main() {
-    env_logger::init();
     let mut rng = rand::rng();
     let Args {
         num_vertices,

@@ -6,7 +6,7 @@ Find an assignment of colors to the vertices of a given graph such that no two v
 
 ## Input
 
-The input consists of the graph. The graph is represented as a list of edges. An edge is represented as a tuple of 2 integers: `v u`, where `v` and `u` are the vertices making the edge. All values are represented as 16-bit unsigned integers.
+The input consists of the graph. The graph is represented as a list of edges. An edge is represented as a tuple of 2 integers: `v u`, where `v` and `u` are the vertices making the edge.
 
 `0 <= v, u < 65536`
 
@@ -14,15 +14,15 @@ Vertex IDs are a consecutive range starting from `0`, i.e., `0, 1, 2, ..., N - 1
 
 ## Output
 
-The output is a space (`' '`) separated list of integers denoting the color assigned to each vertex, ordered by vertex ID starting from 0. The colors should be represented by non-negative integers, starting from 0.
+The output is a whitespace separated list of integers denoting the color assigned to each vertex, ordered by vertex ID starting from 0. The colors should be represented by non-negative integers, starting from 0.
 
 ## Validation and Scoring
 
 The output must:
 
-- Be a list of `V` integers, where `V` is the number of vertices.
-- Contain only non-negative integers representing colors.
-- Satisfy the constraint that for every edge `(u, v)` in the input graph, the color assigned to vertex `u` must be different from the color assigned to vertex `v`.
+- be a list of `V` integers, where `V` is the number of vertices.
+- contain only non-negative integers representing colors.
+- satisfy the constraint that for every edge `(u, v)` in the input graph, the color assigned to vertex `u` must be different from the color assigned to vertex `v`.
 
 Scoring will be based on the number of colors used.
 
