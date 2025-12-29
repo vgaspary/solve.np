@@ -31,7 +31,7 @@ Consider the following graph:
 
 <img src="/static/VC_0.svg" width="720">
 
-The trivial vertex cover is the set of all vertices with score _8_. Here are two better vertex covers with scores _N_ and _M_.
+The trivial vertex cover is the set of all vertices with score _8_. Here are two better vertex covers with scores _6_ and _4_.
 
 <img src="/static/VC_1.svg" width="720">
 
