@@ -1,3 +1,4 @@
+use anyhow::Context;
 use libgraph::Graph;
 use std::collections::HashSet;
 use std::fs::File;
@@ -7,6 +8,8 @@ use thiserror::Error;
 
 type Score = usize;
 type Vertex = usize;
+
+pub const SAMPLE_GRAPH_SIZE: usize = 8;
 
 #[derive(Error, Debug, PartialEq, Eq)]
 pub enum Error {
@@ -46,8 +49,18 @@ pub fn validate(input: &Graph, solution: &HashSet<Vertex>) -> Result<Score, Erro
     Ok(solution.len())
 }
 
-pub fn parse_binary_input(path: &Path) -> std::io::Result<Graph> {
-    ciborium::from_reader(BufReader::new(File::open(path)?)).map_err(std::io::Error::other)
+pub fn parse_binary_input(path: &Path) -> anyhow::Result<Graph> {
+    Ok(ciborium::from_reader(BufReader::new(File::open(path)?))?)
+}
+
+pub fn parse_sample_input(input: &str) -> anyhow::Result<Graph> {
+    input
+        .lines()
+        .try_fold(Graph::new(SAMPLE_GRAPH_SIZE), |graph, line| {
+            let (u, v) = line.split_once(' ').context("Split once failed.")?;
+            let (u, v) = (u.parse()?, v.parse()?);
+            Ok(graph.add_edge((u, v)))
+        })
 }
 
 #[cfg(test)]

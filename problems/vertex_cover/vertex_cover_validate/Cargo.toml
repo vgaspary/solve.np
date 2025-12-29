@@ -7,3 +7,4 @@ edition = "2024"
 thiserror = "2.0.17"
 libgraph = { path = "../../../libgraph" }
 ciborium = "0.2.2"
+anyhow = "1.0.100"

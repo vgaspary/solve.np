@@ -1,12 +1,16 @@
-type SampleSolution = { TspSolution: number[] } | { GraphColoringSolution: number[] };
+type SampleSolution = { TspSolution: number[] } | { GraphColoringSolution: number[] } | { VertexCoverSolution: number[] };
 
 export function parse_solution(problem_id: string, input: string): SampleSolution | null {
-  if (problem_id === "travelling_salesman") {
-    return { TspSolution: input.trim().split(/\s+/).map(n => Number(n)) };
-  } else if (problem_id === "graph_coloring") {
-    return { GraphColoringSolution: input.trim().split(/\s+/).map(n => Number(n)) };
+  switch (problem_id) {
+    case 'travelling_salesman':
+      return { TspSolution: input.trim().split(/\s+/).map(n => Number(n)) };
+    case 'graph_coloring':
+      return { GraphColoringSolution: input.trim().split(/\s+/).map(n => Number(n)) };
+    case 'vertex_cover':
+      return { VertexCoverSolution: input.trim().split(/\s+/).map(n => Number(n)) };
+    default:
+      return null;
   }
-  return null;
 }
 
 export function check_solution(problem_id: string): void {
