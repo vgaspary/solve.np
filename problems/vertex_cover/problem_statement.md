@@ -8,8 +8,6 @@ Find a vertex cover in an undirected graph.
 
 The input consists of the graph. The graph is represented as a list of edges. An edge is represented as a tuple of 2 integers: `v u`, where `v` and `u` are the vertices making the edge.
 
-`0 <= v, u < 65536`
-
 Vertex IDs are a consecutive range starting from `0`, i.e., `0, 1, 2, ..., N - 1`, where `N` is an arbitrary number of vertices. No edge connects a vertex to itself. Any pair of vertices has **zero or one** edge. Note: the graph is not necessarily connected.
 
 ## Output
