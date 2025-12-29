@@ -23,6 +23,7 @@ pub type Score = usize;
 pub enum Solution {
     TspSolution(Vec<usize>),
     GraphColoringSolution(Vec<usize>),
+    VertexCoverSolution(Vec<usize>),
 }
 
 impl ToString for Solution {
@@ -30,6 +31,7 @@ impl ToString for Solution {
         match self {
             Self::TspSolution(path) => path.iter().join(" "),
             Self::GraphColoringSolution(colors) => colors.iter().join(" "),
+            Self::VertexCoverSolution(vertices) => vertices.iter().join(" "),
         }
     }
 }
@@ -77,7 +79,7 @@ pub fn validate(
     state: Arc<State>,
 ) -> anyhow::Result<ValidateSolutionResult> {
     let (user_id, problem_id, solution_id, input_id) = &submission_id;
-    let input_path = state
+    let input = state
         .static_data
         .problems
         .iter()
@@ -86,9 +88,8 @@ pub fn validate(
         .inputs
         .iter()
         .find(|input| input.id == *input_id)
-        .context("Bad input ID")?
-        .path
-        .with_extension("cbor");
+        .context("Bad input ID")?;
+    let input_path = input.path.with_extension("cbor");
     let solution = read_solution_from_db(&submission_id, state.as_ref())?;
     let validation_result = match problem_id.as_ref() {
         "travelling_salesman" => {
@@ -107,6 +108,20 @@ pub fn validate(
             graph_coloring_validate::validate(&graph, coloring)
                 .map(|score| ValidateSolutionResult::Valid(score))
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
+        }
+        "vertex_cover" => {
+            let vertex_cover = parse_vertex_cover_solution(&solution)?;
+            let num_vertices = input.num_vertices;
+            match vertex_cover_validate::pre_validate(&vertex_cover, num_vertices) {
+                Ok(vertex_cover) => {
+                    let graph = vertex_cover_validate::parse_binary_input(&input_path)?;
+                    match vertex_cover_validate::validate(&graph, &vertex_cover) {
+                        Ok(score) => ValidateSolutionResult::Valid(score),
+                        Err(err) => ValidateSolutionResult::Invalid(err.to_string()),
+                    }
+                }
+                Err(err) => ValidateSolutionResult::Invalid(err.to_string()),
+            }
         }
         _ => bail!("Uncovered problem_id"),
     };
@@ -174,5 +189,12 @@ fn parse_graph_coloring_solution(solution: &str) -> anyhow::Result<Vec<usize>> {
     Ok(solution
         .split_whitespace()
         .map(|color| color.parse())
+        .collect::<Result<_, _>>()?)
+}
+
+fn parse_vertex_cover_solution(solution: &str) -> anyhow::Result<Vec<usize>> {
+    Ok(solution
+        .split_whitespace()
+        .map(|vertex| vertex.parse())
         .collect::<Result<_, _>>()?)
 }

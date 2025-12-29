@@ -264,6 +264,13 @@ export function submit_solution(problem_id: string, solution_id: string, input_i
         solution_textarea.classList = "";
         return;
       }
+      if (response.status === 500) {
+        const errorHtml = await response.text();
+        const newHtml = errorHtml.replace('<head>', `<head><base href="${window.location.origin}">`);
+        const blob = new Blob([newHtml], { type: 'text/html' });
+        window.location.assign(URL.createObjectURL(blob));
+        return;
+      }
       const validation_result = await response.json();
       if (validation_result.Valid) {
         status_paragraph.innerHTML = 'Score: ' + validation_result.Valid;

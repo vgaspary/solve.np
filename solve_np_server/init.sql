@@ -1,11 +1,11 @@
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
   votes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT UNIQUE NOT NULL,
     vote BOOLEAN NOT NULL
   );
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
   solutions (
     solution_id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL,
@@ -17,9 +17,9 @@ CREATE TABLE
     ranking INTEGER
   );
 
-CREATE UNIQUE INDEX idx_user_problem_title ON solutions (user_id, problem_id, title);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_problem_title ON solutions (user_id, problem_id, title);
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
   submissions (
     user_id TEXT NOT NULL,
     user_name TEXT NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE
     PRIMARY KEY (user_id, problem_id, solution_id, input_id)
   );
 
-CREATE TRIGGER update_solution_status_on_new_submission AFTER
+CREATE TRIGGER IF NOT EXISTS update_solution_status_on_new_submission AFTER
 UPDATE OF solution_id,
 status ON submissions FOR EACH ROW WHEN OLD.status <> NEW.status BEGIN
 UPDATE solutions
@@ -64,11 +64,12 @@ WHERE
 
 END;
 
-CREATE TABLE
-  num_inputs (problem_id TEXT, cnt INTEGER);
+CREATE TABLE IF NOT EXISTS
+  num_inputs (problem_id TEXT UNIQUE, cnt INTEGER);
 
 INSERT INTO
   num_inputs (problem_id, cnt)
 VALUES
   ('graph_coloring', 9),
-  ('travelling_salesman', 9);
+  ('travelling_salesman', 9),
+  ('vertex_cover', 9);

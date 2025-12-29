@@ -41,18 +41,24 @@ impl State {
 pub struct LazyInput {
     pub id: InputId,
     pub path: PathBuf,
+    pub num_vertices: usize,
 }
 
 pub struct Input {
     pub id: InputId,
     pub path: PathBuf,
+    pub num_vertices: usize,
     pub filename: String,
     pub preview: String,
 }
 
 impl From<LazyInput> for Input {
     fn from(input: LazyInput) -> Self {
-        let LazyInput { id, path } = input;
+        let LazyInput {
+            id,
+            path,
+            num_vertices,
+        } = input;
         let filename = (&path)
             .file_name()
             .expect("Path must have a filename.")
@@ -67,6 +73,7 @@ impl From<LazyInput> for Input {
         Self {
             id,
             path,
+            num_vertices,
             filename,
             preview,
         }

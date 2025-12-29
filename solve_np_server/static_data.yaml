@@ -7,30 +7,39 @@ problems:
       - id: small_sparse
         path: ../problems/travelling_salesman/inputs/small_sparse.txt
         cmd: tsp_gen -v 100 -d 0.3 -m 100 -s 20 -o small_sparse
+        num_vertices: 100
       - id: small_dense
         path: ../problems/travelling_salesman/inputs/small_dense.txt
         cmd: tsp_gen -v 100 -d 0.8 -m 100 -s 30 -o small_dense
+        num_vertices: 100
       - id: small_full
         path: ../problems/travelling_salesman/inputs/small_full.txt
         cmd: tsp_gen -v 100 -d 1.0 -m 100 -s 10 -o small_full
+        num_vertices: 100
       - id: medium_sparse
         path: ../problems/travelling_salesman/inputs/medium_sparse.txt
         cmd: tsp_gen -v 1000 -d 0.3 -m 100 -s 20 -o medium_sparse
+        num_vertices: 1000
       - id: medium_dense
         path: ../problems/travelling_salesman/inputs/medium_dense.txt
         cmd: tsp_gen -v 1000 -d 0.8 -m 100 -s 30 -o medium_dense
+        num_vertices: 1000
       - id: medium_full
         path: ../problems/travelling_salesman/inputs/medium_full.txt
         cmd: tsp_gen -v 1000 -d 1.0 -m 100 -s 10 -o medium_full
+        num_vertices: 1000
       - id: large_sparse
         path: ../problems/travelling_salesman/inputs/large_sparse.txt
         cmd: tsp_gen -v 10000 -d 0.3 -m 100 -s 20 -o large_sparse
+        num_vertices: 10000
       - id: large_dense
         path: ../problems/travelling_salesman/inputs/large_dense.txt
         cmd: tsp_gen -v 10000 -d 0.8 -m 100 -s 30 -o large_dense
+        num_vertices: 10000
       - id: large_full
         path: ../problems/travelling_salesman/inputs/large_full.txt
         cmd: tsp_gen -v 10000 -d 1.0 -m 100 -s 10 -o large_full
+        num_vertices: 10000
   - id: graph_coloring
     name: Graph Coloring
     description: Color the nodes of a graph with as few colors as possible such that connected nodes don't have the same color.
@@ -39,30 +48,39 @@ problems:
       - id: small_ultra_sparse
         path: ../problems/graph_coloring/inputs/small_ultra_sparse.txt
         cmd: graph_coloring_gen -v 100 -d 0.1 -o small_ultra_sparse
+        num_vertices: 100
       - id: small_sparse
         path: ../problems/graph_coloring/inputs/small_sparse.txt
         cmd: graph_coloring_gen -v 100 -d 0.3 -o small_sparse
+        num_vertices: 100
       - id: small_dense
         path: ../problems/graph_coloring/inputs/small_dense.txt
         cmd: graph_coloring_gen -v 100 -d 0.6 -o small_dense
+        num_vertices: 100
       - id: medium_ultra_sparse
         path: ../problems/graph_coloring/inputs/medium_ultra_sparse.txt
         cmd: graph_coloring_gen -v 1000 -d 0.1 -o medium_ultra_sparse
+        num_vertices: 1000
       - id: medium_sparse
         path: ../problems/graph_coloring/inputs/medium_sparse.txt
         cmd: graph_coloring_gen -v 1000 -d 0.3 -o medium_sparse
+        num_vertices: 1000
       - id: medium_dense
         path: ../problems/graph_coloring/inputs/medium_dense.txt
         cmd: graph_coloring_gen -v 1000 -d 0.6 -o medium_dense
+        num_vertices: 1000
       - id: large_ultra_sparse
         path: ../problems/graph_coloring/inputs/large_ultra_sparse.txt
         cmd: graph_coloring_gen -v 10000 -d 0.1 -o large_ultra_sparse
+        num_vertices: 10000
       - id: large_sparse
         path: ../problems/graph_coloring/inputs/large_sparse.txt
         cmd: graph_coloring_gen -v 10000 -d 0.3 -o large_sparse
+        num_vertices: 10000
       - id: large_dense
         path: ../problems/graph_coloring/inputs/large_dense.txt
         cmd: graph_coloring_gen -v 10000 -d 0.6 -o large_dense
+        num_vertices: 10000
   - id: vertex_cover
     name: Vertex Cover
     description: Find a small vertex cover of a graph, a subset of vertices that contains an endpoint of all the edges.
@@ -71,27 +89,36 @@ problems:
       - id: small_sparse
         path: ../problems/vertex_cover/inputs/small_sparse.txt
         cmd: vertex_cover_gen -v 100 -d 0.2 -o small_sparse
+        num_vertices: 100
       - id: small
         path: ../problems/vertex_cover/inputs/small.txt
         cmd: vertex_cover_gen -v 100 -d 0.5 -o small
+        num_vertices: 100
       - id: small_dense
         path: ../problems/vertex_cover/inputs/small_dense.txt
         cmd: vertex_cover_gen -v 100 -d 0.8 -o small_dense
+        num_vertices: 100
       - id: medium_sparse
         path: ../problems/vertex_cover/inputs/medium_sparse.txt
         cmd: vertex_cover_gen -v 1000 -d 0.2 -o medium_sparse
+        num_vertices: 1000
       - id: medium
         path: ../problems/vertex_cover/inputs/medium.txt
         cmd: vertex_cover_gen -v 1000 -d 0.5 -o medium
+        num_vertices: 1000
       - id: medium_dense
         path: ../problems/vertex_cover/inputs/medium_dense.txt
         cmd: vertex_cover_gen -v 1000 -d 0.8 -o medium_dense
+        num_vertices: 1000
       - id: large_sparse
         path: ../problems/vertex_cover/inputs/large_sparse.txt
         cmd: vertex_cover_gen -v 10000 -d 0.2 -o large_sparse
+        num_vertices: 10000
       - id: large
         path: ../problems/vertex_cover/inputs/large.txt
         cmd: vertex_cover_gen -v 10000 -d 0.5 -o large
+        num_vertices: 10000
       - id: large_dense
         path: ../problems/vertex_cover/inputs/large_dense.txt
         cmd: vertex_cover_gen -v 10000 -d 0.8 -o large_dense
+        num_vertices: 10000
