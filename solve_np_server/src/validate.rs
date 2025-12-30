@@ -94,11 +94,16 @@ pub fn validate(
     let validation_result = match problem_id.as_ref() {
         "travelling_salesman" => {
             let path = parse_tsp_solution(&solution)?;
-            // TODO! Pre validate
-            let graph = tsp_validate::parse_input_from(input_path).context("Parsing TSP input")?;
-            tsp_validate::validate(&graph, path)
-                .map(|score| ValidateSolutionResult::Valid(score))
-                .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
+            match tsp_validate::pre_validate(&path, input.num_vertices) {
+                Ok(()) => {
+                    let graph = tsp_validate::parse_binary_input(&input_path)?;
+                    match tsp_validate::validate(&graph, &path) {
+                        Ok(score) => ValidateSolutionResult::Valid(score),
+                        Err(err) => ValidateSolutionResult::Invalid(err.to_string()),
+                    }
+                }
+                Err(err) => ValidateSolutionResult::Invalid(err.to_string()),
+            }
         }
         "graph_coloring" => {
             let coloring = parse_graph_coloring_solution(&solution)?;
@@ -111,8 +116,7 @@ pub fn validate(
         }
         "vertex_cover" => {
             let vertex_cover = parse_vertex_cover_solution(&solution)?;
-            let num_vertices = input.num_vertices;
-            match vertex_cover_validate::pre_validate(&vertex_cover, num_vertices) {
+            match vertex_cover_validate::pre_validate(&vertex_cover, input.num_vertices) {
                 Ok(vertex_cover) => {
                     let graph = vertex_cover_validate::parse_binary_input(&input_path)?;
                     match vertex_cover_validate::validate(&graph, &vertex_cover) {

@@ -29,25 +29,24 @@ pub async fn validate_sample(
 ) -> Result<impl Responder, HttpError> {
     match solution.0 {
         SampleSolution::TspSolution(path) => {
-            let graph = state
+            let sample_input = state
                 .static_data
                 .problems
                 .iter()
-                .find(|problem| problem.id == "travelling_salesman".into())
+                .find(|problem| problem.id.as_ref() == "travelling_salesman")
                 .map(|problem| problem.sample_input.as_ref())
-                .and_then(tsp_validate::parse_input)
-                .ok_or(ErrorInternalServerError(
-                    "Server error: failed parsing TSP sample input.",
-                ))?;
-            match tsp_validate::validate(&graph, path) {
-                Ok(score) => {
-                    Ok(HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
-                }
-                Err(err) => {
+                .ok_or(ErrorInternalServerError("Error code: 43"))
+                .inspect_err(|_| error!("TSP saple input not found"))?;
+            let graph = tsp_validate::parse_sample_input(sample_input)
+                .inspect_err(|err| error!("Failed parsing TSP sample input: {err}"))
+                .map_err(|_| ErrorInternalServerError("Error code: 44"))?;
+            tsp_validate::pre_validate(&path, tsp_validate::SAMPLE_GRAPH_SIZE)
+                .and_then(|_| tsp_validate::validate(&graph, &path))
+                .map(|score| HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
+                .or_else(|err| {
                     Ok(HttpResponse::Ok()
                         .json(ValidateSampleSolutionResult::Invalid(err.to_string())))
-                }
-            }
+                })
         }
         SampleSolution::GraphColoringSolution(coloring) => {
             let graph = state
