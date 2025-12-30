@@ -54,6 +54,14 @@ impl TestApp {
         }
     }
 
+    fn pass_and_preserve_sessions(self) {
+        Command::new("rm")
+            .arg("-f")
+            .arg(&self.db_path)
+            .output()
+            .expect("Failed to remove passed test database");
+    }
+
     async fn log_in(&self) {
         self.log_in_as("user").await;
     }
@@ -79,12 +87,18 @@ impl TestApp {
 impl Drop for TestApp {
     fn drop(&mut self) {
         println!("Stopping server (PID: {})...", self.server_process.id());
-        self.server_process
-            .kill()
-            .expect("Failed to kill server process");
-        self.server_process
-            .wait()
-            .expect("Failed to wait for server process");
+        let pid = Pid::from_raw(self.server_process.id() as i32);
+        // We send a SIGTERM here to allow for graceful shutdown.
+        // We use .ok() to avoid panicking if the process is already dead.
+        signal::kill(pid, Signal::SIGTERM).ok();
+        // We wait for the process to exit.
+        match self.server_process.wait() {
+            Ok(status) => println!("Server process exited with status: {}", status),
+            Err(e) => eprintln!(
+                "Failed to wait for server process: {}. It might have been already reaped.",
+                e
+            ),
+        }
         println!("Server stopped.");
     }
 }
@@ -760,8 +774,8 @@ async fn session_persistence_works() {
 
     let client_with_cookie = test1.client.clone();
 
-    // Drop test1 to stop the server
-    drop(test1);
+    // Pass test1 to stop the server and clean up its resources
+    test1.pass_and_preserve_sessions();
 
     // Spawn a new app instance. It will load from the session file.
     let test2 = spawn_app(&[
