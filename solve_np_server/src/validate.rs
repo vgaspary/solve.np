@@ -93,39 +93,46 @@ pub fn validate(
     let solution = read_solution_from_db(&submission_id, state.as_ref())?;
     let validation_result = match problem_id.as_ref() {
         "travelling_salesman" => {
+            use tsp_validate::parse_binary_input;
+            use tsp_validate::pre_validate;
+            use tsp_validate::validate;
+
             let path = parse_tsp_solution(&solution)?;
-            match tsp_validate::pre_validate(&path, input.num_vertices) {
-                Ok(()) => {
-                    let graph = tsp_validate::parse_binary_input(&input_path)?;
-                    match tsp_validate::validate(&graph, &path) {
-                        Ok(score) => ValidateSolutionResult::Valid(score),
-                        Err(err) => ValidateSolutionResult::Invalid(err.to_string()),
-                    }
-                }
-                Err(err) => ValidateSolutionResult::Invalid(err.to_string()),
-            }
+            pre_validate(&path, input.num_vertices)
+                .and_then(|_| {
+                    let graph = parse_binary_input(&input_path).expect("TSP input");
+                    validate(&graph, &path)
+                })
+                .map(|score| ValidateSolutionResult::Valid(score))
+                .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
         "graph_coloring" => {
+            use graph_coloring_validate::parse_binary_input;
+            use graph_coloring_validate::pre_validate;
+            use graph_coloring_validate::validate;
+
             let coloring = parse_graph_coloring_solution(&solution)?;
-            // TODO! Pre validate
-            let graph = graph_coloring_validate::parse_input_from(input_path)
-                .context("Parsing Graph Coloring input")?;
-            graph_coloring_validate::validate(&graph, coloring)
+            pre_validate(&coloring, input.num_vertices)
+                .and_then(|_| {
+                    let graph = parse_binary_input(input_path).expect("Graph Coloring input");
+                    validate(&graph, &coloring)
+                })
                 .map(|score| ValidateSolutionResult::Valid(score))
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
         "vertex_cover" => {
+            use vertex_cover_validate::parse_binary_input;
+            use vertex_cover_validate::pre_validate;
+            use vertex_cover_validate::validate;
+
             let vertex_cover = parse_vertex_cover_solution(&solution)?;
-            match vertex_cover_validate::pre_validate(&vertex_cover, input.num_vertices) {
-                Ok(vertex_cover) => {
-                    let graph = vertex_cover_validate::parse_binary_input(&input_path)?;
-                    match vertex_cover_validate::validate(&graph, &vertex_cover) {
-                        Ok(score) => ValidateSolutionResult::Valid(score),
-                        Err(err) => ValidateSolutionResult::Invalid(err.to_string()),
-                    }
-                }
-                Err(err) => ValidateSolutionResult::Invalid(err.to_string()),
-            }
+            pre_validate(&vertex_cover, input.num_vertices)
+                .and_then(|vertex_cover| {
+                    let graph = parse_binary_input(&input_path).expect("Vertex Cover input");
+                    validate(&graph, &vertex_cover)
+                })
+                .map(|score| ValidateSolutionResult::Valid(score))
+                .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
         _ => bail!("Uncovered problem_id"),
     };

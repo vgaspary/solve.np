@@ -29,6 +29,11 @@ pub async fn validate_sample(
 ) -> Result<impl Responder, HttpError> {
     match solution.0 {
         SampleSolution::TspSolution(path) => {
+            use tsp_validate::SAMPLE_GRAPH_SIZE;
+            use tsp_validate::parse_sample_input;
+            use tsp_validate::pre_validate;
+            use tsp_validate::validate;
+
             let sample_input = state
                 .static_data
                 .problems
@@ -37,11 +42,11 @@ pub async fn validate_sample(
                 .map(|problem| problem.sample_input.as_ref())
                 .ok_or(ErrorInternalServerError("Error code: 43"))
                 .inspect_err(|_| error!("TSP saple input not found"))?;
-            let graph = tsp_validate::parse_sample_input(sample_input)
+            let graph = parse_sample_input(sample_input)
                 .inspect_err(|err| error!("Failed parsing TSP sample input: {err}"))
                 .map_err(|_| ErrorInternalServerError("Error code: 44"))?;
-            tsp_validate::pre_validate(&path, tsp_validate::SAMPLE_GRAPH_SIZE)
-                .and_then(|_| tsp_validate::validate(&graph, &path))
+            pre_validate(&path, SAMPLE_GRAPH_SIZE)
+                .and_then(|_| validate(&graph, &path))
                 .map(|score| HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
                 .or_else(|err| {
                     Ok(HttpResponse::Ok()
@@ -49,27 +54,36 @@ pub async fn validate_sample(
                 })
         }
         SampleSolution::GraphColoringSolution(coloring) => {
-            let graph = state
+            use graph_coloring_validate::SAMPLE_GRAPH_SIZE;
+            use graph_coloring_validate::parse_sample_input;
+            use graph_coloring_validate::pre_validate;
+            use graph_coloring_validate::validate;
+
+            let sample_input = state
                 .static_data
                 .problems
                 .iter()
-                .find(|problem| problem.id == "graph_coloring".into())
+                .find(|problem| problem.id.as_ref() == "graph_coloring")
                 .map(|problem| problem.sample_input.as_ref())
-                .and_then(graph_coloring_validate::parse_input)
-                .ok_or(ErrorInternalServerError(
-                    "Server error: failed parsing Graph Coloring sample input.",
-                ))?;
-            match graph_coloring_validate::validate(&graph, coloring) {
-                Ok(score) => {
-                    Ok(HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
-                }
-                Err(err) => {
+                .ok_or(ErrorInternalServerError("Error code: 47"))
+                .inspect_err(|_| error!("Graph Coloring saple input not found"))?;
+            let graph = parse_sample_input(sample_input)
+                .inspect_err(|err| error!("Failed parsing Graph Coloring sample input: {err}"))
+                .map_err(|_| ErrorInternalServerError("Error code: 48"))?;
+            pre_validate(&coloring, SAMPLE_GRAPH_SIZE)
+                .and_then(|_| validate(&graph, &coloring))
+                .map(|score| HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
+                .or_else(|err| {
                     Ok(HttpResponse::Ok()
                         .json(ValidateSampleSolutionResult::Invalid(err.to_string())))
-                }
-            }
+                })
         }
         SampleSolution::VertexCoverSolution(vertex_cover) => {
+            use vertex_cover_validate::SAMPLE_GRAPH_SIZE;
+            use vertex_cover_validate::parse_sample_input;
+            use vertex_cover_validate::pre_validate;
+            use vertex_cover_validate::validate;
+
             let sample_input = state
                 .static_data
                 .problems
@@ -78,19 +92,16 @@ pub async fn validate_sample(
                 .map(|problem| problem.sample_input.as_ref())
                 .ok_or(ErrorInternalServerError("Error code: 45"))
                 .inspect_err(|_| error!("Vertex Cover saple input not found"))?;
-            let graph = vertex_cover_validate::parse_sample_input(sample_input)
+            let graph = parse_sample_input(sample_input)
                 .inspect_err(|err| error!("Failed parsing Vertex Cover sample input: {err}"))
                 .map_err(|_| ErrorInternalServerError("Error code: 46"))?;
-
-            vertex_cover_validate::pre_validate(
-                &vertex_cover,
-                vertex_cover_validate::SAMPLE_GRAPH_SIZE,
-            )
-            .and_then(|solution| vertex_cover_validate::validate(&graph, &solution))
-            .map(|score| HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
-            .or_else(|err| {
-                Ok(HttpResponse::Ok().json(ValidateSampleSolutionResult::Invalid(err.to_string())))
-            })
+            pre_validate(&vertex_cover, SAMPLE_GRAPH_SIZE)
+                .and_then(|solution| validate(&graph, &solution))
+                .map(|score| HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
+                .or_else(|err| {
+                    Ok(HttpResponse::Ok()
+                        .json(ValidateSampleSolutionResult::Invalid(err.to_string())))
+                })
         }
     }
 }
