@@ -1,6 +1,5 @@
 use clap::Parser;
 use libgraph::Graph;
-use rand::prelude::*;
 use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
@@ -13,8 +12,7 @@ struct Args {
     #[arg(short('v'), default_value_t = 8)]
     num_vertices: usize,
 
-    /// Graph density [0.0, 1.0], where 0.0 means the smallest possible graph that is fully
-    /// connected, i.e. a minimum spanning tree, and 1.0 means a full graph.
+    /// Graph density [0.0, 1.0], where 0.0 means the empty graph, and 1.0 means a full graph.
     #[arg(short('d'), default_value_t = 0.5)]
     graph_density: f64,
 
@@ -29,19 +27,12 @@ fn main() {
         graph_density,
         output,
     } = Args::parse();
-    let mut edges: Vec<_> = Graph::full(num_vertices).edges().collect();
     let mut rng = rand::rng();
-    edges.shuffle(&mut rng);
-    edges.truncate((edges.len() as f64 * graph_density) as usize);
-
+    let graph = Graph::random(num_vertices, graph_density, &mut rng);
     let mut input_file = BufWriter::new(File::create(format!("{output}.txt")).unwrap());
-    edges
-        .iter()
+    graph
+        .edges()
         .for_each(|(u, v)| writeln!(&mut input_file, "{u} {v}").unwrap());
-
-    let graph = edges
-        .into_iter()
-        .fold(Graph::new(num_vertices), |graph, edge| graph.add_edge(edge));
     let graph_file = BufWriter::new(File::create(format!("{output}.cbor")).unwrap());
     ciborium::into_writer(&graph, graph_file).unwrap();
 }
