@@ -37,7 +37,12 @@ export function check_solution(problem_id: string): void {
       },
       body: JSON.stringify(parse_solution(problem_id, solution))
     })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw response.text();
+      }
+      return response.json();
+    })
     .then(validation_result => {
       if (validation_result.Valid) {
         solution_textarea.classList = "success";
@@ -48,8 +53,7 @@ export function check_solution(problem_id: string): void {
       }
     })
     .catch(err => {
-      solution_textarea.classList = "";
-      sample_solution_result.innerHTML = "";
-      console.log(err);
+      solution_textarea.classList = "error";
+      sample_solution_result.innerHTML = "Malformed solution, failed parsing.";
     });
 }
