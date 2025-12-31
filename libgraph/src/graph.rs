@@ -116,6 +116,13 @@ impl Graph<()> {
             .fold(Self::new(num_vertices), |graph, edge| graph.add_edge(edge))
     }
 
+    pub fn random(num_vertices: usize, density: f64, rng: &mut impl Rng) -> Self {
+        (0..num_vertices)
+            .flat_map(|u| (u + 1..num_vertices).map(move |v| (u, v)))
+            .filter(|_| rng.random_bool(density))
+            .fold(Self::new(num_vertices), |graph, edge| graph.add_edge(edge))
+    }
+
     pub fn add_edge(mut self, (u, v): Edge) -> Self {
         if u != v {
             self.adj_list[u].insert(v, ());
@@ -290,6 +297,35 @@ mod tests {
             3,
             "MST on 5 vertices (path) should have 3 degree-2 nodes"
         );
+    }
+
+    #[test]
+    fn test_random_graph() {
+        let mut rng = StdRng::seed_from_u64(42);
+
+        // Test case: 0 vertices
+        let graph = Graph::random(0, 1.0, &mut rng);
+        assert_eq!(graph.num_vertices(), 0);
+        assert_eq!(get_sorted_edges(&graph).len(), 0);
+
+        // Test case: 0.0 density (no edges)
+        let graph = Graph::random(5, 0.0, &mut rng);
+        assert_eq!(graph.num_vertices(), 5);
+        assert_eq!(get_sorted_edges(&graph).len(), 0);
+
+        // Test case: 1.0 density (full graph)
+        let graph = Graph::random(4, 1.0, &mut rng);
+        assert_eq!(graph.num_vertices(), 4);
+        assert_eq!(get_sorted_edges(&graph).len(), 6);
+        assert_eq!(
+            get_sorted_edges(&graph),
+            vec![(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)]
+        );
+
+        // Test case: 0.5 density (should have some edges)
+        let graph = Graph::random(10, 0.5, &mut rng);
+        assert_eq!(graph.num_vertices(), 10);
+        assert_eq!(get_sorted_edges(&graph).len(), 23);
     }
 
     #[test]
