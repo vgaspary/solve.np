@@ -271,6 +271,11 @@ export function submit_solution(problem_id: string, solution_id: string, input_i
         window.location.assign(URL.createObjectURL(blob));
         return;
       }
+      if (response.status !== 200) {
+        status_paragraph.innerHTML = "Malformed solution, failed parsing.";
+        solution_textarea.classList = "error";
+        return;
+      }
       const validation_result = await response.json();
       if (validation_result.Valid) {
         status_paragraph.innerHTML = 'Score: ' + validation_result.Valid;
