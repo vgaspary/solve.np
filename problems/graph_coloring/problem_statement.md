@@ -22,7 +22,7 @@ The output must:
 - contain only non-negative integers representing colors.
 - satisfy the constraint that for every edge `(u, v)` in the input graph, the color assigned to vertex `u` must be different from the color assigned to vertex `v`.
 
-Scoring will be based on the number of colors used.
+The score is the number of colors used. The objective is to minimize the score.
 
 ## Example
 

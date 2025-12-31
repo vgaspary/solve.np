@@ -23,7 +23,7 @@ The output must:
 - contain only vertex IDs
 - contain all vertex IDs only once (except for `0`)
 
-Scoring is based on the length of the path.
+The score is the length of the path. The objective is to minimize the score.
 
 ## Example
 

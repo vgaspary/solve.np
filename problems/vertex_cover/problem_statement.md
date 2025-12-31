@@ -21,7 +21,7 @@ The output must:
 - be a valid vertex cover
 - not contain duplicates or invalid vertex IDs
 
-The score is the size of the vertex cover.
+The score is the size of the vertex cover. The objective is to minimize the score.
 
 ## Example
 
