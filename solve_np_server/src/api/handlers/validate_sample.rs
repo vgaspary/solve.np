@@ -15,6 +15,7 @@ pub enum SampleSolution {
     TspSolution(Vec<usize>),
     GraphColoringSolution(Vec<usize>),
     VertexCoverSolution(Vec<usize>),
+    MaximumCliqueSolution(Vec<usize>),
 }
 
 #[derive(Serialize)]
@@ -91,12 +92,37 @@ pub async fn validate_sample(
                 .find(|problem| problem.id.as_ref() == "vertex_cover")
                 .map(|problem| problem.sample_input.as_ref())
                 .ok_or(ErrorInternalServerError("Error code: 45"))
-                .inspect_err(|_| error!("Vertex Cover saple input not found"))?;
+                .inspect_err(|_| error!("Vertex Cover sample input not found"))?;
             let graph = parse_sample_input(sample_input)
                 .inspect_err(|err| error!("Failed parsing Vertex Cover sample input: {err}"))
                 .map_err(|_| ErrorInternalServerError("Error code: 46"))?;
             pre_validate(&vertex_cover, SAMPLE_GRAPH_SIZE)
                 .and_then(|solution| validate(&graph, &solution))
+                .map(|score| HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
+                .or_else(|err| {
+                    Ok(HttpResponse::Ok()
+                        .json(ValidateSampleSolutionResult::Invalid(err.to_string())))
+                })
+        }
+        SampleSolution::MaximumCliqueSolution(clique) => {
+            use maximum_clique_validate::SAMPLE_GRAPH_SIZE;
+            use maximum_clique_validate::parse_sample_input;
+            use maximum_clique_validate::pre_validate;
+            use maximum_clique_validate::validate;
+
+            let sample_input = state
+                .static_data
+                .problems
+                .iter()
+                .find(|problem| problem.id.as_ref() == "maximum_clique")
+                .map(|problem| problem.sample_input.as_ref())
+                .ok_or(ErrorInternalServerError("Error code: 49"))
+                .inspect_err(|_| error!("Maximum Clique sample input not found"))?;
+            let graph = parse_sample_input(sample_input)
+                .inspect_err(|err| error!("Failed parsing Maximum Clique sample input: {err}"))
+                .map_err(|_| ErrorInternalServerError("Error code: 50"))?;
+            pre_validate(&clique, SAMPLE_GRAPH_SIZE)
+                .and_then(|_| validate(&graph, &clique))
                 .map(|score| HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
                 .or_else(|err| {
                     Ok(HttpResponse::Ok()

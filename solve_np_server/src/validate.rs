@@ -24,6 +24,7 @@ pub enum Solution {
     TspSolution(Vec<usize>),
     GraphColoringSolution(Vec<usize>),
     VertexCoverSolution(Vec<usize>),
+    MaximumCliqueSolution(Vec<usize>),
 }
 
 impl ToString for Solution {
@@ -32,6 +33,7 @@ impl ToString for Solution {
             Self::TspSolution(path) => path.iter().join(" "),
             Self::GraphColoringSolution(colors) => colors.iter().join(" "),
             Self::VertexCoverSolution(vertices) => vertices.iter().join(" "),
+            Self::MaximumCliqueSolution(clique) => clique.iter().join(" "),
         }
     }
 }
@@ -134,6 +136,20 @@ pub fn validate(
                 .map(|score| ValidateSolutionResult::Valid(score))
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
+        "maximum_clique" => {
+            use maximum_clique_validate::parse_binary_input;
+            use maximum_clique_validate::pre_validate;
+            use maximum_clique_validate::validate;
+
+            let clique = parse_maximum_clique_solution(&solution)?;
+            pre_validate(&clique, input.num_vertices)
+                .and_then(|_| {
+                    let graph = parse_binary_input(&input_path).expect("Maximum Clique input");
+                    validate(&graph, &clique)
+                })
+                .map(|score| ValidateSolutionResult::Valid(score))
+                .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
+        }
         _ => bail!("Uncovered problem_id"),
     };
     match &validation_result {
@@ -204,6 +220,13 @@ fn parse_graph_coloring_solution(solution: &str) -> anyhow::Result<Vec<usize>> {
 }
 
 fn parse_vertex_cover_solution(solution: &str) -> anyhow::Result<Vec<usize>> {
+    Ok(solution
+        .split_whitespace()
+        .map(|vertex| vertex.parse())
+        .collect::<Result<_, _>>()?)
+}
+
+fn parse_maximum_clique_solution(solution: &str) -> anyhow::Result<Vec<usize>> {
     Ok(solution
         .split_whitespace()
         .map(|vertex| vertex.parse())
