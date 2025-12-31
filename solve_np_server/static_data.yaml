@@ -122,3 +122,44 @@ problems:
         path: ../problems/vertex_cover/inputs/large_dense.txt
         cmd: vertex_cover_gen -v 10000 -d 0.8 -o large_dense
         num_vertices: 10000
+  - id: maximum_clique
+    name: Maximum Clique
+    description: Find a large clique in a graph, a subgraph where all vertex pairs are connected by an edge.
+    problem_statement: ../problems/maximum_clique/problem_statement.md
+    inputs:
+      - id: small_sparse
+        path: ../problems/maximum_clique/inputs/small_sparse.txt
+        cmd: maximum_clique_gen -v 100 -d 0.1 -o small_sparse
+        num_vertices: 100
+      - id: small
+        path: ../problems/maximum_clique/inputs/small.txt
+        cmd: maximum_clique_gen -v 100 -d 0.5 -o small
+        num_vertices: 100
+      - id: small_dense
+        path: ../problems/maximum_clique/inputs/small_dense.txt
+        cmd: maximum_clique_gen -v 100 -d 0.9 -o small_dense
+        num_vertices: 100
+      - id: medium_sparse
+        path: ../problems/maximum_clique/inputs/medium_sparse.txt
+        cmd: maximum_clique_gen -v 1000 -d 0.1 -o medium_sparse
+        num_vertices: 1000
+      - id: medium
+        path: ../problems/maximum_clique/inputs/medium.txt
+        cmd: maximum_clique_gen -v 1000 -d 0.5 -o medium
+        num_vertices: 1000
+      - id: medium_dense
+        path: ../problems/maximum_clique/inputs/medium_dense.txt
+        cmd: maximum_clique_gen -v 1000 -d 0.9 -o medium_dense
+        num_vertices: 1000
+      - id: large_sparse
+        path: ../problems/maximum_clique/inputs/large_sparse.txt
+        cmd: maximum_clique_gen -v 10000 -d 0.1 -o large_sparse
+        num_vertices: 10000
+      - id: large
+        path: ../problems/maximum_clique/inputs/large.txt
+        cmd: maximum_clique_gen -v 10000 -d 0.5 -o large
+        num_vertices: 10000
+      - id: large_dense
+        path: ../problems/maximum_clique/inputs/large_dense.txt
+        cmd: maximum_clique_gen -v 10000 -d 0.9 -o large_dense
+        num_vertices: 10000
