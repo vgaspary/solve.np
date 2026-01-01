@@ -1,5 +1,6 @@
 use clap::Parser;
 use libgraph::Graph;
+use rand::prelude::*;
 use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
@@ -29,10 +30,13 @@ fn main() {
     } = Args::parse();
     let mut rng = rand::rng();
     let graph = Graph::random(num_vertices, graph_density, &mut rng);
-    let mut input_file = BufWriter::new(File::create(format!("{output}.txt")).unwrap());
-    graph
-        .edges()
-        .for_each(|(u, v)| writeln!(&mut input_file, "{u} {v}").unwrap());
     let graph_file = BufWriter::new(File::create(format!("{output}.cbor")).unwrap());
     ciborium::into_writer(&graph, graph_file).unwrap();
+
+    let mut edges: Vec<_> = graph.edges().collect();
+    edges.shuffle(&mut rng);
+    let mut input_file = BufWriter::new(File::create(format!("{output}.txt")).unwrap());
+    edges
+        .iter()
+        .for_each(|(u, v)| writeln!(&mut input_file, "{u} {v}").unwrap());
 }

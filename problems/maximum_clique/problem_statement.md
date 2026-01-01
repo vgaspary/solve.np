@@ -27,10 +27,10 @@ The score is the size of the clique. The objective is to maximize the score.
 
 Consider the following graph:
 
-<img src="" width="720">
+<img src="/static/MC_0.svg" width="720">
 
-A clique of size 3 could be `{0, 1, 2}`. A larger clique of size 4 could be `{2, 3, 4, 5}`. The maximum clique for this graph has size 5.
+A clique of size 3 could be `{2, 4, 5}`. A larger clique of size 4 could be `{0, 2, 5, 7}`. This happens to be the maximum clique of the graph.
 
-<img src="" width="720">
+<img src="/static/MC_1.svg" width="720">
 
-<img src="" width="720">
+<img src="/static/MC_2.svg" width="720">
