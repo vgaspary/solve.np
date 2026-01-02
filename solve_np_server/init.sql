@@ -67,9 +67,10 @@ END;
 CREATE TABLE IF NOT EXISTS
   num_inputs (problem_id TEXT UNIQUE, cnt INTEGER);
 
-INSERT INTO
+INSERT OR REPLACE INTO
   num_inputs (problem_id, cnt)
 VALUES
   ('graph_coloring', 9),
   ('travelling_salesman', 9),
-  ('vertex_cover', 9);
+  ('vertex_cover', 9),
+  ('maximum_clique', 9);
