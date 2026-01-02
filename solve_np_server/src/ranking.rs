@@ -53,7 +53,11 @@ fn rank_submissions(submissions: Vec<Submission>) -> Vec<(Rank, Submission)> {
         .map(|submissions| {
             submissions
                 .into_iter()
-                .rank_by(|submission| submission.score)
+                .rank_by(|submission| match submission.problem_id.as_ref() {
+                    "maximum_clique" => submission.score.wrapping_neg(),
+                    "vertex_cover" | "travelling_salesman" | "graph_coloring" => submission.score,
+                    _ => panic!("unexpected problem ID"),
+                })
         })
         .flatten()
         .collect()
