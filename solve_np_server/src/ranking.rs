@@ -46,17 +46,16 @@ impl FromSql for Ranking {
 fn rank_submissions(submissions: Vec<Submission>) -> Vec<(Rank, Submission)> {
     submissions
         .into_iter()
-        .into_group_map_by(|submission| {
-            (submission.problem_id.clone(), submission.input_id.clone())
-        })
+        .into_group_map_by(|submission| (submission.problem_id, submission.input_id.clone()))
         .into_values()
         .map(|submissions| {
             submissions
                 .into_iter()
-                .rank_by(|submission| match submission.problem_id.as_ref() {
-                    "maximum_clique" => submission.score.wrapping_neg(),
-                    "vertex_cover" | "travelling_salesman" | "graph_coloring" => submission.score,
-                    _ => panic!("unexpected problem ID"),
+                .rank_by(|submission| match submission.problem_id {
+                    ProblemId::TravellingSalesman => submission.score,
+                    ProblemId::GraphColoring => submission.score,
+                    ProblemId::VertexCover => submission.score,
+                    ProblemId::MaximumClique => submission.score.wrapping_neg(),
                 })
         })
         .flatten()
@@ -83,8 +82,8 @@ fn rank_solutions(
         .into_values()
         .filter_map(|submissions| {
             let solution_id = submissions.first()?.1.solution_id.clone();
-            let problem_id = submissions.first()?.1.problem_id.clone();
-            let ranking = *solution_ranking.get(&(solution_id.clone(), problem_id.clone()))?;
+            let problem_id = submissions.first()?.1.problem_id;
+            let ranking = *solution_ranking.get(&(solution_id.clone(), problem_id))?;
             let aggregate_rank: usize = submissions.into_iter().map(|(Rank(r), _)| r).sum();
             Some((
                 Solution {
@@ -95,7 +94,7 @@ fn rank_solutions(
                 aggregate_rank,
             ))
         })
-        .into_group_map_by(|(solution, _)| solution.problem_id.clone())
+        .into_group_map_by(|(solution, _)| solution.problem_id)
         .into_values()
         .map(|solutions| {
             solutions

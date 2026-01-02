@@ -1,4 +1,5 @@
 use crate::state::State;
+use crate::types::ProblemId;
 use actix_web::HttpResponse;
 use actix_web::Responder;
 use actix_web::error::Error as HttpError;
@@ -39,7 +40,7 @@ pub async fn validate_sample(
                 .static_data
                 .problems
                 .iter()
-                .find(|problem| problem.id.as_ref() == "travelling_salesman")
+                .find(|problem| problem.id == ProblemId::TravellingSalesman)
                 .map(|problem| problem.sample_input.as_ref())
                 .ok_or(ErrorInternalServerError("Error code: 43"))
                 .inspect_err(|_| error!("TSP saple input not found"))?;
@@ -64,7 +65,7 @@ pub async fn validate_sample(
                 .static_data
                 .problems
                 .iter()
-                .find(|problem| problem.id.as_ref() == "graph_coloring")
+                .find(|problem| problem.id == ProblemId::GraphColoring)
                 .map(|problem| problem.sample_input.as_ref())
                 .ok_or(ErrorInternalServerError("Error code: 47"))
                 .inspect_err(|_| error!("Graph Coloring saple input not found"))?;
@@ -89,7 +90,7 @@ pub async fn validate_sample(
                 .static_data
                 .problems
                 .iter()
-                .find(|problem| problem.id.as_ref() == "vertex_cover")
+                .find(|problem| problem.id == ProblemId::VertexCover)
                 .map(|problem| problem.sample_input.as_ref())
                 .ok_or(ErrorInternalServerError("Error code: 45"))
                 .inspect_err(|_| error!("Vertex Cover sample input not found"))?;
@@ -114,7 +115,7 @@ pub async fn validate_sample(
                 .static_data
                 .problems
                 .iter()
-                .find(|problem| problem.id.as_ref() == "maximum_clique")
+                .find(|problem| problem.id == ProblemId::MaximumClique)
                 .map(|problem| problem.sample_input.as_ref())
                 .ok_or(ErrorInternalServerError("Error code: 49"))
                 .inspect_err(|_| error!("Maximum Clique sample input not found"))?;

@@ -4,7 +4,6 @@ use crate::types::ProblemId;
 use crate::types::SolutionId;
 use crate::types::Status;
 use anyhow::Context;
-use anyhow::bail;
 use itertools::Itertools;
 use rusqlite::params;
 use serde::Deserialize;
@@ -93,8 +92,8 @@ pub fn validate(
         .context("Bad input ID")?;
     let input_path = input.path.with_extension("cbor");
     let solution = read_solution_from_db(&submission_id, state.as_ref())?;
-    let validation_result = match problem_id.as_ref() {
-        "travelling_salesman" => {
+    let validation_result = match problem_id {
+        ProblemId::TravellingSalesman => {
             use tsp_validate::parse_binary_input;
             use tsp_validate::pre_validate;
             use tsp_validate::validate;
@@ -108,7 +107,7 @@ pub fn validate(
                 .map(|score| ValidateSolutionResult::Valid(score))
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
-        "graph_coloring" => {
+        ProblemId::GraphColoring => {
             use graph_coloring_validate::parse_binary_input;
             use graph_coloring_validate::pre_validate;
             use graph_coloring_validate::validate;
@@ -122,7 +121,7 @@ pub fn validate(
                 .map(|score| ValidateSolutionResult::Valid(score))
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
-        "vertex_cover" => {
+        ProblemId::VertexCover => {
             use vertex_cover_validate::parse_binary_input;
             use vertex_cover_validate::pre_validate;
             use vertex_cover_validate::validate;
@@ -136,7 +135,7 @@ pub fn validate(
                 .map(|score| ValidateSolutionResult::Valid(score))
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
-        "maximum_clique" => {
+        ProblemId::MaximumClique => {
             use maximum_clique_validate::parse_binary_input;
             use maximum_clique_validate::pre_validate;
             use maximum_clique_validate::validate;
@@ -150,7 +149,6 @@ pub fn validate(
                 .map(|score| ValidateSolutionResult::Valid(score))
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
-        _ => bail!("Uncovered problem_id"),
     };
     match &validation_result {
         ValidateSolutionResult::Valid(score) => state.db.lock().unwrap().execute(

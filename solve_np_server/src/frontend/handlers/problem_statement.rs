@@ -47,10 +47,10 @@ struct Input {
 
 pub async fn problem_statement(
     session: Session,
-    path: web::Path<String>,
+    path: web::Path<ProblemId>,
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
-    let problem_id: ProblemId = path.into_inner().into();
+    let problem_id: ProblemId = path.into_inner();
     let problem = state
         .static_data
         .problems
@@ -63,7 +63,7 @@ pub async fn problem_statement(
             let mut problem_statement = String::new();
             pulldown_cmark::html::push_html(&mut problem_statement, parser);
             Ok(Problem {
-                id: problem_id.clone(),
+                id: problem_id,
                 name: problem.name.clone(),
                 problem_statement,
                 sample_input: problem.sample_input.clone(),

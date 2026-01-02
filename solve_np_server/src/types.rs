@@ -2,7 +2,6 @@ use rusqlite::types::FromSql;
 use rusqlite::types::ToSql;
 use serde::Deserialize;
 use serde::Serialize;
-use std::convert::AsRef;
 use std::fmt;
 
 pub type Score = usize;
@@ -34,36 +33,49 @@ impl FromSql for Status {
     }
 }
 
-#[derive(Hash, Eq, PartialEq, Clone, Ord, PartialOrd, Deserialize)]
-pub struct ProblemId(String);
-
-impl<T: Into<String>> From<T> for ProblemId {
-    fn from(value: T) -> Self {
-        Self(value.into())
-    }
+#[derive(Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd, Deserialize)]
+pub enum ProblemId {
+    #[serde(rename = "travelling_salesman")]
+    TravellingSalesman,
+    #[serde(rename = "graph_coloring")]
+    GraphColoring,
+    #[serde(rename = "vertex_cover")]
+    VertexCover,
+    #[serde(rename = "maximum_clique")]
+    MaximumClique,
 }
 
 impl fmt::Display for ProblemId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt::Display::fmt(&self.0, f)
+        match self {
+            ProblemId::TravellingSalesman => write!(f, "travelling_salesman"),
+            ProblemId::GraphColoring => write!(f, "graph_coloring"),
+            ProblemId::VertexCover => write!(f, "vertex_cover"),
+            ProblemId::MaximumClique => write!(f, "maximum_clique"),
+        }
     }
 }
 
 impl FromSql for ProblemId {
     fn column_result(value: rusqlite::types::ValueRef<'_>) -> rusqlite::types::FromSqlResult<Self> {
-        Ok(value.as_str()?.into())
+        match value.as_str()? {
+            "travelling_salesman" => Ok(Self::TravellingSalesman),
+            "graph_coloring" => Ok(Self::GraphColoring),
+            "vertex_cover" => Ok(Self::VertexCover),
+            "maximum_clique" => Ok(Self::MaximumClique),
+            _ => Err(rusqlite::types::FromSqlError::OutOfRange(4)),
+        }
     }
 }
 
 impl ToSql for ProblemId {
     fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
-        self.0.to_sql()
-    }
-}
-
-impl AsRef<str> for ProblemId {
-    fn as_ref(&self) -> &str {
-        self.0.as_ref()
+        match self {
+            Self::TravellingSalesman => ("travelling_salesman").to_sql(),
+            Self::GraphColoring => ("graph_coloring").to_sql(),
+            Self::VertexCover => ("vertex_cover").to_sql(),
+            Self::MaximumClique => ("maximum_clique").to_sql(),
+        }
     }
 }
 
