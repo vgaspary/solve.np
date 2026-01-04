@@ -163,3 +163,56 @@ problems:
         path: ../problems/maximum_clique/inputs/large_dense.txt
         cmd: maximum_clique_gen -v 10000 -d 0.9 -o large_dense
         num_vertices: 10000
+  - id: maximum_cut
+    name: Maximum Cut
+    description: Partition the vertices of the graph such that the cut-set, the edges crossing the partition, have a large total weight.
+    problem_statement: ../problems/../problems/maximum_cut/problem_statement.md
+    inputs:
+      - id: small_sparse_normal
+        path: ../problems/maximum_cut/inputs/small_sparse_normal.txt
+        cmd: maximum_cut_gen -v 100 -d 0.1 -o small_sparse_normal normal --mean 500 --sd 200
+        num_vertices: 100
+      - id: small_sparse_uniform
+        path: ../problems/maximum_cut/inputs/small_sparse_uniform.txt
+        cmd: maximum_cut_gen -v 100 -d 0.1 -o small_sparse_uniform uniform --min 0 --max 1000
+        num_vertices: 100
+      - id: small_normal
+        path: ../problems/maximum_cut/inputs/small_normal.txt
+        cmd: maximum_cut_gen -v 100 -d 0.5 -o small_normal normal --mean 500 --sd 200
+        num_vertices: 100
+      - id: small_uniform
+        path: ../problems/maximum_cut/inputs/small_uniform.txt
+        cmd: maximum_cut_gen -v 100 -d 0.5 -o small_uniform uniform --min 0 --max 1000
+        num_vertices: 100
+      - id: medium_sparse_normal
+        path: ../problems/maximum_cut/inputs/medium_sparse_normal.txt
+        cmd: maximum_cut_gen -v 1000 -d 0.1 -o medium_sparse_normal normal --mean 500 --sd 200
+        num_vertices: 1000
+      - id: medium_sparse_uniform
+        path: ../problems/maximum_cut/inputs/medium_sparse_uniform.txt
+        cmd: maximum_cut_gen -v 1000 -d 0.1 -o medium_sparse_uniform uniform --min 0 --max 1000
+        num_vertices: 1000
+      - id: medium_normal
+        path: ../problems/maximum_cut/inputs/medium_normal.txt
+        cmd: maximum_cut_gen -v 1000 -d 0.5 -o medium_normal normal --mean 500 --sd 200
+        num_vertices: 1000
+      - id: medium_uniform
+        path: ../problems/maximum_cut/inputs/medium_uniform.txt
+        cmd: maximum_cut_gen -v 1000 -d 0.5 -o medium_uniform uniform --min 0 --max 1000
+        num_vertices: 1000
+      - id: large_sparse_normal
+        path: ../problems/maximum_cut/inputs/large_sparse_normal.txt
+        cmd: maximum_cut_gen -v 10000 -d 0.1 -o large_sparse_normal normal --mean 500 --sd 200
+        num_vertices: 10000
+      - id: large_sparse_uniform
+        path: ../problems/maximum_cut/inputs/large_sparse_uniform.txt
+        cmd: maximum_cut_gen -v 10000 -d 0.1 -o large_sparse_uniform uniform --min 0 --max 1000
+        num_vertices: 10000
+      - id: large_normal
+        path: ../problems/maximum_cut/inputs/large_normal.txt
+        cmd: maximum_cut_gen -v 10000 -d 0.5 -o large_normal normal --mean 500 --sd 200
+        num_vertices: 10000
+      - id: large_uniform
+        path: ../problems/maximum_cut/inputs/large_uniform.txt
+        cmd: maximum_cut_gen -v 10000 -d 0.5 -o large_uniform uniform --min 0 --max 1000
+        num_vertices: 10000
