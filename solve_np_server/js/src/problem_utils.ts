@@ -2,7 +2,8 @@ type SampleSolution =
   { TspSolution: number[] }
   | { GraphColoringSolution: number[] }
   | { VertexCoverSolution: number[] }
-  | { MaximumCliqueSolution: number[] };
+  | { MaximumCliqueSolution: number[] }
+  | { MaximumCutSolution: number[] };
 
 export function parse_solution(problem_id: string, input: string): SampleSolution | null {
   switch (problem_id) {
@@ -14,6 +15,8 @@ export function parse_solution(problem_id: string, input: string): SampleSolutio
       return { VertexCoverSolution: input.trim().split(/\s+/).map(n => Number(n)) };
     case 'maximum_clique':
       return { MaximumCliqueSolution: input.trim().split(/\s+/).map(n => Number(n)) };
+    case 'maximum_cut':
+      return { MaximumCutSolution: input.trim().split(/\s+/).map(n => Number(n)) };
     default:
       return null;
   }

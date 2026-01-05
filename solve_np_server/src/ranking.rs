@@ -56,6 +56,7 @@ fn rank_submissions(submissions: Vec<Submission>) -> Vec<(Rank, Submission)> {
                     ProblemId::GraphColoring => submission.score,
                     ProblemId::VertexCover => submission.score,
                     ProblemId::MaximumClique => submission.score.wrapping_neg(),
+                    ProblemId::MaximumCut => submission.score.wrapping_neg(),
                 })
         })
         .flatten()

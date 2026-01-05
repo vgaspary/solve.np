@@ -73,4 +73,5 @@ VALUES
   ('graph_coloring', 9),
   ('travelling_salesman', 9),
   ('vertex_cover', 9),
-  ('maximum_clique', 9);
+  ('maximum_clique', 9),
+  ('maximum_cut', 12);

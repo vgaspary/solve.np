@@ -43,6 +43,8 @@ pub enum ProblemId {
     VertexCover,
     #[serde(rename = "maximum_clique")]
     MaximumClique,
+    #[serde(rename = "maximum_cut")]
+    MaximumCut,
 }
 
 impl fmt::Display for ProblemId {
@@ -52,6 +54,7 @@ impl fmt::Display for ProblemId {
             ProblemId::GraphColoring => write!(f, "graph_coloring"),
             ProblemId::VertexCover => write!(f, "vertex_cover"),
             ProblemId::MaximumClique => write!(f, "maximum_clique"),
+            ProblemId::MaximumCut => write!(f, "maximum_cut"),
         }
     }
 }
@@ -63,6 +66,7 @@ impl FromSql for ProblemId {
             "graph_coloring" => Ok(Self::GraphColoring),
             "vertex_cover" => Ok(Self::VertexCover),
             "maximum_clique" => Ok(Self::MaximumClique),
+            "maximum_cut" => Ok(Self::MaximumCut),
             _ => Err(rusqlite::types::FromSqlError::OutOfRange(4)),
         }
     }
@@ -75,6 +79,7 @@ impl ToSql for ProblemId {
             Self::GraphColoring => ("graph_coloring").to_sql(),
             Self::VertexCover => ("vertex_cover").to_sql(),
             Self::MaximumClique => ("maximum_clique").to_sql(),
+            Self::MaximumCut => ("maximum_cut").to_sql(),
         }
     }
 }

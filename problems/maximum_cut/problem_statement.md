@@ -29,10 +29,10 @@ Consider the following grpah:
 
 <img src="/static/MaxCut_0.svg" width="720">
 
-The following is a cut yielding score `TODO`.
+The following is a cut yielding score `39`.
 
 <img src="/static/MaxCut_1.svg" width="720">
 
-This is an even better cut with score `TODO`.
+This is an even better cut with score `41` (still not the best).
 
 <img src="/static/MaxCut_2.svg" width="720">
