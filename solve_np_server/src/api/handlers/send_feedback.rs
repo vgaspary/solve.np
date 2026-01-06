@@ -7,6 +7,7 @@ use lettre::AsyncTransport;
 use lettre::message::Mailbox;
 use lettre::message::Message;
 use lettre::message::SinglePart;
+use log::error;
 use log::info;
 use serde::Deserialize;
 
@@ -38,7 +39,13 @@ async fn send_feedback_helper(
     } = form.into_inner();
     let content = format!(
         "{content}\n\nFrom: {}\n",
-        email.unwrap_or("anonymous".into())
+        email
+            .map(|maybe_empty| if maybe_empty.is_empty() {
+                String::from("anonymous")
+            } else {
+                maybe_empty
+            })
+            .unwrap_or("anonymous".into())
     );
     let email = Message::builder()
         .from(
@@ -63,6 +70,7 @@ async fn send_feedback_helper(
             mail_client
                 .send(email)
                 .await
+                .inspect_err(|err| error!("Failed sending feedback due to: {err}",))
                 .map_err(|_| "failed sending the feedback to feedback@solvenp.now".to_string())?;
         }
     };
