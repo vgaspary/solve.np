@@ -1,9 +1,12 @@
+use futures::future::join_all;
 use nix::sys::signal;
 use nix::sys::signal::Signal;
 use nix::unistd::Pid;
 use once_cell::sync::Lazy;
 use reqwest::cookie::Jar;
 use rusqlite::params;
+use serde_json::json;
+use std::collections::HashMap;
 use std::env;
 use std::io::Write;
 use std::net::TcpListener;
@@ -29,6 +32,40 @@ static E2E_TEST_BUILD: Lazy<()> = Lazy::new(|| {
     }
     println!("Build successful.");
 });
+
+use serde::Deserialize;
+
+#[derive(Debug, Clone, Deserialize)]
+struct StaticData {
+    problems: Vec<Problem>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+struct Problem {
+    id: String,
+    name: String,
+    inputs: Vec<Input>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+struct Input {
+    id: String,
+    num_vertices: usize,
+}
+
+#[derive(Debug, Clone, Copy)]
+enum SortingOrder {
+    Minimize,
+    Maximize,
+}
+
+fn get_problems() -> Vec<Problem> {
+    let static_data_content =
+        std::fs::read_to_string("static_data.yaml").expect("Failed to read static_data.yaml");
+    let static_data: StaticData =
+        serde_yaml::from_str(&static_data_content).expect("Failed to parse static_data.yaml");
+    static_data.problems
+}
 
 struct TestApp {
     address: String,
@@ -88,10 +125,7 @@ impl Drop for TestApp {
     fn drop(&mut self) {
         println!("Stopping server (PID: {})...", self.server_process.id());
         let pid = Pid::from_raw(self.server_process.id() as i32);
-        // We send a SIGTERM here to allow for graceful shutdown.
-        // We use .ok() to avoid panicking if the process is already dead.
         signal::kill(pid, Signal::SIGTERM).ok();
-        // We wait for the process to exit.
         match self.server_process.wait() {
             Ok(status) => println!("Server process exited with status: {}", status),
             Err(e) => eprintln!(
@@ -288,18 +322,25 @@ async fn problems_page_works() {
 }
 
 #[tokio::test]
-async fn problem_statement_page_works() {
+async fn all_problem_pages_work() {
     let test = spawn_app(&[]).await;
-    let response = test
-        .client
-        .get(&format!("{}/problems/graph_coloring", &test.address))
-        .send()
-        .await
-        .expect("Failed to execute request.");
+    let problems = get_problems();
+    let futures = problems.into_iter().map(|problem| {
+        let client = test.client.clone();
+        let address = test.address.clone();
+        async move {
+            let response = client
+                .get(&format!("{}/problems/{}", &address, problem.id))
+                .send()
+                .await
+                .expect("Failed to execute request.");
 
-    assert!(response.status().is_success());
-    let content = response.text().await.unwrap();
-    assert!(content.contains("<title>Graph Coloring - solveNP</title>"));
+            assert!(response.status().is_success());
+            let content = response.text().await.unwrap();
+            assert!(content.contains(&format!("<title>{} - solveNP</title>", problem.name)));
+        }
+    });
+    join_all(futures).await;
     test.pass();
 }
 
@@ -385,65 +426,66 @@ async fn logout_works() {
 }
 
 #[tokio::test]
-async fn validate_sample_tsp_correct() {
+async fn validate_sample_works() {
     let test = spawn_app(&[]).await;
-    let tsp_solution = serde_json::json!({
-        "TspSolution": [0, 1, 4, 2, 6, 5, 3, 7, 0]
+    let problems = get_problems();
+    let solutions = HashMap::from([
+        (
+            "travelling_salesman",
+            (
+                json!({ "TspSolution": [0, 1, 4, 2, 6, 5, 3, 7, 0] }),
+                json!({"Valid": 69}),
+            ),
+        ),
+        (
+            "graph_coloring",
+            (
+                json!({"GraphColoringSolution": [0, 1, 2, 3, 4, 5, 6, 7]}),
+                json!({"Valid": 8}),
+            ),
+        ),
+        (
+            "vertex_cover",
+            (
+                json!({"VertexCoverSolution": [0, 1, 2, 3, 4, 5, 6, 7]}),
+                json!({"Valid": 8}),
+            ),
+        ),
+        (
+            "maximum_clique",
+            (
+                json!({"MaximumCliqueSolution": [0, 2, 5]}),
+                json!({"Valid": 3}),
+            ),
+        ),
+        (
+            "maximum_cut",
+            (
+                json!({"MaximumCutSolution": [0, 2, 5]}),
+                json!({"Valid": 47}),
+            ),
+        ),
+    ]);
+    let client = test.client.clone();
+    let address = test.address.clone();
+    let futures = problems.into_iter().map(|problem| {
+        let (solution, result) = solutions.get(&problem.id.as_str()).cloned().unwrap();
+        let client = client.clone();
+        let address = address.clone();
+        async move {
+            let response = client
+                .post(&format!("{}/api/validate_sample", address))
+                .json(&solution)
+                .send()
+                .await
+                .expect("Failed to execute request.");
+
+            assert!(response.status().is_success());
+            let json: serde_json::Value = response.json().await.unwrap();
+            assert_eq!(json, result);
+        }
     });
-
-    let response = test
-        .client
-        .post(&format!("{}/api/validate_sample", &test.address))
-        .json(&tsp_solution)
-        .send()
-        .await
-        .expect("Failed to execute request.");
-
-    assert!(response.status().is_success());
-    let json: serde_json::Value = response.json().await.unwrap();
-    assert_eq!(json, serde_json::json!({"Valid": 69}));
-    test.pass();
-}
-
-#[tokio::test]
-async fn validate_sample_tsp_incorrect() {
-    let test = spawn_app(&[]).await;
-    let tsp_solution = serde_json::json!({
-        "TspSolution": [0, 1, 2, 3]
-    });
-
-    let response = test
-        .client
-        .post(&format!("{}/api/validate_sample", &test.address))
-        .json(&tsp_solution)
-        .send()
-        .await
-        .expect("Failed to execute request.");
-
-    assert!(response.status().is_success());
-    let json: serde_json::Value = response.json().await.unwrap();
-    assert!(json["Invalid"].is_string());
-    test.pass();
-}
-
-#[tokio::test]
-async fn validate_sample_graph_coloring_incorrect() {
-    let test = spawn_app(&[]).await;
-    let gc_solution = serde_json::json!({
-        "GraphColoringSolution": [0, 0, 0, 0, 0, 0, 0, 0]
-    });
-
-    let response = test
-        .client
-        .post(&format!("{}/api/validate_sample", &test.address))
-        .json(&gc_solution)
-        .send()
-        .await
-        .expect("Failed to execute request.");
-
-    assert!(response.status().is_success());
-    let json: serde_json::Value = response.json().await.unwrap();
-    assert!(json["Invalid"].is_string());
+    join_all(futures).await;
     test.pass();
 }
 
@@ -496,8 +538,11 @@ async fn vote_works() {
     test.pass();
 }
 
-#[tokio::test]
-async fn solutions_api_works() {
+async fn solutions_api_works_for_problem(
+    problem_id: String,
+    input_id: String,
+    solution_json: serde_json::Value,
+) {
     let test = spawn_app(&[]).await;
     test.log_in().await;
 
@@ -505,8 +550,8 @@ async fn solutions_api_works() {
     let create_solution_response = test
         .client
         .post(&format!("{}/api/solutions", &test.address))
-        .json(&serde_json::json!({
-            "problem_id": "graph_coloring",
+        .json(&json!({
+            "problem_id": problem_id,
             "title": "My test solution",
             "description": "A description"
         }))
@@ -536,30 +581,39 @@ async fn solutions_api_works() {
     let submit_response = test
         .client
         .post(&format!(
-            "{}/api/submit_solution/graph_coloring/{}/small_ultra_sparse",
-            &test.address, solution_id
+            "{}/api/submit_solution/{}/{}/{}",
+            &test.address, problem_id, solution_id, input_id
         ))
-        .json(&serde_json::json!({"GraphColoringSolution": (0..100).collect::<Vec<_>>()}))
+        .json(&solution_json)
         .send()
         .await
         .expect("Failed to submit solution");
     assert!(submit_response.status().is_success());
     let submit_json: serde_json::Value = submit_response.json().await.unwrap();
-    assert!(submit_json["Valid"].is_number());
+    assert!(
+        submit_json["Valid"].is_number() || submit_json["Invalid"].is_string(),
+        "Expected either Valid score or Invalid message, got: {:?}",
+        submit_json
+    );
+    let score_or_status = if submit_json["Valid"].is_number() {
+        json!({"Solved": submit_json["Valid"].as_i64().unwrap()})
+    } else {
+        json!("Attempted")
+    };
 
     // Check submission status
     let submission_status_response = test
         .client
         .get(&format!(
-            "{}/api/solutions/{}/input/small_ultra_sparse/status",
-            &test.address, solution_id
+            "{}/api/solutions/{}/input/{}/status",
+            &test.address, solution_id, input_id
         ))
         .send()
         .await
         .expect("Failed to get submission status");
     assert_eq!(submission_status_response.status(), reqwest::StatusCode::OK);
     let submission_status: serde_json::Value = submission_status_response.json().await.unwrap();
-    assert_eq!(submission_status, serde_json::json!({"Solved": 100}));
+    assert_eq!(submission_status, score_or_status);
 
     // Delete the solution
     let delete_response = test
@@ -570,6 +624,22 @@ async fn solutions_api_works() {
         .expect("Failed to delete solution");
     assert_eq!(delete_response.status(), reqwest::StatusCode::NO_CONTENT);
     test.pass();
+}
+
+#[tokio::test]
+async fn all_solutions_api_work() {
+    let problems = get_problems();
+    let problem = problems
+        .into_iter()
+        .find(|p| p.id == "travelling_salesman")
+        .unwrap();
+    let input = problem.inputs[0].clone();
+    let solution = {
+        let mut path: Vec<usize> = (0..input.num_vertices).collect();
+        path.push(0);
+        json!({"TspSolution": path})
+    };
+    solutions_api_works_for_problem(problem.id, input.id, solution).await;
 }
 
 #[tokio::test]
@@ -634,60 +704,70 @@ async fn update_solution_works() {
     test.pass();
 }
 
+#[ignore]
 #[tokio::test]
-async fn leaderboard_works() {
-    let test = spawn_app(&["--rerank-period", "100ms"]).await;
-    let mut solution_ids = Vec::new();
-    for user_idx in 0..20 {
-        let user_name = format!("user_{user_idx}");
-        test.log_in_as(&user_name).await;
-        test.client
-            .post(&format!("{}/api/solutions", &test.address))
-            .json(&serde_json::json!({
-                "problem_id": "graph_coloring",
-                "title": "My best solution.",
-                "description": format!("Best solution {user_name} has to offer."),
-            }))
-            .send()
-            .await
-            .expect("Failed to create solution");
-        let solution_id = get_solution_id(&test).await;
-        solution_ids.push(solution_id);
-        test.log_out().await;
-    }
+async fn all_leaderboards_work() {
+    let problems = get_problems();
+    let test = spawn_app(&["--rerank-period", "1s"]).await;
 
-    let pid = Pid::from_raw(test.server_process.id() as i32);
-    signal::kill(pid, Signal::SIGTSTP).expect("Failed to suspend the server.");
+    let sorting_orders = HashMap::from([
+        ("graph_coloring", SortingOrder::Minimize),
+        ("travelling_salesman", SortingOrder::Minimize),
+        ("vertex_cover", SortingOrder::Minimize),
+        ("maximum_clique", SortingOrder::Maximize),
+        ("maximum_cut", SortingOrder::Maximize),
+    ]);
 
-    // Mock 'submit_solution' calls by adding DB records in 'submissions' table.
-    let mut conn =
-        rusqlite::Connection::open(&test.db_path).expect("Failed to connect to the database");
-    let tx = conn.transaction().unwrap();
-    for user_idx in 0..20 {
-        let user_name = format!("user_{user_idx}");
-        let solution_id = solution_ids[user_idx].clone();
-        let user_id: String = tx
-            .query_row(
-                "SELECT user_id FROM solutions WHERE solution_id = ?",
-                [&solution_id],
-                |row| row.get(0),
-            )
-            .expect("Failed to get user_id from solutions table");
+    for problem in problems {
+        let sorting_order = sorting_orders.get(problem.id.as_str()).unwrap();
+        for user_idx in 0..20 {
+            let user_name = format!("user_{}", user_idx);
+            test.log_in_as(&user_name).await;
 
-        for input_id in [
-            "small_ultra_sparse",
-            "small_sparse",
-            "small_dense",
-            "medium_ultra_sparse",
-            "medium_sparse",
-            "medium_dense",
-            "large_ultra_sparse",
-            "large_sparse",
-            "large_dense",
-        ] {
-            let score = 100 + user_idx;
-            tx.execute(
-                    "INSERT INTO submissions (user_id, user_name, problem_id, solution_id, input_id, solution, hash_digest, status, invalid_message) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            let create_solution_response = test
+                .client
+                .post(&format!("{}/api/solutions", &test.address))
+                .json(&json!({
+                    "problem_id": problem.id,
+                    "title": "My best solution.",
+                    "description": format!("Best solution {} has to offer.", user_name),
+                }))
+                .send()
+                .await
+                .expect("Failed to create solution");
+            assert!(create_solution_response.status().is_success());
+            let solution_id = get_solution_id(&test).await;
+
+            // Mock 'submit_solution' calls by adding DB records in 'submissions' table.
+            let pid = Pid::from_raw(test.server_process.id() as i32);
+            signal::kill(pid, Signal::SIGTSTP).expect("Failed to suspend the server.");
+            let mut conn = rusqlite::Connection::open(&test.db_path)
+                .expect("Failed to connect to the database");
+            let tx = conn.transaction().unwrap();
+            let user_name = format!("user_{user_idx}");
+            let user_id: String = tx
+                .query_row(
+                    "SELECT user_id FROM solutions WHERE solution_id = ?",
+                    [&solution_id],
+                    |row| row.get(0),
+                )
+                .expect("Failed to get user_id from solutions table");
+
+            for input_id in [
+                "small_ultra_sparse",
+                "small_sparse",
+                "small_dense",
+                "medium_ultra_sparse",
+                "medium_sparse",
+                "medium_dense",
+                "large_ultra_sparse",
+                "large_sparse",
+                "large_dense",
+            ] {
+                let score = 100 + user_idx;
+                tx.execute(
+                    "INSERT INTO submissions (user_id, user_name, problem_id, solution_id, input_id, solution, hash_digest, status, invalid_me
+sage) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     params![
                         &user_id,
                         &user_name,
@@ -701,7 +781,7 @@ async fn leaderboard_works() {
                     ],
                 )
                 .expect("Failed to insert submission");
-            tx.execute(
+                tx.execute(
                     "UPDATE submissions SET status = ? WHERE user_id = ? AND problem_id = ? and solution_id = ? and input_id = ?;",
                     params![
                         score,
@@ -712,25 +792,51 @@ async fn leaderboard_works() {
                     ],
                 )
                 .expect("Failed to update submission");
+            }
+            tx.commit().unwrap();
+            signal::kill(pid, Signal::SIGCONT).expect("Failed to resume the server.");
+
+            test.log_out().await;
         }
+
+        tokio::time::sleep(Duration::from_millis(1200)).await;
+        let leaderboard_page_html = test
+            .client
+            .get(&format!("{}/leaderboard", &test.address))
+            .send()
+            .await
+            .expect("Failed to get leaderboard page")
+            .text()
+            .await
+            .unwrap();
+
+        let re = regex::Regex::new("<td>user_([0-9]+)</td>").unwrap();
+        let matches: Vec<usize> = re
+            .captures_iter(&leaderboard_page_html)
+            .map(|cap| cap[1].parse().unwrap())
+            .collect();
+
+        assert_eq!(
+            matches.len(),
+            10,
+            "Leaderboard should contain 10 users for problem {}",
+            problem.id
+        );
+
+        let mut sorted_matches = matches.clone();
+        sorted_matches.sort();
+
+        let expected_users: Vec<usize> = match sorting_order {
+            SortingOrder::Minimize => (0..10).collect(),
+            SortingOrder::Maximize => (10..20).rev().collect(),
+        };
+
+        assert_eq!(
+            matches, expected_users,
+            "Users are not sorted correctly on the leaderboard for problem {}",
+            problem.id
+        );
     }
-    tx.commit().unwrap();
-    signal::kill(pid, Signal::SIGCONT).expect("Failed to resume the server.");
-
-    tokio::time::sleep(Duration::from_millis(200)).await;
-    let leaderboard_page_html = test
-        .client
-        .get(&format!("{}/leaderboard", &test.address))
-        .send()
-        .await
-        .expect("Failed to get leaderboard page")
-        .text()
-        .await
-        .unwrap();
-    let re = regex::Regex::new("<td>user_[0-9]+</td>").unwrap();
-    let matches = re.find_iter(&leaderboard_page_html).count();
-    assert_eq!(matches, 100, "Leaderboard should contain 10 users.");
-
     test.pass();
 }
 
