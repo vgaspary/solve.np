@@ -8,6 +8,7 @@ members = [
   "problems/maximum_clique/maximum_clique_validate",
   "problems/maximum_cut/maximum_cut_gen",
   "problems/maximum_cut/maximum_cut_validate",
+  "problems/steiner_tree/steiner_tree_gen",
   "problems/travelling_salesman/tsp_gen",
   "problems/travelling_salesman/tsp_validate",
   "problems/vertex_cover/vertex_cover_gen",

@@ -1,4 +1,5 @@
 use clap::Parser;
+use clap::Subcommand;
 use libgraph::Graph;
 use rand::prelude::*;
 use rand_distr::Normal;
@@ -52,7 +53,7 @@ struct UniformDistributionArgs {
     max: usize,
 }
 
-#[derive(clap::Subcommand)]
+#[derive(Subcommand)]
 enum WeightDistribution {
     Normal(NormalDistributionArgs),
     Uniform(UniformDistributionArgs),
