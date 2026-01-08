@@ -4,8 +4,10 @@
   <body>
     {{ header | safe }}
     {% for problem in problems %}
-      <h2><a href="/problems/{{ problem.id }}">{{ problem.name }}</a></h2>
-      {{ problem.solution_table | safe }}
+      <div class="data-display-card">
+        <h2><a href="/problems/{{ problem.id }}">{{ problem.name }}</a></h2>
+        {{ problem.solution_table | safe }}
+      </div>
     {% endfor %}
   </body>
 </html>

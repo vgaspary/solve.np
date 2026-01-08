@@ -626,7 +626,7 @@ details[open] > summary {
   font-size: 1.2em;
 }
 
-.problem-leaderboard {
+.data-display-card {
   background: #24283b;
   border: 1px solid #414868;
   border-radius: 8px;
@@ -634,15 +634,15 @@ details[open] > summary {
   margin-bottom: 2em;
 }
 
-.problem-leaderboard h2 {
+.data-display-card h2 {
   margin-top: 0;
 }
 
-.problem-leaderboard details {
+.data-display-card details {
   margin-top: 2em;
 }
 
-.problem-leaderboard summary {
+.data-display-card summary {
   background: #1a1b26;
   padding: 10px 15px;
   border-radius: 4px;
@@ -650,17 +650,17 @@ details[open] > summary {
   transition: all 0.2s ease-in-out;
 }
 
-.problem-leaderboard summary:hover {
+.data-display-card summary:hover {
   border-color: #7aa2f7;
 }
 
-.problem-leaderboard details[open] > summary {
+.data-display-card details[open] > summary {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   border-color: #7aa2f7;
 }
 
-.problem-leaderboard .details-content {
+.data-display-card .details-content {
   padding: 20px;
   border: 1px solid #7aa2f7;
   border-top: none;

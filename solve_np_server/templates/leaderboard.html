@@ -4,7 +4,7 @@
   <body>
     {{ header | safe }}
     {% for problem in problems %}
-      <div class="problem-leaderboard">
+      <div class="data-display-card">
         <h2><a href="/problems/{{ problem.id }}">{{ problem.name }}</a></h2>
         <span>Overall ranking</span>
         <table>
