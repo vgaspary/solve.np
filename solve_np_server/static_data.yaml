@@ -166,7 +166,7 @@ problems:
   - id: maximum_cut
     name: Maximum Cut
     description: Partition the vertices of the graph such that the cut-set, the edges crossing the partition, have a large total weight.
-    problem_statement: ../problems/../problems/maximum_cut/problem_statement.md
+    problem_statement: ../problems/nmaximum_cut/problem_statement.md
     inputs:
       - id: small_sparse_normal
         path: ../problems/maximum_cut/inputs/small_sparse_normal.txt
@@ -215,4 +215,57 @@ problems:
       - id: large_uniform
         path: ../problems/maximum_cut/inputs/large_uniform.txt
         cmd: maximum_cut_gen -v 10000 -d 0.5 -o large_uniform uniform --min 0 --max 1000
+        num_vertices: 10000
+  - id: steiner_tree
+    name: Steiner Tree
+    description: TBD
+    problem_statement: ../problems/steiner_tree/problem_statement.md
+    inputs:
+      - id: small_sparse_normal
+        path: ../problems/steiner_tree/inputs/small_sparse_normal.txt
+        cmd: steiner_tree_gen -v 100 -d 0.1 -t 10 -o small_sparse_normal normal --mean 50 --sd 30
+        num_vertices: 100
+      - id: small_dense_normal
+        path: ../problems/steiner_tree/inputs/small_dense_normal.txt
+        cmd: steiner_tree_gen -v 100 -d 0.3 -t 10 -o small_dense_normal normal --mean 50 --sd 30
+        num_vertices: 100
+      - id: small_sparse_bimodal
+        path: ../problems/steiner_tree/inputs/small_sparse_bimodal.txt
+        cmd: steiner_tree_gen -v 100 -d 0.1 -t 10 -o small_sparse_bimodal bimodal --low-mean 20 --low-sd 10 --high-mean 80 --high-sd 10 --low-prob 0.3
+        num_vertices: 100
+      - id: small_dense_bimodal
+        path: ../problems/steiner_tree/inputs/small_dense_bimodal.txt
+        cmd: steiner_tree_gen -v 100 -d 0.3 -t 10 -o small_dense_bimodal bimodal --low-mean 20 --low-sd 10 --high-mean 80 --high-sd 10 --low-prob 0.3
+        num_vertices: 100
+      - id: medium_sparse_normal
+        path: ../problems/steiner_tree/inputs/medium_sparse_normal.txt
+        cmd: steiner_tree_gen -v 1000 -d 0.1 -t 200 -o medium_sparse_normal normal --mean 500 --sd 250
+        num_vertices: 1000
+      - id: medium_dense_normal
+        path: ../problems/steiner_tree/inputs/medium_dense_normal.txt
+        cmd: steiner_tree_gen -v 1000 -d 0.3 -t 200 -o medium_dense_normal normal --mean 500 --sd 250
+        num_vertices: 1000
+      - id: medium_sparse_bimodal
+        path: ../problems/steiner_tree/inputs/medium_sparse_bimodal.txt
+        cmd: steiner_tree_gen -v 1000 -d 0.1 -t 200 -o medium_sparse_bimodal bimodal --low-mean 200 --low-sd 100 --high-mean 800 --high-sd 100 --low-prob 0.2
+        num_vertices: 1000
+      - id: medium_dense_bimodal
+        path: ../problems/steiner_tree/inputs/medium_dense_bimodal.txt
+        cmd: steiner_tree_gen -v 1000 -d 0.3 -t 200 -o medium_dense_bimodal bimodal --low-mean 200 --low-sd 100 --high-mean 800 --high-sd 100 --low-prob 0.2
+        num_vertices: 1000
+      - id: large_sparse_normal
+        path: ../problems/steiner_tree/inputs/large_sparse_normal.txt
+        cmd: steiner_tree_gen -v 10000 -d 0.1 -t 1500 -o large_sparse_normal normal --mean 500 --sd 100
+        num_vertices: 10000
+      - id: large_dense_normal
+        path: ../problems/steiner_tree/inputs/large_dense_normal.txt
+        cmd: steiner_tree_gen -v 10000 -d 0.3 -t 1500 -o large_dense_normal normal --mean 500 --sd 100
+        num_vertices: 10000
+      - id: large_sparse_bimodal
+        path: ../problems/steiner_tree/inputs/large_sparse_bimodal.txt
+        cmd: steiner_tree_gen -v 10000 -d 0.1 -t 1500 -o large_sparse_bimodal bimodal --low-mean 200 --low-sd 100 --high-mean 800 --high-sd 100 --low-prob 0.1
+        num_vertices: 10000
+      - id: large_dense_bimodal
+        path: ../problems/steiner_tree/inputs/large_dense_bimodal.txt
+        cmd: steiner_tree_gen -v 10000 -d 0.3 -t 1500 -o large_dense_bimodal bimodal --low-mean 200 --low-sd 100 --high-mean 800 --high-sd 100 --low-prob 0.1
         num_vertices: 10000

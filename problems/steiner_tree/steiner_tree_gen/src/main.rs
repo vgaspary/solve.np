@@ -3,10 +3,10 @@ use clap::Subcommand;
 use libgraph::Graph;
 use rand::prelude::*;
 use rand_distr::Normal;
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
-use std::collections::HashSet;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -81,12 +81,14 @@ fn main() {
         weight_dist,
     } = Args::parse();
     let mut rng = rand::rng();
-
     let mut input_file = BufWriter::new(File::create(format!("{output}.txt")).unwrap());
-    let terminals = (0..num_vertices).choose_multiple(&mut rng, num_terminals).into_iter().map(|t| t.to_string()).collect::<Vec<_>>().join(" ");
-    writeln!(&mut input_file, "{terminals}").unwrap();
+    let terminals = (0..num_vertices)
+        .choose_multiple(&mut rng, num_terminals)
+        .into_iter()
+        .map(|t| t.to_string())
+        .collect::<Vec<_>>();
+    writeln!(&mut input_file, "{}", terminals.join(" ")).unwrap();
     writeln!(&mut input_file, "").unwrap();
-
     let mst_edges = Graph::minimum_spanning_tree(num_vertices, &mut rng)
         .edges()
         .collect::<HashSet<_>>();
@@ -97,10 +99,14 @@ fn main() {
     extra_edges.shuffle(&mut rng);
     let target_extra_edges = (extra_edges.len() as f64 * graph_density) as usize;
     extra_edges.truncate(target_extra_edges);
-    let mut edges: Vec<_> = mst_edges.into_iter().chain(extra_edges.into_iter()).map(|(u, v)| {
-        let w = random_weight(&weight_dist, &mut rng);
-        (u, v, w)
-    }).collect();
+    let mut edges: Vec<_> = mst_edges
+        .into_iter()
+        .chain(extra_edges.into_iter())
+        .map(|(u, v)| {
+            let w = random_weight(&weight_dist, &mut rng);
+            (u, v, w)
+        })
+        .collect();
     edges.shuffle(&mut rng);
     for (u, v, weight) in &edges {
         writeln!(&mut input_file, "{u} {v} {weight}").unwrap();
@@ -110,8 +116,9 @@ fn main() {
         .fold(Graph::new(num_vertices), |graph, &(u, v, weight)| {
             graph.add_edge_with_metadata((u, v), weight)
         });
-    let graph_file = BufWriter::new(File::create(format!("{output}.cbor")).unwrap());
-    ciborium::into_writer(&graph, graph_file).unwrap();
+    let input = (terminals, graph);
+    let binary_file = BufWriter::new(File::create(format!("{output}.cbor")).unwrap());
+    ciborium::into_writer(&input, binary_file).unwrap();
 }
 
 fn random_weight(dist: &WeightDistribution, rng: &mut impl Rng) -> usize {
@@ -120,7 +127,13 @@ fn random_weight(dist: &WeightDistribution, rng: &mut impl Rng) -> usize {
             let normal = Normal::new(*mean as f64, *sd as f64).unwrap();
             normal.sample(rng).clamp(1.0, usize::MAX as f64) as usize
         }
-        WeightDistribution::Bimodal(BimodalDistributionArgs { low_mean, low_sd, high_mean, high_sd, low_prob }) => {
+        WeightDistribution::Bimodal(BimodalDistributionArgs {
+            low_mean,
+            low_sd,
+            high_mean,
+            high_sd,
+            low_prob,
+        }) => {
             if rng.random_bool(*low_prob) {
                 let normal = Normal::new(*low_mean as f64, *low_sd as f64).unwrap();
                 normal.sample(rng).clamp(1.0, usize::MAX as f64) as usize
@@ -131,3 +144,4 @@ fn random_weight(dist: &WeightDistribution, rng: &mut impl Rng) -> usize {
         }
     }
 }
+
