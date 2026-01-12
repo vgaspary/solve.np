@@ -14,22 +14,13 @@ pub struct Graph<Metadata = ()> {
     pub adj_list: Vec<HashMap<usize, Metadata>>,
 }
 
-impl<Metadata> Graph<Metadata>
-where
-    Metadata: Clone,
-{
+impl<T> Graph<T> {
     pub fn new(num_vertices: usize) -> Self {
         Self {
-            adj_list: vec![HashMap::new(); num_vertices],
+            adj_list: std::iter::repeat_with(|| HashMap::new())
+                .take(num_vertices)
+                .collect(),
         }
-    }
-
-    pub fn add_edge_with_metadata(mut self, (u, v): Edge, metadata: Metadata) -> Self {
-        if u != v {
-            self.adj_list[u].insert(v, metadata.clone());
-            self.adj_list[v].insert(u, metadata);
-        }
-        self
     }
 
     pub fn edges(&self) -> impl Iterator<Item = Edge> {
@@ -43,6 +34,28 @@ where
 
     pub fn num_vertices(&self) -> usize {
         self.adj_list.len()
+    }
+
+    pub fn has_edge(&self, edge: Edge) -> bool {
+        self.get_edge_metadata(edge).is_some()
+    }
+
+    pub fn get_edge_metadata(&self, edge: Edge) -> Option<&T> {
+        let (u, v) = edge;
+        self.adj_list.get(u).and_then(|ns| ns.get(&v))
+    }
+}
+
+impl<Metadata> Graph<Metadata>
+where
+    Metadata: Clone,
+{
+    pub fn add_edge_with_metadata(mut self, (u, v): Edge, metadata: Metadata) -> Self {
+        if u != v {
+            self.adj_list[u].insert(v, metadata.clone());
+            self.adj_list[v].insert(u, metadata);
+        }
+        self
     }
 
     pub fn edges_with_metadata(&self) -> impl Iterator<Item = (Edge, Metadata)> {
@@ -156,6 +169,18 @@ mod tests {
     }
 
     #[test]
+    fn test_num_vertices() {
+        let graph: Graph<()> = Graph::new(0);
+        assert_eq!(graph.num_vertices(), 0);
+
+        let graph: Graph<()> = Graph::new(1);
+        assert_eq!(graph.num_vertices(), 1);
+
+        let graph: Graph<()> = Graph::new(5);
+        assert_eq!(graph.num_vertices(), 5);
+    }
+
+    #[test]
     fn test_add_edge() {
         let graph = Graph::new(3).add_edge((0, 1));
         assert!(graph.adj_list[0].contains_key(&1));
@@ -187,6 +212,39 @@ mod tests {
         let graph = Graph::new(1).add_edge((0, 0));
         assert!(graph.adj_list[0].is_empty());
         assert_eq!(get_sorted_edges(&graph), vec![]);
+    }
+
+    #[test]
+    fn test_has_edge() {
+        let graph = Graph::new(4)
+            .add_edge((0, 1))
+            .add_edge((1, 2))
+            .add_edge((2, 3));
+
+        assert!(graph.has_edge((0, 1)));
+        assert!(graph.has_edge((1, 0))); // Check reverse direction
+        assert!(graph.has_edge((1, 2)));
+        assert!(graph.has_edge((2, 1)));
+        assert!(graph.has_edge((2, 3)));
+        assert!(graph.has_edge((3, 2)));
+
+        assert!(!graph.has_edge((0, 2)));
+        assert!(!graph.has_edge((0, 3)));
+        assert!(!graph.has_edge((1, 3)));
+    }
+
+    #[test]
+    fn test_edges() {
+        let graph = Graph::new(4)
+            .add_edge((0, 1))
+            .add_edge((1, 2))
+            .add_edge((2, 3))
+            .add_edge((0, 3));
+
+        assert_eq!(
+            get_sorted_edges(&graph),
+            vec![(0, 1), (0, 3), (1, 2), (2, 3)]
+        );
     }
 
     #[test]
@@ -360,4 +418,46 @@ mod tests {
         assert!(graph.adj_list[0].is_empty());
         assert!(graph.edges_with_metadata().next().is_none());
     }
+
+
+    #[test]
+    fn test_get_edge_metadata() {
+        // Test with i32 metadata
+        let graph_i32 = Graph::new(3)
+            .add_edge_with_metadata((0, 1), 10)
+            .add_edge_with_metadata((1, 2), 20);
+
+        // Existing edge
+        assert_eq!(graph_i32.get_edge_metadata((0, 1)), Some(&10));
+        // Reverse direction of existing edge (should return metadata)
+        assert_eq!(graph_i32.get_edge_metadata((1, 0)), Some(&10));
+        // Another existing edge
+        assert_eq!(graph_i32.get_edge_metadata((1, 2)), Some(&20));
+
+        // Non-existent edge
+        assert_eq!(graph_i32.get_edge_metadata((0, 2)), None);
+        // Edge with out-of-bounds vertex
+        assert_eq!(graph_i32.get_edge_metadata((0, 99)), None);
+        assert_eq!(graph_i32.get_edge_metadata((99, 0)), None);
+
+        // Test with unit metadata `()`
+        let graph_unit = Graph::new(3)
+            .add_edge((0, 1))
+            .add_edge((1, 2));
+
+        // Existing edge
+        assert_eq!(graph_unit.get_edge_metadata((0, 1)), Some(&()));
+        assert_eq!(graph_unit.get_edge_metadata((1, 0)), Some(&()));
+        // Non-existent edge
+        assert_eq!(graph_unit.get_edge_metadata((0, 2)), None);
+
+        // Test on an empty graph
+        let empty_graph: Graph<i32> = Graph::new(0);
+        assert_eq!(empty_graph.get_edge_metadata((0, 1)), None);
+
+        // Test on a graph with vertices but no edges
+        let no_edge_graph: Graph<i32> = Graph::new(1);
+        assert_eq!(no_edge_graph.get_edge_metadata((0, 0)), None);
+    }
 }
+
