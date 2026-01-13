@@ -1,0 +1,10 @@
+[package]
+name = "steiner_tree_validate"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.100"
+ciborium = "0.2.2"
+libgraph = { path = "../../../libgraph" }
+thiserror = "2.0.17"
