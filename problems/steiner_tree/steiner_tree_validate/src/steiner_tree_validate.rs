@@ -1,4 +1,5 @@
-use anyhow::{Context, bail};
+use anyhow::Context;
+use anyhow::bail;
 use libgraph::Graph;
 use std::cell::OnceCell;
 use std::collections::HashSet;

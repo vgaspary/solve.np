@@ -144,4 +144,3 @@ fn random_weight(dist: &WeightDistribution, rng: &mut impl Rng) -> usize {
         }
     }
 }
-

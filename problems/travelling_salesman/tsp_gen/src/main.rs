@@ -3,8 +3,9 @@ use libgraph::Graph;
 use rand::prelude::*;
 use rand_distr::Normal;
 use std::collections::HashSet;
+use std::fs::File;
+use std::io::BufWriter;
 use std::io::Write;
-use std::{fs::File, io::BufWriter};
 
 /// Generate input for the Travelling Salesman problem.
 #[derive(Parser, Debug)]

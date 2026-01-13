@@ -115,7 +115,10 @@ mod tests {
     fn test_validate_not_clique() {
         let graph = create_graph();
         let solution = vec![0, 1, 4];
-        assert_eq!(validate(&graph, &solution), Err(Error::NotClique { u: 0, v: 4 }));
+        assert_eq!(
+            validate(&graph, &solution),
+            Err(Error::NotClique { u: 0, v: 4 })
+        );
     }
 
     #[test]

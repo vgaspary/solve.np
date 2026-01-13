@@ -1,7 +1,3 @@
-#![allow(dead_code)]
-
-use std::collections::HashMap;
-
 use crate::state::State;
 use crate::types::InputId;
 use crate::types::ProblemId;
@@ -15,6 +11,7 @@ use log::debug;
 use log::info;
 use rusqlite::params;
 use rusqlite::types::FromSql;
+use std::collections::HashMap;
 
 struct Submission {
     problem_id: ProblemId,

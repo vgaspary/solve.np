@@ -419,7 +419,6 @@ mod tests {
         assert!(graph.edges_with_metadata().next().is_none());
     }
 
-
     #[test]
     fn test_get_edge_metadata() {
         // Test with i32 metadata
@@ -441,9 +440,7 @@ mod tests {
         assert_eq!(graph_i32.get_edge_metadata((99, 0)), None);
 
         // Test with unit metadata `()`
-        let graph_unit = Graph::new(3)
-            .add_edge((0, 1))
-            .add_edge((1, 2));
+        let graph_unit = Graph::new(3).add_edge((0, 1)).add_edge((1, 2));
 
         // Existing edge
         assert_eq!(graph_unit.get_edge_metadata((0, 1)), Some(&()));
@@ -460,4 +457,3 @@ mod tests {
         assert_eq!(no_edge_graph.get_edge_metadata((0, 0)), None);
     }
 }
-

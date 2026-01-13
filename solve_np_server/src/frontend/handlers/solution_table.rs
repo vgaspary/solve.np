@@ -46,7 +46,9 @@ pub async fn solution_table(
     let user_id = session
         .get::<SessionId>("session_id")?
         .and_then(|session_id| state.session_registry.get_user_id(session_id))
-        .ok_or(ErrorInternalServerError("Something went wrong. Please log in."))?;
+        .ok_or(ErrorInternalServerError(
+            "Something went wrong. Please log in.",
+        ))?;
     let problem_id = path.into_inner();
 
     let solutions = state
