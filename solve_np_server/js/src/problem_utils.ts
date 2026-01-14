@@ -3,20 +3,43 @@ type SampleSolution =
   | { GraphColoringSolution: number[] }
   | { VertexCoverSolution: number[] }
   | { MaximumCliqueSolution: number[] }
-  | { MaximumCutSolution: number[] };
+  | { MaximumCutSolution: number[] }
+  | { SteinerTreeSolution: [number, number][] };
+
+function parseNumberList(input: string): number[] {
+  const trimmedInput = input.trim();
+  if (trimmedInput === '') {
+    return [];
+  }
+  const numbers = trimmedInput.split(/\s+/).map(n => Number(n));
+  if (numbers.some(isNaN)) {
+    throw new Error("Malformed solution: All values must be valid numbers.");
+  }
+  return numbers;
+}
 
 export function parse_solution(problem_id: string, input: string): SampleSolution | null {
   switch (problem_id) {
     case 'travelling_salesman':
-      return { TspSolution: input.trim().split(/\s+/).map(n => Number(n)) };
+      return { TspSolution: parseNumberList(input) };
     case 'graph_coloring':
-      return { GraphColoringSolution: input.trim().split(/\s+/).map(n => Number(n)) };
+      return { GraphColoringSolution: parseNumberList(input) };
     case 'vertex_cover':
-      return { VertexCoverSolution: input.trim().split(/\s+/).map(n => Number(n)) };
+      return { VertexCoverSolution: parseNumberList(input) };
     case 'maximum_clique':
-      return { MaximumCliqueSolution: input.trim().split(/\s+/).map(n => Number(n)) };
+      return { MaximumCliqueSolution: parseNumberList(input) };
     case 'maximum_cut':
-      return { MaximumCutSolution: input.trim().split(/\s+/).map(n => Number(n)) };
+      return { MaximumCutSolution: parseNumberList(input) };
+    case 'steiner_tree':
+      return {
+        SteinerTreeSolution: input.trim().split('\n').map(line => {
+          const vertices = parseNumberList(line);
+          if (vertices.length !== 2) {
+            throw new Error("Malformed solution: Each line must contain exactly two numbers.");
+          }
+          return [vertices[0], vertices[1]] as [number, number];
+        })
+      };
     default:
       return null;
   }
@@ -38,21 +61,26 @@ export function check_solution(problem_id: string): void {
     return;
   }
 
-  fetch('/api/validate_sample',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(parse_solution(problem_id, solution))
-    })
-    .then(response => {
+  (async () => {
+    try {
+      const parsed_solution_body = parse_solution(problem_id, solution);
+
+      const response = await fetch('/api/validate_sample',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(parsed_solution_body)
+        });
+
       if (!response.ok) {
-        throw response.text();
+        const errorText = await response.text();
+        throw new Error(errorText || "Validation request failed");
       }
-      return response.json();
-    })
-    .then(validation_result => {
+
+      const validation_result = await response.json();
+
       if (validation_result.Valid) {
         solution_textarea.classList = "success";
         sample_solution_result.innerHTML = validation_result.Valid;
@@ -60,9 +88,13 @@ export function check_solution(problem_id: string): void {
         solution_textarea.classList = "error";
         sample_solution_result.innerHTML = validation_result.Invalid;
       }
-    })
-    .catch(err => {
+    } catch (err) {
       solution_textarea.classList = "error";
-      sample_solution_result.innerHTML = "Malformed solution, failed parsing.";
-    });
+      if (err instanceof Error) {
+        sample_solution_result.innerHTML = err.message;
+      } else {
+        sample_solution_result.innerHTML = "Malformed solution, failed parsing.";
+      }
+    }
+  })();
 }

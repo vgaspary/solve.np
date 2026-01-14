@@ -34,6 +34,7 @@ serde = { version = "1.0.219", features = ["derive", "serde_derive"] }
 serde_json = "1.0.140"
 serde_yaml = "0.9.34"
 sha256 = "1.6.0"
+steiner_tree_validate = { path = "../problems/steiner_tree/steiner_tree_validate" }
 tokio = { version = "1", features = ["full"] }
 tsp_validate = { path = "../problems/travelling_salesman/tsp_validate" }
 uuid = { version = "1.18.1", features = ["v4"] }

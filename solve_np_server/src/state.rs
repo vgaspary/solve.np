@@ -111,7 +111,7 @@ impl From<LazyProblem> for Problem {
         sample_input_path.pop();
         sample_input_path.push("inputs");
         sample_input_path.push("sample.txt");
-        let sample_input = read_to_string(sample_input_path).expect("Failed to read sample input.");
+        let sample_input = read_to_string(sample_input_path).expect("Failed to read sample input");
         let inputs = inputs.into_iter().map(Input::from).collect();
         Problem {
             id,

@@ -465,6 +465,13 @@ async fn validate_sample_works() {
                 json!({"Valid": 47}),
             ),
         ),
+        (
+            "steiner_tree",
+            (
+                json!({"SteinerTreeSolution": [(0, 2), (2, 7), (2, 5), (3, 7)]}),
+                json!({"Valid": 34}),
+            ),
+        ),
     ]);
     let client = test.client.clone();
     let address = test.address.clone();

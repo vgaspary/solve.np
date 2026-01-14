@@ -4,6 +4,7 @@ use crate::types::ProblemId;
 use crate::types::SolutionId;
 use crate::types::Status;
 use anyhow::Context;
+use anyhow::bail;
 use itertools::Itertools;
 use rusqlite::params;
 use serde::Deserialize;
@@ -25,6 +26,7 @@ pub enum Solution {
     VertexCoverSolution(Vec<usize>),
     MaximumCliqueSolution(Vec<usize>),
     MaximumCutSolution(Vec<usize>),
+    SteinerTree(Vec<(usize, usize)>),
 }
 
 impl ToString for Solution {
@@ -35,6 +37,7 @@ impl ToString for Solution {
             Self::VertexCoverSolution(vertices) => vertices.iter().join(" "),
             Self::MaximumCliqueSolution(clique) => clique.iter().join(" "),
             Self::MaximumCutSolution(vertices) => vertices.iter().join(" "),
+            Self::SteinerTree(edges) => edges.iter().map(|(u, v)| format!("{u} {v}")).join("\n"),
         }
     }
 }
@@ -165,6 +168,20 @@ pub fn validate(
                 .map(|score| ValidateSolutionResult::Valid(score))
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
+        ProblemId::SteinerTree => {
+            use steiner_tree_validate::parse_binary_input;
+            use steiner_tree_validate::pre_validate;
+            use steiner_tree_validate::validate;
+
+            let edges = parse_steiner_tree_solution(&solution)?;
+            pre_validate(&edges, input.num_vertices)
+                .and_then(|_| {
+                    let graph = parse_binary_input(&input_path).expect("Steiner Tree input");
+                    validate(&graph, &edges)
+                })
+                .map(|score| ValidateSolutionResult::Valid(score))
+                .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
+        }
     };
     match &validation_result {
         ValidateSolutionResult::Valid(score) => state.db.lock().unwrap().execute(
@@ -252,4 +269,16 @@ fn parse_maximum_cut_solution(solution: &str) -> anyhow::Result<Vec<usize>> {
         .split_whitespace()
         .map(|vertex| vertex.parse())
         .collect::<Result<_, _>>()?)
+}
+
+fn parse_steiner_tree_solution(solution: &str) -> anyhow::Result<Vec<(usize, usize)>> {
+    solution
+        .lines()
+        .map(
+            |line| match line.split_whitespace().collect_vec().as_slice() {
+                [u, v] => Ok((u.parse()?, v.parse()?)),
+                _ => bail!("Malformed line: {line}"),
+            },
+        )
+        .collect()
 }

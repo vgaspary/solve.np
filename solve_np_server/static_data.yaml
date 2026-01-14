@@ -166,7 +166,7 @@ problems:
   - id: maximum_cut
     name: Maximum Cut
     description: Partition the vertices of the graph such that the cut-set, the edges crossing the partition, have a large total weight.
-    problem_statement: ../problems/nmaximum_cut/problem_statement.md
+    problem_statement: ../problems/maximum_cut/problem_statement.md
     inputs:
       - id: small_sparse_normal
         path: ../problems/maximum_cut/inputs/small_sparse_normal.txt
@@ -218,7 +218,7 @@ problems:
         num_vertices: 10000
   - id: steiner_tree
     name: Steiner Tree
-    description: TBD
+    description: Find a tree of minimum total edge weight that connects a given set of terminal vertices, optionally using additional intermediate vertices (Steiner points).
     problem_statement: ../problems/steiner_tree/problem_statement.md
     inputs:
       - id: small_sparse_normal

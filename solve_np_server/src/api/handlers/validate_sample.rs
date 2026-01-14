@@ -18,6 +18,7 @@ pub enum SampleSolution {
     VertexCoverSolution(Vec<usize>),
     MaximumCliqueSolution(Vec<usize>),
     MaximumCutSolution(Vec<usize>),
+    SteinerTreeSolution(Vec<(usize, usize)>),
 }
 
 #[derive(Serialize)]
@@ -150,6 +151,31 @@ pub async fn validate_sample(
                 .map_err(|_| ErrorInternalServerError("Error code: 52"))?;
             pre_validate(&vertices, SAMPLE_GRAPH_SIZE)
                 .and_then(|vertices| validate(&graph, &vertices))
+                .map(|score| HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
+                .or_else(|err| {
+                    Ok(HttpResponse::Ok()
+                        .json(ValidateSampleSolutionResult::Invalid(err.to_string())))
+                })
+        }
+        SampleSolution::SteinerTreeSolution(edges) => {
+            use steiner_tree_validate::SAMPLE_GRAPH_SIZE;
+            use steiner_tree_validate::parse_sample_input;
+            use steiner_tree_validate::pre_validate;
+            use steiner_tree_validate::validate;
+
+            let sample_input = state
+                .static_data
+                .problems
+                .iter()
+                .find(|problem| problem.id == ProblemId::SteinerTree)
+                .map(|problem| problem.sample_input.as_ref())
+                .ok_or(ErrorInternalServerError("Error code: 53"))
+                .inspect_err(|_| error!("Maximum Cut sample input not found"))?;
+            let graph = parse_sample_input(sample_input)
+                .inspect_err(|err| error!("Failed parsing Maximum Cut sample input: {err}"))
+                .map_err(|_| ErrorInternalServerError("Error code: 54"))?;
+            pre_validate(&edges, SAMPLE_GRAPH_SIZE)
+                .and_then(|_| validate(&graph, &edges))
                 .map(|score| HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
                 .or_else(|err| {
                     Ok(HttpResponse::Ok()

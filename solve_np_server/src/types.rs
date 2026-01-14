@@ -45,6 +45,8 @@ pub enum ProblemId {
     MaximumClique,
     #[serde(rename = "maximum_cut")]
     MaximumCut,
+    #[serde(rename = "steiner_tree")]
+    SteinerTree,
 }
 
 impl fmt::Display for ProblemId {
@@ -55,6 +57,7 @@ impl fmt::Display for ProblemId {
             ProblemId::VertexCover => write!(f, "vertex_cover"),
             ProblemId::MaximumClique => write!(f, "maximum_clique"),
             ProblemId::MaximumCut => write!(f, "maximum_cut"),
+            ProblemId::SteinerTree => write!(f, "steiner_tree"),
         }
     }
 }
@@ -67,6 +70,7 @@ impl FromSql for ProblemId {
             "vertex_cover" => Ok(Self::VertexCover),
             "maximum_clique" => Ok(Self::MaximumClique),
             "maximum_cut" => Ok(Self::MaximumCut),
+            "steiner_tree" => Ok(Self::SteinerTree),
             _ => Err(rusqlite::types::FromSqlError::OutOfRange(4)),
         }
     }
@@ -80,6 +84,7 @@ impl ToSql for ProblemId {
             Self::VertexCover => ("vertex_cover").to_sql(),
             Self::MaximumClique => ("maximum_clique").to_sql(),
             Self::MaximumCut => ("maximum_cut").to_sql(),
+            Self::SteinerTree => ("steiner_tree").to_sql(),
         }
     }
 }
