@@ -468,8 +468,8 @@ async fn validate_sample_works() {
         (
             "steiner_tree",
             (
-                json!({"SteinerTreeSolution": [(0, 2), (2, 7), (2, 5), (3, 7)]}),
-                json!({"Valid": 34}),
+                json!({"SteinerTreeSolution": [(0, 1), (1, 5), (5, 7), (6, 7)]}),
+                json!({"Valid": 12}),
             ),
         ),
     ]);

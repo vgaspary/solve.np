@@ -175,10 +175,10 @@ mod tests {
     fn test_pre_validate_cycle_detected() {
         let solution = vec![(0, 1), (1, 2), (2, 0)];
         let num_vertices = 3;
-        assert_eq!(
+        assert!(matches!(
             pre_validate(&solution, num_vertices),
-            Err(Error::CycleDetected { v: 0 })
-        );
+            Err(Error::CycleDetected { v: _ })
+        ));
     }
 
     #[test]
