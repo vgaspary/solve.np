@@ -26,6 +26,7 @@ use actix_web::web::put;
 use actix_web::web::scope;
 use api::handlers as api_handlers;
 use args::Args;
+use args::server_config_from_tls_args;
 use auth::SessionId;
 use auth::session_registry::save_to_file;
 use base64::prelude::*;
@@ -38,7 +39,6 @@ use log::debug;
 use log::error;
 use log::info;
 use ranking::update_ranking;
-use rustls::ServerConfig;
 use state::State;
 use std::sync::Arc;
 use tokio::task;
@@ -211,13 +211,10 @@ async fn main() -> std::io::Result<()> {
                 .build(),
             )
     });
-    let server = if args.tls_args.tls_cert.is_none() {
-        server.bind(("0.0.0.0", args.port))?
-    } else {
-        server.bind_rustls_0_23(
-            ("0.0.0.0", args.port),
-            ServerConfig::try_from(&args.tls_args)?,
-        )?
+    let addr = ("0.0.0.0", args.port);
+    let server = match server_config_from_tls_args(&args.tls_args) {
+        Some(config) => server.bind_rustls_0_23(addr, config)?,
+        None => server.bind(addr)?,
     };
     server.run().await
 }

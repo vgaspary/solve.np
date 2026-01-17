@@ -11,8 +11,6 @@ use clap::Parser;
 use log::error;
 use rusqlite::Connection;
 use rustls::ServerConfig;
-use rustls_pemfile::certs;
-use rustls_pemfile::private_key;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::PathBuf;
@@ -150,22 +148,19 @@ impl TryFrom<&Args> for State {
     }
 }
 
-impl TryFrom<&TlsArgs> for ServerConfig {
-    type Error = std::io::Error;
-    fn try_from(tls_args: &TlsArgs) -> std::io::Result<ServerConfig> {
-        let mut key_file = BufReader::new(File::open(
-            tls_args.tls_key.as_ref().expect("Invalid args"),
-        )?);
-        let pkey = private_key(&mut key_file)?.expect("Private key");
-        let mut cert_file = BufReader::new(File::open(
-            tls_args.tls_cert.as_ref().expect("Invalid args"),
-        )?);
-        let cert_chain = certs(&mut cert_file).collect::<Result<_, _>>()?;
-        let tls_config = rustls::ServerConfig::builder()
-            .with_no_client_auth()
-            .with_single_cert(cert_chain, pkey)
-            .inspect_err(|e| error!("{e}"))
-            .map_err(|_| std::io::ErrorKind::Other)?;
-        Ok(tls_config)
-    }
+pub fn server_config_from_tls_args(tls_args: &TlsArgs) -> Option<ServerConfig> {
+    let mut key_file =
+        BufReader::new(File::open(tls_args.tls_key.as_ref()?).expect("Open privatekey file"));
+    let pkey = rustls_pemfile::private_key(&mut key_file).expect("Private key")?;
+    let mut cert_file =
+        BufReader::new(File::open(tls_args.tls_cert.as_ref()?).expect("Open cert file"));
+    let cert_chain = rustls_pemfile::certs(&mut cert_file)
+        .collect::<Result<_, _>>()
+        .expect("Extracting certificates");
+    let tls_config = ServerConfig::builder()
+        .with_no_client_auth()
+        .with_single_cert(cert_chain, pkey)
+        .inspect_err(|e| error!("{e}"))
+        .unwrap();
+    Some(tls_config)
 }
