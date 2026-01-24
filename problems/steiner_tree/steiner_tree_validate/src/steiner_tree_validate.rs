@@ -1,4 +1,3 @@
-use anyhow::Context;
 use anyhow::bail;
 use libgraph::Graph;
 use std::cell::OnceCell;
