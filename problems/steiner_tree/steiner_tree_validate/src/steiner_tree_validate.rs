@@ -108,7 +108,7 @@ pub fn parse_sample_input(input: &str) -> anyhow::Result<Input> {
     let mut lines = input.lines();
     let terminals = lines
         .next()
-        .context("")?
+        .expect("Sample input is not empty")
         .split_ascii_whitespace()
         .map(|n| n.parse())
         .collect::<Result<_, _>>()?;

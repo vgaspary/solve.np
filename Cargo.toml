@@ -5,6 +5,7 @@ members = [
   "problems/graph_coloring/graph_coloring_gen",
   "problems/graph_coloring/graph_coloring_validate",
   "problems/knapsack/knapsack_gen",
+  "problems/knapsack/knapsack_validate",
   "problems/maximum_clique/maximum_clique_gen",
   "problems/maximum_clique/maximum_clique_validate",
   "problems/maximum_cut/maximum_cut_gen",
