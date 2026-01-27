@@ -67,14 +67,14 @@ fn main() {
     })
     .take(num_items)
     .collect::<Vec<_>>();
-    let total_weight = items.iter().map(|(_, weight)| *weight).sum::<u64>();
+    let total_weight = items.iter().map(|(weight, _)| *weight).sum::<u64>();
     let capacity = total_weight / 2;
 
     let mut txt_file = BufWriter::new(File::create(format!("{output}.txt")).unwrap());
     writeln!(&mut txt_file, "{}", capacity).unwrap();
     writeln!(&mut txt_file).unwrap();
-    for (value, weight) in &items {
-        writeln!(&mut txt_file, "{} {}", value, weight).unwrap();
+    for (weight, value) in &items {
+        writeln!(&mut txt_file, "{} {}", weight, value).unwrap();
     }
 
     let cbor_file = BufWriter::new(File::create(format!("{output}.cbor")).unwrap());

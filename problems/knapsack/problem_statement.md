@@ -10,9 +10,9 @@ The input consists of the weight limit of the knapsack and the items.
 
 -  The first line contains a single integer denoting the **weight limit** of the knapsack.
 -  The second line is intentionally left blank.
--  Each subsequent line represents an item, consisting of two space-separated integers: `v w`.
-    -   `v` is the **value** of the item.
+-  Each subsequent line represents an item, consisting of two space-separated integers: `w v`.
     -   `w` is the **weight** of the item.
+    -   `v` is the **value** of the item.
 
 ## Output
 
@@ -31,23 +31,38 @@ The goal is to maximize the total value of the items in the knapsack. The soluti
 Consider the following input:
 
 ```
-10
+32
 
-10 5
-40 4
-30 6
-50 3
+2 6
+8 9
+10 13
+6 11
+6 10
+4 9
+3 6
+3 4
+15 16
+7 8
 ```
 
-This means the knapsack has a weight limit of 10. There are four items:
-- Item 0: value 10, weight 5
-- Item 1: value 40, weight 4
-- Item 2: value 30, weight 6
-- Item 3: value 50, weight 3
+This means the knapsack has a weight limit of 32. There are 10 items:
+- Item 0: weight 2, value 6
+- Item 1: weight 8, value 9
+- Item 2: weight 10, value 13
+- Item 3: weight 6, value 11
+- Item 4: weight 6, value 10
+- Item 5: weight 4, value 9
+- Item 6: weight 3, value 6
+- Item 7: weight 3, value 4
+- Item 8: weight 15, value 16
+- Item 9: weight 7, value 8
 
-The optimal solution is to pick items 1 and 3. The total value is 90 and the total weight is 7, which is within the limit.
+<img src="/static/K_0.svg" width="720">
 
-The output for this solution would be:
-```
-1 3
-```
+One way to fill up the knapsack would be picking the items `1 3 6 8`. The score would be `42`.
+
+<img src="/static/K_1.svg" width="720">
+
+We can do even better with `0 2 3 4 5 6`. That would improve the score up to `55`. Note, this way the knapsack is not fully loaded.
+
+<img src="/static/K_2.svg" width="720">
