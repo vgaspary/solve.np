@@ -74,6 +74,6 @@ VALUES
   ('graph_coloring', 9),
   ('vertex_cover', 9),
   ('maximum_clique', 9),
-  ('maximum_cut', 12)
-  ('steiner_tree', 12)
+  ('maximum_cut', 12),
+  ('steiner_tree', 12),
   ('knapsack', 8);
