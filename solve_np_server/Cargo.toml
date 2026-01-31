@@ -16,6 +16,7 @@ graph_coloring_validate = { path = "../problems/graph_coloring/graph_coloring_va
 humantime = "2.3.0"
 itertools = "0.14.0"
 jsonwebtoken = "9.3.0"
+knapsack_validate = { path = "../problems/knapsack/knapsack_validate" }
 lettre = { version = "0.11.19", features = ["tokio1-native-tls"] }
 libgraph = { path = "../libgraph" }
 librank = { path = "../librank" }

@@ -47,6 +47,8 @@ pub enum ProblemId {
     MaximumCut,
     #[serde(rename = "steiner_tree")]
     SteinerTree,
+    #[serde(rename = "knapsack")]
+    Knapsack,
 }
 
 impl fmt::Display for ProblemId {
@@ -58,6 +60,7 @@ impl fmt::Display for ProblemId {
             ProblemId::MaximumClique => write!(f, "maximum_clique"),
             ProblemId::MaximumCut => write!(f, "maximum_cut"),
             ProblemId::SteinerTree => write!(f, "steiner_tree"),
+            ProblemId::Knapsack => write!(f, "knapsack"),
         }
     }
 }
@@ -85,6 +88,7 @@ impl ToSql for ProblemId {
             Self::MaximumClique => ("maximum_clique").to_sql(),
             Self::MaximumCut => ("maximum_cut").to_sql(),
             Self::SteinerTree => ("steiner_tree").to_sql(),
+            Self::Knapsack => ("knapsack").to_sql(),
         }
     }
 }

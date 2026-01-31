@@ -41,13 +41,13 @@ impl State {
 pub struct LazyInput {
     pub id: InputId,
     pub path: PathBuf,
-    pub num_vertices: usize,
+    pub pre_validate_metadata: usize,
 }
 
 pub struct Input {
     pub id: InputId,
     pub path: PathBuf,
-    pub num_vertices: usize,
+    pub pre_validate_metadata: usize,
     pub filename: String,
     pub preview: String,
 }
@@ -57,7 +57,7 @@ impl From<LazyInput> for Input {
         let LazyInput {
             id,
             path,
-            num_vertices,
+            pre_validate_metadata,
         } = input;
         let filename = (&path)
             .file_name()
@@ -73,7 +73,7 @@ impl From<LazyInput> for Input {
         Self {
             id,
             path,
-            num_vertices,
+            pre_validate_metadata,
             filename,
             preview,
         }

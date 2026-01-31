@@ -26,7 +26,8 @@ pub enum Solution {
     VertexCoverSolution(Vec<usize>),
     MaximumCliqueSolution(Vec<usize>),
     MaximumCutSolution(Vec<usize>),
-    SteinerTree(Vec<(usize, usize)>),
+    SteinerTreeSolution(Vec<(usize, usize)>),
+    KnapsackSolution(Vec<usize>),
 }
 
 impl ToString for Solution {
@@ -37,7 +38,10 @@ impl ToString for Solution {
             Self::VertexCoverSolution(vertices) => vertices.iter().join(" "),
             Self::MaximumCliqueSolution(clique) => clique.iter().join(" "),
             Self::MaximumCutSolution(vertices) => vertices.iter().join(" "),
-            Self::SteinerTree(edges) => edges.iter().map(|(u, v)| format!("{u} {v}")).join("\n"),
+            Self::SteinerTreeSolution(edges) => {
+                edges.iter().map(|(u, v)| format!("{u} {v}")).join("\n")
+            }
+            Self::KnapsackSolution(items) => items.iter().join(" "),
         }
     }
 }
@@ -103,8 +107,9 @@ pub fn validate(
             use tsp_validate::pre_validate;
             use tsp_validate::validate;
 
+            let num_vertices = input.pre_validate_metadata;
             let path = parse_tsp_solution(&solution)?;
-            pre_validate(&path, input.num_vertices)
+            pre_validate(&path, num_vertices)
                 .and_then(|_| {
                     let graph = parse_binary_input(&input_path).expect("TSP input");
                     validate(&graph, &path)
@@ -117,8 +122,9 @@ pub fn validate(
             use graph_coloring_validate::pre_validate;
             use graph_coloring_validate::validate;
 
+            let num_vertices = input.pre_validate_metadata;
             let coloring = parse_graph_coloring_solution(&solution)?;
-            pre_validate(&coloring, input.num_vertices)
+            pre_validate(&coloring, num_vertices)
                 .and_then(|_| {
                     let graph = parse_binary_input(input_path).expect("Graph Coloring input");
                     validate(&graph, &coloring)
@@ -131,8 +137,9 @@ pub fn validate(
             use vertex_cover_validate::pre_validate;
             use vertex_cover_validate::validate;
 
+            let num_vertices = input.pre_validate_metadata;
             let vertex_cover = parse_vertex_cover_solution(&solution)?;
-            pre_validate(&vertex_cover, input.num_vertices)
+            pre_validate(&vertex_cover, num_vertices)
                 .and_then(|vertex_cover| {
                     let graph = parse_binary_input(&input_path).expect("Vertex Cover input");
                     validate(&graph, &vertex_cover)
@@ -145,8 +152,9 @@ pub fn validate(
             use maximum_clique_validate::pre_validate;
             use maximum_clique_validate::validate;
 
+            let num_vertices = input.pre_validate_metadata;
             let clique = parse_maximum_clique_solution(&solution)?;
-            pre_validate(&clique, input.num_vertices)
+            pre_validate(&clique, num_vertices)
                 .and_then(|_| {
                     let graph = parse_binary_input(&input_path).expect("Maximum Clique input");
                     validate(&graph, &clique)
@@ -159,8 +167,9 @@ pub fn validate(
             use maximum_cut_validate::pre_validate;
             use maximum_cut_validate::validate;
 
+            let num_vertices = input.pre_validate_metadata;
             let vertices = parse_maximum_cut_solution(&solution)?;
-            pre_validate(&vertices, input.num_vertices)
+            pre_validate(&vertices, num_vertices)
                 .and_then(|vertices| {
                     let graph = parse_binary_input(&input_path).expect("Maximum Cut input");
                     validate(&graph, &vertices)
@@ -173,13 +182,29 @@ pub fn validate(
             use steiner_tree_validate::pre_validate;
             use steiner_tree_validate::validate;
 
+            let num_vertices = input.pre_validate_metadata;
             let edges = parse_steiner_tree_solution(&solution)?;
-            pre_validate(&edges, input.num_vertices)
+            pre_validate(&edges, num_vertices)
                 .and_then(|_| {
                     let graph = parse_binary_input(&input_path).expect("Steiner Tree input");
                     validate(&graph, &edges)
                 })
                 .map(|score| ValidateSolutionResult::Valid(score))
+                .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
+        }
+        ProblemId::Knapsack => {
+            use knapsack_validate::parse_binary_input;
+            use knapsack_validate::pre_validate;
+            use knapsack_validate::validate;
+
+            let num_items = input.pre_validate_metadata;
+            let items = parse_knapsack_solution(&solution)?;
+            pre_validate(&items, num_items)
+                .and_then(|_| {
+                    let input = parse_binary_input(&input_path).expect("Knapsack input");
+                    validate(&input, &items)
+                })
+                .map(|score| ValidateSolutionResult::Valid(score as usize))
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
     };
@@ -281,4 +306,11 @@ fn parse_steiner_tree_solution(solution: &str) -> anyhow::Result<Vec<(usize, usi
             },
         )
         .collect()
+}
+
+fn parse_knapsack_solution(solution: &str) -> anyhow::Result<Vec<usize>> {
+    Ok(solution
+        .split_whitespace()
+        .map(|item| item.parse())
+        .collect::<Result<_, _>>()?)
 }

@@ -4,7 +4,9 @@ type SampleSolution =
   | { VertexCoverSolution: number[] }
   | { MaximumCliqueSolution: number[] }
   | { MaximumCutSolution: number[] }
-  | { SteinerTreeSolution: [number, number][] };
+  | { SteinerTreeSolution: [number, number][] }
+  | { KnapsackSolution: number[] }
+  ;
 
 function parseNumberList(input: string): number[] {
   const trimmedInput = input.trim();
@@ -40,6 +42,8 @@ export function parse_solution(problem_id: string, input: string): SampleSolutio
           return [vertices[0], vertices[1]] as [number, number];
         })
       };
+    case 'knapsack':
+      return { KnapsackSolution: parseNumberList(input) };
     default:
       return null;
   }

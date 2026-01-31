@@ -19,6 +19,7 @@ pub enum SampleSolution {
     MaximumCliqueSolution(Vec<usize>),
     MaximumCutSolution(Vec<usize>),
     SteinerTreeSolution(Vec<(usize, usize)>),
+    KnapsackSolution(Vec<usize>),
 }
 
 #[derive(Serialize)]
@@ -170,13 +171,40 @@ pub async fn validate_sample(
                 .find(|problem| problem.id == ProblemId::SteinerTree)
                 .map(|problem| problem.sample_input.as_ref())
                 .ok_or(ErrorInternalServerError("Error code: 53"))
-                .inspect_err(|_| error!("Maximum Cut sample input not found"))?;
+                .inspect_err(|_| error!("Steiner Tree sample input not found"))?;
             let graph = parse_sample_input(sample_input)
-                .inspect_err(|err| error!("Failed parsing Maximum Cut sample input: {err}"))
+                .inspect_err(|err| error!("Failed parsing Steiner Tree sample input: {err}"))
                 .map_err(|_| ErrorInternalServerError("Error code: 54"))?;
             pre_validate(&edges, SAMPLE_GRAPH_SIZE)
                 .and_then(|_| validate(&graph, &edges))
                 .map(|score| HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score)))
+                .or_else(|err| {
+                    Ok(HttpResponse::Ok()
+                        .json(ValidateSampleSolutionResult::Invalid(err.to_string())))
+                })
+        }
+        SampleSolution::KnapsackSolution(items) => {
+            use knapsack_validate::SAMPLE_NUM_ITEMS;
+            use knapsack_validate::parse_sample_input;
+            use knapsack_validate::pre_validate;
+            use knapsack_validate::validate;
+
+            let sample_input = state
+                .static_data
+                .problems
+                .iter()
+                .find(|problem| problem.id == ProblemId::Knapsack)
+                .map(|problem| problem.sample_input.as_ref())
+                .ok_or(ErrorInternalServerError("Error code: 55"))
+                .inspect_err(|_| error!("Knapsack sample input not found"))?;
+            let input = parse_sample_input(sample_input)
+                .inspect_err(|err| error!("Failed parsing Knapsack sample input: {err}"))
+                .map_err(|_| ErrorInternalServerError("Error code: 56"))?;
+            pre_validate(&items, SAMPLE_NUM_ITEMS)
+                .and_then(|_| validate(&input, &items))
+                .map(|score| {
+                    HttpResponse::Ok().json(ValidateSampleSolutionResult::Valid(score as usize))
+                })
                 .or_else(|err| {
                     Ok(HttpResponse::Ok()
                         .json(ValidateSampleSolutionResult::Invalid(err.to_string())))

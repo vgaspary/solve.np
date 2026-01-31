@@ -7,39 +7,39 @@ problems:
       - id: small_sparse
         path: ../problems/travelling_salesman/inputs/small_sparse.txt
         cmd: tsp_gen -v 100 -d 0.3 -m 100 -s 20 -o small_sparse
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: small_dense
         path: ../problems/travelling_salesman/inputs/small_dense.txt
         cmd: tsp_gen -v 100 -d 0.8 -m 100 -s 30 -o small_dense
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: small_full
         path: ../problems/travelling_salesman/inputs/small_full.txt
         cmd: tsp_gen -v 100 -d 1.0 -m 100 -s 10 -o small_full
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: medium_sparse
         path: ../problems/travelling_salesman/inputs/medium_sparse.txt
         cmd: tsp_gen -v 1000 -d 0.3 -m 100 -s 20 -o medium_sparse
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: medium_dense
         path: ../problems/travelling_salesman/inputs/medium_dense.txt
         cmd: tsp_gen -v 1000 -d 0.8 -m 100 -s 30 -o medium_dense
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: medium_full
         path: ../problems/travelling_salesman/inputs/medium_full.txt
         cmd: tsp_gen -v 1000 -d 1.0 -m 100 -s 10 -o medium_full
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: large_sparse
         path: ../problems/travelling_salesman/inputs/large_sparse.txt
         cmd: tsp_gen -v 10000 -d 0.3 -m 100 -s 20 -o large_sparse
-        num_vertices: 10000
+        pre_validate_metadata: 10000
       - id: large_dense
         path: ../problems/travelling_salesman/inputs/large_dense.txt
         cmd: tsp_gen -v 10000 -d 0.8 -m 100 -s 30 -o large_dense
-        num_vertices: 10000
+        pre_validate_metadata: 10000
       - id: large_full
         path: ../problems/travelling_salesman/inputs/large_full.txt
         cmd: tsp_gen -v 10000 -d 1.0 -m 100 -s 10 -o large_full
-        num_vertices: 10000
+        pre_validate_metadata: 10000
   - id: graph_coloring
     name: Graph Coloring
     description: Color the nodes of a graph with as few colors as possible such that connected nodes don't have the same color.
@@ -48,39 +48,39 @@ problems:
       - id: small_ultra_sparse
         path: ../problems/graph_coloring/inputs/small_ultra_sparse.txt
         cmd: graph_coloring_gen -v 100 -d 0.1 -o small_ultra_sparse
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: small_sparse
         path: ../problems/graph_coloring/inputs/small_sparse.txt
         cmd: graph_coloring_gen -v 100 -d 0.3 -o small_sparse
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: small_dense
         path: ../problems/graph_coloring/inputs/small_dense.txt
         cmd: graph_coloring_gen -v 100 -d 0.6 -o small_dense
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: medium_ultra_sparse
         path: ../problems/graph_coloring/inputs/medium_ultra_sparse.txt
         cmd: graph_coloring_gen -v 1000 -d 0.1 -o medium_ultra_sparse
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: medium_sparse
         path: ../problems/graph_coloring/inputs/medium_sparse.txt
         cmd: graph_coloring_gen -v 1000 -d 0.3 -o medium_sparse
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: medium_dense
         path: ../problems/graph_coloring/inputs/medium_dense.txt
         cmd: graph_coloring_gen -v 1000 -d 0.6 -o medium_dense
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: large_ultra_sparse
         path: ../problems/graph_coloring/inputs/large_ultra_sparse.txt
         cmd: graph_coloring_gen -v 10000 -d 0.1 -o large_ultra_sparse
-        num_vertices: 10000
+        pre_validate_metadata: 10000
       - id: large_sparse
         path: ../problems/graph_coloring/inputs/large_sparse.txt
         cmd: graph_coloring_gen -v 10000 -d 0.3 -o large_sparse
-        num_vertices: 10000
+        pre_validate_metadata: 10000
       - id: large_dense
         path: ../problems/graph_coloring/inputs/large_dense.txt
         cmd: graph_coloring_gen -v 10000 -d 0.6 -o large_dense
-        num_vertices: 10000
+        pre_validate_metadata: 10000
   - id: vertex_cover
     name: Vertex Cover
     description: Find a small vertex cover of a graph, a subset of vertices that contains an endpoint of all the edges.
@@ -89,39 +89,39 @@ problems:
       - id: small_sparse
         path: ../problems/vertex_cover/inputs/small_sparse.txt
         cmd: vertex_cover_gen -v 100 -d 0.2 -o small_sparse
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: small
         path: ../problems/vertex_cover/inputs/small.txt
         cmd: vertex_cover_gen -v 100 -d 0.5 -o small
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: small_dense
         path: ../problems/vertex_cover/inputs/small_dense.txt
         cmd: vertex_cover_gen -v 100 -d 0.8 -o small_dense
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: medium_sparse
         path: ../problems/vertex_cover/inputs/medium_sparse.txt
         cmd: vertex_cover_gen -v 1000 -d 0.2 -o medium_sparse
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: medium
         path: ../problems/vertex_cover/inputs/medium.txt
         cmd: vertex_cover_gen -v 1000 -d 0.5 -o medium
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: medium_dense
         path: ../problems/vertex_cover/inputs/medium_dense.txt
         cmd: vertex_cover_gen -v 1000 -d 0.8 -o medium_dense
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: large_sparse
         path: ../problems/vertex_cover/inputs/large_sparse.txt
         cmd: vertex_cover_gen -v 10000 -d 0.2 -o large_sparse
-        num_vertices: 10000
+        pre_validate_metadata: 10000
       - id: large
         path: ../problems/vertex_cover/inputs/large.txt
         cmd: vertex_cover_gen -v 10000 -d 0.5 -o large
-        num_vertices: 10000
+        pre_validate_metadata: 10000
       - id: large_dense
         path: ../problems/vertex_cover/inputs/large_dense.txt
         cmd: vertex_cover_gen -v 10000 -d 0.8 -o large_dense
-        num_vertices: 10000
+        pre_validate_metadata: 10000
   - id: maximum_clique
     name: Maximum Clique
     description: Find a large clique in a graph, a subgraph where all vertex pairs are connected by an edge.
@@ -130,39 +130,39 @@ problems:
       - id: small_sparse
         path: ../problems/maximum_clique/inputs/small_sparse.txt
         cmd: maximum_clique_gen -v 100 -d 0.1 -o small_sparse
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: small
         path: ../problems/maximum_clique/inputs/small.txt
         cmd: maximum_clique_gen -v 100 -d 0.5 -o small
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: small_dense
         path: ../problems/maximum_clique/inputs/small_dense.txt
         cmd: maximum_clique_gen -v 100 -d 0.9 -o small_dense
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: medium_sparse
         path: ../problems/maximum_clique/inputs/medium_sparse.txt
         cmd: maximum_clique_gen -v 1000 -d 0.1 -o medium_sparse
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: medium
         path: ../problems/maximum_clique/inputs/medium.txt
         cmd: maximum_clique_gen -v 1000 -d 0.5 -o medium
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: medium_dense
         path: ../problems/maximum_clique/inputs/medium_dense.txt
         cmd: maximum_clique_gen -v 1000 -d 0.9 -o medium_dense
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: large_sparse
         path: ../problems/maximum_clique/inputs/large_sparse.txt
         cmd: maximum_clique_gen -v 10000 -d 0.1 -o large_sparse
-        num_vertices: 10000
+        pre_validate_metadata: 10000
       - id: large
         path: ../problems/maximum_clique/inputs/large.txt
         cmd: maximum_clique_gen -v 10000 -d 0.5 -o large
-        num_vertices: 10000
+        pre_validate_metadata: 10000
       - id: large_dense
         path: ../problems/maximum_clique/inputs/large_dense.txt
         cmd: maximum_clique_gen -v 10000 -d 0.9 -o large_dense
-        num_vertices: 10000
+        pre_validate_metadata: 10000
   - id: maximum_cut
     name: Maximum Cut
     description: Partition the vertices of the graph such that the cut-set, the edges crossing the partition, have a large total weight.
@@ -171,51 +171,51 @@ problems:
       - id: small_sparse_normal
         path: ../problems/maximum_cut/inputs/small_sparse_normal.txt
         cmd: maximum_cut_gen -v 100 -d 0.1 -o small_sparse_normal normal --mean 500 --sd 200
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: small_sparse_uniform
         path: ../problems/maximum_cut/inputs/small_sparse_uniform.txt
         cmd: maximum_cut_gen -v 100 -d 0.1 -o small_sparse_uniform uniform --min 0 --max 1000
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: small_normal
         path: ../problems/maximum_cut/inputs/small_normal.txt
         cmd: maximum_cut_gen -v 100 -d 0.5 -o small_normal normal --mean 500 --sd 200
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: small_uniform
         path: ../problems/maximum_cut/inputs/small_uniform.txt
         cmd: maximum_cut_gen -v 100 -d 0.5 -o small_uniform uniform --min 0 --max 1000
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: medium_sparse_normal
         path: ../problems/maximum_cut/inputs/medium_sparse_normal.txt
         cmd: maximum_cut_gen -v 1000 -d 0.1 -o medium_sparse_normal normal --mean 500 --sd 200
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: medium_sparse_uniform
         path: ../problems/maximum_cut/inputs/medium_sparse_uniform.txt
         cmd: maximum_cut_gen -v 1000 -d 0.1 -o medium_sparse_uniform uniform --min 0 --max 1000
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: medium_normal
         path: ../problems/maximum_cut/inputs/medium_normal.txt
         cmd: maximum_cut_gen -v 1000 -d 0.5 -o medium_normal normal --mean 500 --sd 200
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: medium_uniform
         path: ../problems/maximum_cut/inputs/medium_uniform.txt
         cmd: maximum_cut_gen -v 1000 -d 0.5 -o medium_uniform uniform --min 0 --max 1000
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: large_sparse_normal
         path: ../problems/maximum_cut/inputs/large_sparse_normal.txt
         cmd: maximum_cut_gen -v 10000 -d 0.1 -o large_sparse_normal normal --mean 500 --sd 200
-        num_vertices: 10000
+        pre_validate_metadata: 10000
       - id: large_sparse_uniform
         path: ../problems/maximum_cut/inputs/large_sparse_uniform.txt
         cmd: maximum_cut_gen -v 10000 -d 0.1 -o large_sparse_uniform uniform --min 0 --max 1000
-        num_vertices: 10000
+        pre_validate_metadata: 10000
       - id: large_normal
         path: ../problems/maximum_cut/inputs/large_normal.txt
         cmd: maximum_cut_gen -v 10000 -d 0.5 -o large_normal normal --mean 500 --sd 200
-        num_vertices: 10000
+        pre_validate_metadata: 10000
       - id: large_uniform
         path: ../problems/maximum_cut/inputs/large_uniform.txt
         cmd: maximum_cut_gen -v 10000 -d 0.5 -o large_uniform uniform --min 0 --max 1000
-        num_vertices: 10000
+        pre_validate_metadata: 10000
   - id: steiner_tree
     name: Steiner Tree
     description: Find a tree of minimum total edge weight that connects a given set of terminal vertices, optionally using additional intermediate vertices (Steiner points).
@@ -224,48 +224,85 @@ problems:
       - id: small_sparse_normal
         path: ../problems/steiner_tree/inputs/small_sparse_normal.txt
         cmd: steiner_tree_gen -v 100 -d 0.1 -t 10 -o small_sparse_normal normal --mean 50 --sd 30
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: small_dense_normal
         path: ../problems/steiner_tree/inputs/small_dense_normal.txt
         cmd: steiner_tree_gen -v 100 -d 0.3 -t 10 -o small_dense_normal normal --mean 50 --sd 30
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: small_sparse_bimodal
         path: ../problems/steiner_tree/inputs/small_sparse_bimodal.txt
         cmd: steiner_tree_gen -v 100 -d 0.1 -t 10 -o small_sparse_bimodal bimodal --low-mean 20 --low-sd 10 --high-mean 80 --high-sd 10 --low-prob 0.3
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: small_dense_bimodal
         path: ../problems/steiner_tree/inputs/small_dense_bimodal.txt
         cmd: steiner_tree_gen -v 100 -d 0.3 -t 10 -o small_dense_bimodal bimodal --low-mean 20 --low-sd 10 --high-mean 80 --high-sd 10 --low-prob 0.3
-        num_vertices: 100
+        pre_validate_metadata: 100
       - id: medium_sparse_normal
         path: ../problems/steiner_tree/inputs/medium_sparse_normal.txt
         cmd: steiner_tree_gen -v 1000 -d 0.1 -t 200 -o medium_sparse_normal normal --mean 500 --sd 250
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: medium_dense_normal
         path: ../problems/steiner_tree/inputs/medium_dense_normal.txt
         cmd: steiner_tree_gen -v 1000 -d 0.3 -t 200 -o medium_dense_normal normal --mean 500 --sd 250
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: medium_sparse_bimodal
         path: ../problems/steiner_tree/inputs/medium_sparse_bimodal.txt
         cmd: steiner_tree_gen -v 1000 -d 0.1 -t 200 -o medium_sparse_bimodal bimodal --low-mean 200 --low-sd 100 --high-mean 800 --high-sd 100 --low-prob 0.2
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: medium_dense_bimodal
         path: ../problems/steiner_tree/inputs/medium_dense_bimodal.txt
         cmd: steiner_tree_gen -v 1000 -d 0.3 -t 200 -o medium_dense_bimodal bimodal --low-mean 200 --low-sd 100 --high-mean 800 --high-sd 100 --low-prob 0.2
-        num_vertices: 1000
+        pre_validate_metadata: 1000
       - id: large_sparse_normal
         path: ../problems/steiner_tree/inputs/large_sparse_normal.txt
         cmd: steiner_tree_gen -v 10000 -d 0.1 -t 1500 -o large_sparse_normal normal --mean 500 --sd 100
-        num_vertices: 10000
+        pre_validate_metadata: 10000
       - id: large_dense_normal
         path: ../problems/steiner_tree/inputs/large_dense_normal.txt
         cmd: steiner_tree_gen -v 10000 -d 0.3 -t 1500 -o large_dense_normal normal --mean 500 --sd 100
-        num_vertices: 10000
+        pre_validate_metadata: 10000
       - id: large_sparse_bimodal
         path: ../problems/steiner_tree/inputs/large_sparse_bimodal.txt
         cmd: steiner_tree_gen -v 10000 -d 0.1 -t 1500 -o large_sparse_bimodal bimodal --low-mean 200 --low-sd 100 --high-mean 800 --high-sd 100 --low-prob 0.1
-        num_vertices: 10000
+        pre_validate_metadata: 10000
       - id: large_dense_bimodal
         path: ../problems/steiner_tree/inputs/large_dense_bimodal.txt
         cmd: steiner_tree_gen -v 10000 -d 0.3 -t 1500 -o large_dense_bimodal bimodal --low-mean 200 --low-sd 100 --high-mean 800 --high-sd 100 --low-prob 0.1
-        num_vertices: 10000
+        pre_validate_metadata: 10000
+  - id: knapsack
+    name: Knapsack
+    description: Given a weight-limited knapsack and items of various weight and value, fill up the knapsack with as much valua as possible.
+    problem_statement: ../problems/knapsack/problem_statement.md
+    inputs:
+      - id: small_normal
+        path: ../problems/knapsack/inputs/small_normal.txt
+        cmd: knapsack_gen  -n 100 --w-low-mean 100 --w-low-sd 30 --w-high-mean 1000 --w-high-sd 300 --w-low-prob 1.0 --k-mean 10 --k-sd 5 -o small_normal
+        pre_validate_metadata: 100
+      - id: small_bimodal
+        path: ../problems/knapsack/inputs/small_bimodal.txt
+        cmd: knapsack_gen  -n 100 --w-low-mean 100 --w-low-sd 30 --w-high-mean 1000 --w-high-sd 300 --w-low-prob 0.5 --k-mean 10 --k-sd 5 -o small_bimodal
+        pre_validate_metadata: 100
+      - id: medium_normal
+        path: ../problems/knapsack/inputs/medium_normal.txt
+        cmd: knapsack_gen  -n 1000 --w-low-mean 100 --w-low-sd 20 --w-high-mean 1000 --w-high-sd 100 --w-low-prob 1.0 --k-mean 5 --k-sd 2 -o medium_normal
+        pre_validate_metadata: 1000
+      - id: medium_bimodal
+        path: ../problems/knapsack/inputs/medium_bimodal.txt
+        cmd: knapsack_gen  -n 1000 --w-low-mean 100 --w-low-sd 20 --w-high-mean 1000 --w-high-sd 100 --w-low-prob 0.5 --k-mean 5 --k-sd 2 -o medium_bimodal
+        pre_validate_metadata: 1000
+      - id: large_normal
+        path: ../problems/knapsack/inputs/large_normal.txt
+        cmd: knapsack_gen  -n 10000 --w-low-mean 100 --w-low-sd 10 --w-high-mean 1000 --w-high-sd 50 --w-low-prob 1.0 --k-mean 1 --k-sd 10 -o large_normal
+        pre_validate_metadata: 10000
+      - id: large_bimodal
+        path: ../problems/knapsack/inputs/large_bimodal.txt
+        cmd: knapsack_gen  -n 10000 --w-low-mean 100 --w-low-sd 10 --w-high-mean 1000 --w-high-sd 50 --w-low-prob 0.5 --k-mean 1 --k-sd 10 -o large_bimodal
+        pre_validate_metadata: 10000
+      - id: extra_large_normal
+        path: ../problems/knapsack/inputs/extra_large_normal.txt
+        cmd: knapsack_gen  -n 100000 --w-low-mean 100 --w-low-sd 10 --w-high-mean 1000 --w-high-sd 50 --w-low-prob 1.0 --k-mean 1 --k-sd 10 -o extra_large_normal
+        pre_validate_metadata: 100000
+      - id: extra_large_bimodal
+        path: ../problems/knapsack/inputs/extra_large_bimodal.txt
+        cmd: knapsack_gen  -n 100000 --w-low-mean 100 --w-low-sd 10 --w-high-mean 1000 --w-high-sd 50 --w-low-prob 0.5 --k-mean 1 --k-sd 10 -o extra_large_bimodal
+        pre_validate_metadata: 100000

@@ -55,6 +55,7 @@ fn rank_submissions(submissions: Vec<Submission>) -> Vec<(Rank, Submission)> {
                     ProblemId::MaximumClique => submission.score.wrapping_neg(),
                     ProblemId::MaximumCut => submission.score.wrapping_neg(),
                     ProblemId::SteinerTree => submission.score,
+                    ProblemId::Knapsack => submission.score.wrapping_neg(),
                 })
         })
         .flatten()
