@@ -50,7 +50,7 @@ struct Problem {
 #[derive(Debug, Clone, Deserialize)]
 struct Input {
     id: String,
-    num_vertices: usize,
+    pre_validate_metadata: usize,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -472,6 +472,13 @@ async fn validate_sample_works() {
                 json!({"Valid": 12}),
             ),
         ),
+        (
+            "knapsack",
+            (
+                json!({"KnapsackSolution": [0, 1, 2]}),
+                json!({"Valid": 28}),
+            ),
+        ),
     ]);
     let client = test.client.clone();
     let address = test.address.clone();
@@ -642,7 +649,7 @@ async fn all_solutions_api_work() {
         .unwrap();
     let input = problem.inputs[0].clone();
     let solution = {
-        let mut path: Vec<usize> = (0..input.num_vertices).collect();
+        let mut path: Vec<usize> = (0..input.pre_validate_metadata).collect();
         path.push(0);
         json!({"TspSolution": path})
     };
