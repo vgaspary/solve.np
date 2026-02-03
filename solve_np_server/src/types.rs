@@ -1,3 +1,4 @@
+use log::error;
 use rusqlite::types::FromSql;
 use rusqlite::types::ToSql;
 use serde::Deserialize;
@@ -74,7 +75,11 @@ impl FromSql for ProblemId {
             "maximum_clique" => Ok(Self::MaximumClique),
             "maximum_cut" => Ok(Self::MaximumCut),
             "steiner_tree" => Ok(Self::SteinerTree),
-            _ => Err(rusqlite::types::FromSqlError::OutOfRange(4)),
+            "knapsack" => Ok(Self::Knapsack),
+            unknown => {
+                error!("No mapping for {unknown} in `impl FromSql for ProblemId`");
+                Err(rusqlite::types::FromSqlError::OutOfRange(7))
+            }
         }
     }
 }
