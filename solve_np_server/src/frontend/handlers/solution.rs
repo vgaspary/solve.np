@@ -1,6 +1,7 @@
 use crate::auth::SessionId;
 use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::handlers::header::HeaderTemplate;
+use crate::frontend::utils::md_to_html;
 use crate::state::State;
 use crate::types::InputId;
 use crate::types::ProblemId;
@@ -77,7 +78,7 @@ pub async fn solution(
                 id: solution_id.clone(),
                 problem_id: row.get(0)?,
                 title: row.get(1)?,
-                description: row.get(2)?,
+                description: md_to_html(row.get::<_, String>(2)?),
                 status: row.get(3)?,
             })
         )

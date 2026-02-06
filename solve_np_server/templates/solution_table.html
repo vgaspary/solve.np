@@ -13,7 +13,7 @@
         <span style="color: green;">Solved</span>
         {% endmatch %}</td>
       <td><a href="/solutions/{{ solution.id }}{% if let Some(input_id) = input_id %}?input_id={{ input_id }}{% endif %}">{{ solution.title }}</a></td>
-      <td><i>{{ solution.description }}</i></td>
+      <td>{{ solution.description | safe }}</td>
     </tr>
     {% endfor %}
     <tr id="new_attempt_row" >

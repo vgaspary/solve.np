@@ -1,6 +1,7 @@
 use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::utils::bytes_to_string_h;
 use crate::frontend::utils::get_file_metadata;
+use crate::frontend::utils::md_to_html;
 use crate::frontend_handlers::header::HeaderTemplate;
 use crate::frontend_handlers::solution_table::Solution;
 use crate::frontend_handlers::solution_table::SolutionTable;
@@ -18,7 +19,6 @@ use askama::Template;
 use itertools::Itertools;
 use log::debug;
 use log::error;
-use pulldown_cmark::Parser;
 use rusqlite::params;
 use std::fs;
 
@@ -58,14 +58,11 @@ pub async fn problem_statement(
         .find(|problem| problem.id == problem_id)
         .ok_or_else(|| ErrorInternalServerError("Error code: 42"))
         .and_then(|problem| {
-            let md_content = fs::read_to_string(&problem.problem_statement)?;
-            let parser = Parser::new(&md_content);
-            let mut problem_statement = String::new();
-            pulldown_cmark::html::push_html(&mut problem_statement, parser);
+            let problem_statement = fs::read_to_string(&problem.problem_statement)?;
             Ok(Problem {
                 id: problem_id,
                 name: problem.name.clone(),
-                problem_statement,
+                problem_statement: md_to_html(problem_statement),
                 sample_input: problem.sample_input.clone(),
                 inputs: problem
                     .inputs

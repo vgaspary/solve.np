@@ -1,3 +1,5 @@
+use pulldown_cmark::Parser;
+use pulldown_cmark::html;
 use std::fs::metadata;
 use std::io::Error;
 use std::os::unix::fs::MetadataExt;
@@ -26,6 +28,12 @@ pub(crate) fn bytes_to_string_h(bytes: u64) -> String {
         1_000_000_000..10_000_000_000 => format!("{:.2}GB", round(bytes as f64 / 1e9)),
         10_000_000_000.. => format!("{}GB", bytes / 1_000_000_000),
     }
+}
+
+pub(crate) fn md_to_html(md_content: impl AsRef<str>) -> String {
+    let mut html_content = String::new();
+    html::push_html(&mut html_content, Parser::new(md_content.as_ref()));
+    html_content
 }
 
 #[cfg(test)]

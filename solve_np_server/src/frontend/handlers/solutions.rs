@@ -1,4 +1,5 @@
 use crate::auth::SessionId;
+use crate::frontend::utils::md_to_html;
 use crate::frontend_handlers::head::HeadTemplate;
 use crate::frontend_handlers::header::HeaderTemplate;
 use crate::frontend_handlers::header::Page;
@@ -71,7 +72,7 @@ pub async fn solutions(
                     Solution {
                         id: row.get(0)?,
                         title: row.get(2)?,
-                        description: row.get(3)?,
+                        description: md_to_html(row.get::<_, String>(3)?),
                         status: row.get(4)?,
                     },
                 )
