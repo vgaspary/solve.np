@@ -43,6 +43,7 @@ h3 {
   color: #c0caf5;
 }
 code {
+  isolation: isolate;
   position: relative;
   display: inline-block;
   margin: 0;
@@ -58,7 +59,7 @@ code:before {
   top: 3px;
   bottom: 0px;
   border: 1px solid #414868;
-  background: #24283b;
+  background: #1e2230;
 }
 pre.wrap {
   max-width: 100%;
