@@ -50,7 +50,7 @@ export function edit_solution(button: HTMLElement, solutionId: string, problemId
     <td></td>
     <td></td>
     <td><input type="text" autocomplete="off" placeholder="Title" value="${solution.title}" /></td>
-    <td><input type="text" autocomplete="off" placeholder="Description (optional)" value="${solution.description}" /></td>
+    <td><input type="text" autocomplete="off" placeholder="Description (optional)" value="${solution.description}" style="width: 100%;" /></td>
     `;
     const titleInput = editRow.cells[3]?.firstChild! as HTMLInputElement;
     const descriptionInput = editRow.cells[4]?.firstChild! as HTMLInputElement;
@@ -59,7 +59,7 @@ export function edit_solution(button: HTMLElement, solutionId: string, problemId
     saveCancelRow.innerHTML = `
     <td colspan="2"><a><i>[Save]</i></a></td>
     <td><a><i>[Cancel]</i></a></td>
-    <td><span class="error-message"></span></td>
+    <td colspan="2"><span class="error-message"></span></td>
     `;
     const saveButton = saveCancelRow.cells[0]?.firstChild! as HTMLAnchorElement;
     const cancelButton = saveCancelRow.cells[1]?.firstChild! as HTMLAnchorElement;
@@ -165,7 +165,7 @@ export function new_attempt(button: HTMLElement): void {
     <td></td>
     <td></td>
     <td><input type="text" autocomplete="off" placeholder="Title" id="new_title" /></td>
-    <td><input type="text" autocomplete="off" placeholder="Description (optional)" id="new_description" /></td>
+    <td><input type="text" autocomplete="off" placeholder="Description (optional)" id="new_description" style="width: 100%;" /></td>
   `;
 
   const title_input = new_row.querySelector("#new_title") as HTMLElement;
