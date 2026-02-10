@@ -19,7 +19,7 @@
             <td>{{ rank }}</td>
             <td>{{ solution.user_name }}</td>
             <td>{{ solution.title }}</td>
-            <td>{% if let Some(desc) = solution.description %}{{ desc }}{% endif %}</td>
+            <td>{% if let Some(desc) = solution.description %}{{ desc | safe }}{% endif %}</td>
           </tr>
           {% endfor %}
         </table>

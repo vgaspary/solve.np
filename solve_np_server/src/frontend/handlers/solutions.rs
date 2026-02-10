@@ -72,7 +72,7 @@ pub async fn solutions(
                     Solution {
                         id: row.get(0)?,
                         title: row.get(2)?,
-                        description: md_to_html(row.get::<_, String>(3)?),
+                        description: md_to_html(row.get(3)?),
                         status: row.get(4)?,
                     },
                 )

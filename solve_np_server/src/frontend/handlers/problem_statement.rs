@@ -58,11 +58,10 @@ pub async fn problem_statement(
         .find(|problem| problem.id == problem_id)
         .ok_or_else(|| ErrorInternalServerError("Error code: 42"))
         .and_then(|problem| {
-            let problem_statement = fs::read_to_string(&problem.problem_statement)?;
             Ok(Problem {
                 id: problem_id,
                 name: problem.name.clone(),
-                problem_statement: md_to_html(problem_statement),
+                problem_statement: md_to_html(fs::read_to_string(&problem.problem_statement)?),
                 sample_input: problem.sample_input.clone(),
                 inputs: problem
                     .inputs

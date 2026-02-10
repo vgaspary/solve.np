@@ -78,7 +78,7 @@ pub async fn solution(
                 id: solution_id.clone(),
                 problem_id: row.get(0)?,
                 title: row.get(1)?,
-                description: md_to_html(row.get::<_, String>(2)?),
+                description: md_to_html(row.get(2)?),
                 status: row.get(3)?,
             })
         )

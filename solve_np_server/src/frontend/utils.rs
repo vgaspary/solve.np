@@ -30,9 +30,9 @@ pub(crate) fn bytes_to_string_h(bytes: u64) -> String {
     }
 }
 
-pub(crate) fn md_to_html(md_content: impl AsRef<str>) -> String {
+pub(crate) fn md_to_html(md_content: String) -> String {
     let mut html_content = String::new();
-    html::push_html(&mut html_content, Parser::new(md_content.as_ref()));
+    html::push_html(&mut html_content, Parser::new(&md_content));
     html_content
 }
 
