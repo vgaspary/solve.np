@@ -1,6 +1,7 @@
 use crate::frontend::handlers::head::HeadTemplate;
 use crate::frontend::handlers::header::HeaderTemplate;
 use crate::frontend::handlers::header::Page;
+use crate::frontend::utils::md_to_html;
 use crate::state::State;
 use crate::types::InputId;
 use crate::types::ProblemId;
@@ -98,7 +99,7 @@ pub async fn leaderboard(
             let solution = Solution {
                 user_name: row.get(0)?,
                 title: row.get(2)?,
-                description: row.get(3)?,
+                description: row.get::<_, Option<_>>(3)?.map(md_to_html),
             };
             Ok((problem_id, Ranked(rank, solution)))
         })
