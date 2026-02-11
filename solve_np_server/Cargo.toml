@@ -18,8 +18,8 @@ itertools = "0.14.0"
 jsonwebtoken = "9.3.0"
 knapsack_validate = { path = "../problems/knapsack/knapsack_validate" }
 lettre = { version = "0.11.19", features = ["tokio1-native-tls"] }
-libgraph = { path = "../libgraph" }
-librank = { path = "../librank" }
+libgraph = "0.1.0"
+librank = "0.1.0"
 log = "0.4.27"
 maximum_clique_validate = { path = "../problems/maximum_clique/maximum_clique_validate" }
 maximum_cut_validate = { path = "../problems/maximum_cut/maximum_cut_validate" }

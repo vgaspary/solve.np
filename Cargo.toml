@@ -1,7 +1,5 @@
 [workspace]
 members = [
-  "libgraph",
-  "librank",
   "problems/graph_coloring/graph_coloring_gen",
   "problems/graph_coloring/graph_coloring_validate",
   "problems/knapsack/knapsack_gen",

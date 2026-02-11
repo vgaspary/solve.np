@@ -6,6 +6,6 @@ edition = "2024"
 [dependencies]
 ciborium = "0.2.2"
 clap = { version = "4.5.54", features = ["derive"] }
+libgraph = "0.1.0"
 rand = "0.9.2"
 rand_distr = "0.5.1"
-libgraph = { path = "../../../libgraph" }

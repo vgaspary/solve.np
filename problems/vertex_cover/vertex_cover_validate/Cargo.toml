@@ -5,6 +5,6 @@ edition = "2024"
 
 [dependencies]
 thiserror = "2.0.17"
-libgraph = { path = "../../../libgraph" }
 ciborium = "0.2.2"
 anyhow = "1.0.100"
+libgraph = "0.1.0"
