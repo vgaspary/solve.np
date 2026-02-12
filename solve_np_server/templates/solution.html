@@ -14,7 +14,7 @@
       {% when Status::Solved(score) %}
       <span id="solution_status" style="color: green;">Solved</span>
       {% endmatch %}</p>
-      <p>{{ solution.description }}</p>
+      <p>{{ solution.description | safe }}</p>
     </div>
     {% for input in inputs %}
     <div>
