@@ -7,6 +7,12 @@ type Solution = {
   description: string,
 }
 
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.appendChild(document.createTextNode(text));
+  return div.innerHTML;
+}
+
 async function maybe_edit_solution(solution_id: string, problemId: string, titleInput: HTMLInputElement, descriptionInput: HTMLInputElement): Promise<void> {
   if (titleInput.value.trim() === '') {
     throw `'Title' field is mandatory.`;
@@ -26,6 +32,7 @@ async function maybe_edit_solution(solution_id: string, problemId: string, title
 
 async function reload_solution_table(problemId: string): Promise<void> {
   const solutionTable = document.getElementById(`${problemId}_solution_table`) as HTMLElement;
+  if (!solutionTable) return;
   const response = await fetch(`/solution_table/${problemId}`);
   const content = await response.text();
   solutionTable.innerHTML = content;
@@ -94,6 +101,79 @@ export function edit_solution(button: HTMLElement, solutionId: string, problemId
         global_event_listener_stack.pop();
       })();
     };
+  })();
+}
+
+export function edit_solution_title_desc(solutionId: string, problemId: string): void {
+  (async () => {
+    try {
+      const response: Response = await fetch(`/api/solutions/${solutionId}`);
+      if (!response.ok) throw await response.text();
+      const solution: Solution = JSON.parse(await response.text());
+
+      const titleDiv = document.getElementById('title');
+      if (!titleDiv) return;
+      const descriptionDiv = document.getElementById('description');
+      if (!descriptionDiv) return;
+      titleDiv.innerHTML = `<input type="text" autocomplete="off" placeholder="Title" id="edit_title_input" value="${escapeHtml(solution.title)}" />`;
+      descriptionDiv.innerHTML = `<input type="text" autocomplete="off" placeholder="Description (optional)" id="edit_description_input" value="${escapeHtml(solution.description)}" style="width: 90%;" />`;
+      const titleInput = document.getElementById('edit_title_input') as HTMLInputElement;
+      const descriptionInput = document.getElementById('edit_description_input') as HTMLInputElement;
+      const controlsSpan = document.createElement('span');
+      controlsSpan.innerHTML = `
+        <a id="save_solution_button" style="margin-left: 10px; cursor: pointer;" tabindex="0"><i>[save]</i></a>
+        <a id="cancel_solution_button" style="margin-left: 5px; cursor: pointer;" tabindex="0"><i>[cancel]</i></a>
+        <span id="edit_solution_error_message" class="error-message" style="margin-left: 10px;"></span>
+      `;
+      titleDiv.appendChild(controlsSpan);
+      const saveButton = document.getElementById('save_solution_button') as HTMLAnchorElement;
+      const cancelButton = document.getElementById('cancel_solution_button') as HTMLAnchorElement;
+      const errorMessageSpan = document.getElementById('edit_solution_error_message') as HTMLSpanElement;
+      titleInput.focus();
+
+      global_event_listener_stack.push((event: Event): void => {
+        if (event instanceof KeyboardEvent) {
+          switch (event.key) {
+            case 'Enter':
+              if (document.activeElement === cancelButton) {
+                cancelButton.click();
+              } else {
+                saveButton.click();
+              }
+              break;
+            case 'Escape':
+              cancelButton.click();
+              break;
+          }
+        }
+      });
+
+      saveButton.onclick = async () => {
+        try {
+          await maybe_edit_solution(solutionId, problemId, titleInput, descriptionInput);
+          global_event_listener_stack.pop();
+          window.location.reload();
+        } catch (err) {
+          errorMessageSpan.innerHTML = `${err}`;
+        }
+      };
+
+      cancelButton.onclick = () => {
+        global_event_listener_stack.pop();
+        window.location.reload();
+      };
+
+    } catch (error) {
+      console.error('Error in edit_solution_title_desc:', error);
+      // Display error if initial fetch fails or other critical errors
+      const titleDiv = document.getElementById('title');
+      if (titleDiv && titleDiv.parentNode) {
+        const errorDisplay = document.createElement('span');
+        errorDisplay.className = 'error-message';
+        errorDisplay.innerHTML = `Failed to load solution for editing: ${error}`;
+        titleDiv.parentNode.insertBefore(errorDisplay, titleDiv.nextSibling);
+      }
+    }
   })();
 }
 
@@ -205,6 +285,7 @@ export function create_solution(button: HTMLElement, problemId: string): void {
 
   if (title.value.trim() === '') {
     error_msg.innerHTML = '\'Title\' field is mandatory.';
+    global_event_listener_stack.pop();
     return;
   }
 
@@ -226,6 +307,7 @@ export function create_solution(button: HTMLElement, problemId: string): void {
       global_event_listener_stack.pop();
     } catch (err) {
       error_msg.innerHTML = `${err}`;
+      global_event_listener_stack.pop();
     }
   })();
 }

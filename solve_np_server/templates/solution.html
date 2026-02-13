@@ -4,8 +4,9 @@
   <body>
     {{ header | safe }}
     <div>
-      <div><h1>{{ solution.title }}</h1></div>
-      <div>{{ solution.description | safe }}</div>
+      <h1><div id="title">{{ solution.title }} <a onclick="solve_np.edit_solution_title_desc('{{ solution.id }}', '{{ problem.id }}')">[🖉]</a></div></h1> 
+      <div id="description">{{ solution.description | safe }}</div>
+      <br>
       <div>Problem: <a href="/problems/{{ problem.id }}">{{ problem.name }}</a></div>
       <div>Status: {% match solution.status %}
       {% when Status::Untested %}
