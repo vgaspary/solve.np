@@ -136,7 +136,7 @@ pub async fn leaderboard(
                 user_name: row.get(0)?,
                 score: row.get(3)?,
                 solution_title: row.get(5)?,
-                solution_description: row.get(6)?,
+                solution_description: row.get::<_, Option<_>>(6)?.map(md_to_html),
             };
             Ok(((problem_id, input_id), Ranked(rank, submission)))
         })

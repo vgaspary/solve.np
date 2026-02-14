@@ -44,7 +44,7 @@
                   <td>{{ submission.user_name }}</td>
                   <td>{{ submission.score }}</td>
                   <td>{{ submission.solution_title }}</td>
-                  <td>{% if let Some(desc) = submission.solution_description %}{{ desc }}{% endif %}</td>
+                  <td>{% if let Some(desc) = submission.solution_description %}{{ desc | safe }}{% endif %}</td>
                 </tr>
                 {% endfor %}
               </table>
