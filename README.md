@@ -6,8 +6,6 @@ This project is a web server for hosting a competition to solve NP-complete prob
 
 The project is organized into the following main directories:
 
-- `libgraph/`: A Rust library for graph-related data structures and algorithms.
-- `librank/`: A Rust library for ranking solutions.
 - `problems/`: Contains subdirectories for each NP-complete problem. Each problem has:
     - A problem statement in `problem_statement.md`.
     - A generator for creating new instances of the problem (`<problem>_gen/`).
@@ -30,7 +28,7 @@ cargo build
 ```
 
 This command will:
-1.  Compile the Rust code for the server and all `lib` and `problem` crates.
+1. Compile the Rust code for the server and all `problem` crates.
 2.  Build the Javascript bundle using `esbuild`.
 3.  Create an SQLite database file `solve_np.db3` and initialize it with the schema from `init.sql`.
 
