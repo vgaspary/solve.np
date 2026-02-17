@@ -474,10 +474,7 @@ async fn validate_sample_works() {
         ),
         (
             "knapsack",
-            (
-                json!({"KnapsackSolution": [0, 1, 2]}),
-                json!({"Valid": 28}),
-            ),
+            (json!({"KnapsackSolution": [0, 1, 2]}), json!({"Valid": 28})),
         ),
     ]);
     let client = test.client.clone();
