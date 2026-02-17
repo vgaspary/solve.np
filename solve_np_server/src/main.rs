@@ -2,6 +2,7 @@ mod api;
 mod args;
 mod auth;
 mod frontend;
+mod logger_middleware;
 mod mailer;
 mod ranking;
 mod state;
@@ -9,7 +10,6 @@ mod types;
 mod validate;
 
 use actix_files::Files;
-use actix_session::SessionExt;
 use actix_session::SessionMiddleware;
 use actix_session::config::PersistentSession;
 use actix_session::storage::CookieSessionStore;
@@ -27,7 +27,6 @@ use actix_web::web::scope;
 use api::handlers as api_handlers;
 use args::Args;
 use args::server_config_from_tls_args;
-use auth::SessionId;
 use auth::session_registry::save_to_file;
 use base64::prelude::*;
 use clap::Parser;
@@ -38,6 +37,7 @@ use frontend::public_files::sitemap_xml;
 use log::debug;
 use log::error;
 use log::info;
+use logger_middleware::RequestLogger;
 use ranking::update_ranking;
 use state::State;
 use std::sync::Arc;
@@ -185,20 +185,7 @@ async fn main() -> std::io::Result<()> {
             )
             /* ----------------- */
             .route("/health_check", get().to(api_handlers::health_check))
-            .wrap(
-                actix_web::middleware::Logger::new(
-                    r#"%{session_id}xi %a "%r" %s %b "%{Referer}i" "%{User-Agent}i" %T"#,
-                )
-                .custom_request_replace("session_id", |req| {
-                    req.get_session()
-                        .get::<SessionId>("session_id")
-                        .ok()
-                        .flatten()
-                        .map(SessionId::short)
-                        .map(|id| id.to_string())
-                        .unwrap_or_default()
-                }),
-            )
+            .wrap(RequestLogger)
             .wrap(
                 SessionMiddleware::builder(
                     CookieSessionStore::default(),
