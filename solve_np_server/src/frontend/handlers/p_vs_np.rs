@@ -11,7 +11,6 @@ use actix_web::error::ErrorInternalServerError;
 use actix_web::http::header::ContentType;
 use actix_web::web;
 use askama::Template;
-use log::error;
 use rusqlite::params;
 
 #[derive(Clone, Copy)]
@@ -42,7 +41,6 @@ fn get_vote_data(
             params![user_id],
             |row| row.get(0),
         )
-        .inspect_err(|err| error!("{err}"))
         .ok()
     else {
         return Ok(None);
