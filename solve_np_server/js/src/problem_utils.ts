@@ -87,7 +87,7 @@ export function check_solution(problem_id: string): void {
 
       if (validation_result.Valid) {
         solution_textarea.classList = "success";
-        sample_solution_result.innerHTML = validation_result.Valid;
+        sample_solution_result.innerHTML = `Score: ${validation_result.Valid}`;
       } else if (validation_result.Invalid) {
         solution_textarea.classList = "error";
         sample_solution_result.innerHTML = validation_result.Invalid;
