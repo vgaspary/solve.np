@@ -60,7 +60,7 @@ struct GithubAuthTokenResponse {
 #[derive(Deserialize)]
 struct GithubAuthUserResponse {
     login: String,
-    id: i32,
+    id: i64,
     name: Option<String>,
 }
 
