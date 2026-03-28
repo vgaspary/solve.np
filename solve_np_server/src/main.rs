@@ -103,12 +103,10 @@ async fn main() -> std::io::Result<()> {
         .decode(&args.key)
         .expect("Secret key must be base64 encoded.");
     start_background_tasks(&args, Arc::clone(&state));
+    #[rustfmt::skip]
     let server = HttpServer::new(move || {
         App::new()
-            .wrap(
-                ErrorHandlers::new()
-                    .handler(StatusCode::INTERNAL_SERVER_ERROR, handle_internal_error),
-            )
+            .wrap(ErrorHandlers::new().handler(StatusCode::INTERNAL_SERVER_ERROR, handle_internal_error))
             .app_data(state.clone())
             /* --- Frontend scope --- */
             .service(Files::new("/static", "./static"))
@@ -120,67 +118,31 @@ async fn main() -> std::io::Result<()> {
             .route("/leaderboard", get().to(frontend_handlers::leaderboard))
             .route("/p_vs_np", get().to(frontend_handlers::p_vs_np))
             .route("/problems", get().to(frontend_handlers::problems))
-            .route(
-                "/problems/{problem_id}",
-                get().to(frontend_handlers::problem_statement),
-            )
+            .route("/problems/{problem_id}", get().to(frontend_handlers::problem_statement))
             .route("/solutions", get().to(frontend_handlers::solutions))
-            .route(
-                "/solutions/{solution_id}",
-                get().to(frontend_handlers::solution),
-            )
-            .route(
-                "/solution_table/{problem_id}",
-                get().to(frontend_handlers::solution_table),
-            )
+            .route("/solutions/{solution_id}", get().to(frontend_handlers::solution))
+            .route("/solution_table/{problem_id}", get().to(frontend_handlers::solution_table))
             .route("/feedback", get().to(frontend_handlers::feedback))
             /* ---------------------- */
             /* --- API scope --- */
             .service(
                 scope("/api")
-                    .service(
-                        Files::new("/problems", "../problems")
-                            .mime_override(|_| DispositionType::Attachment),
-                    )
+                    .service(Files::new("/problems", "../problems").mime_override(|_| DispositionType::Attachment))
                     .route("/validate_sample", post().to(api_handlers::validate_sample))
                     .route("/vote/{vote}", post().to(api_handlers::vote))
                     .route("/log_in", post().to(api_handlers::log_in))
                     .route("/google_auth", get().to(api_handlers::google_auth))
-                    .route(
-                        "/google_auth_callback",
-                        get().to(api_handlers::google_auth_callback),
-                    )
+                    .route("/google_auth_callback", get().to(api_handlers::google_auth_callback))
                     .route("/github_auth", get().to(api_handlers::github_auth))
-                    .route(
-                        "/github_auth_callback",
-                        get().to(api_handlers::github_auth_callback),
-                    )
+                    .route("/github_auth_callback", get().to(api_handlers::github_auth_callback))
                     .route("/log_out", get().to(api_handlers::log_out))
-                    .route(
-                        "/solutions/{solution_id}",
-                        delete().to(api_handlers::delete_solution),
-                    )
-                    .route(
-                        "/solutions/{solution_id}",
-                        get().to(api_handlers::get_solution),
-                    )
-                    .route(
-                        "/solutions/{solution_id}",
-                        put().to(api_handlers::update_solution),
-                    )
+                    .route("/solutions/{solution_id}", delete().to(api_handlers::delete_solution))
+                    .route("/solutions/{solution_id}", get().to(api_handlers::get_solution))
+                    .route("/solutions/{solution_id}", put().to(api_handlers::update_solution))
                     .route("/solutions", post().to(api_handlers::create_solution))
-                    .route(
-                        "/submit_solution/{problem_id}/{solution_id}/{input_id}",
-                        post().to(api_handlers::submit_solution),
-                    )
-                    .route(
-                        "/solutions/{solution_id}/status",
-                        get().to(api_handlers::solution_status),
-                    )
-                    .route(
-                        "/solutions/{solution_id}/input/{input_id}/status",
-                        get().to(api_handlers::submission_status),
-                    )
+                    .route("/submit_solution/{problem_id}/{solution_id}/{input_id}", post().to(api_handlers::submit_solution))
+                    .route("/solutions/{solution_id}/status", get().to(api_handlers::solution_status))
+                    .route("/solutions/{solution_id}/input/{input_id}/status", get().to(api_handlers::submission_status))
                     .route("/feedback", post().to(api_handlers::send_feedback)),
             )
             /* ----------------- */
