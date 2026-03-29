@@ -2,7 +2,6 @@ use crate::auth::gauth::GOOGLE_AUTH_AUTHZ_ENDPOINT;
 use crate::auth::gauth::GOOGLE_AUTH_SCOPE;
 use crate::auth::gauth::GOOGLE_AUTH_TOKEN_ENDPOINT;
 use crate::auth::gauth::redirect_uri;
-use crate::auth::gauth::validate_id_token;
 use crate::state::State;
 use actix_session::Session;
 use actix_web::Responder;
@@ -91,7 +90,9 @@ pub async fn google_auth_callback(
         .await
         .inspect_err(|e| error!("{e}"))
         .map_err(|_| ErrorInternalServerError("Failed to parse Google token response."))?;
-    let claims = validate_id_token(&token_response.id_token, client_id)
+    let claims = state
+        .google_public_keys
+        .validate_id_token(&token_response.id_token, client_id)
         .await
         .map_err(ErrorUnauthorized)?;
     let session_id = state.session_registry.create_session(claims);

@@ -1,5 +1,6 @@
 use crate::auth::gauth::GoogleAuthClientId;
 use crate::auth::gauth::GoogleAuthClientSecret;
+use crate::auth::gauth::GooglePublicKeys;
 use crate::auth::github_auth::GithubAuthClientId;
 use crate::auth::github_auth::GithubAuthClientSecret;
 use crate::auth::session_registry::SessionRegistry;
@@ -26,6 +27,7 @@ pub struct State {
     pub session_registry: SessionRegistry,
     pub google_auth_client_id: Option<GoogleAuthClientId>,
     pub google_auth_client_secret: Option<GoogleAuthClientSecret>,
+    pub google_public_keys: GooglePublicKeys,
     pub github_auth_client_id: Option<GithubAuthClientId>,
     pub github_auth_client_secret: Option<GithubAuthClientSecret>,
     pub mail_client: Option<AsyncSmtpTransport<Tokio1Executor>>,

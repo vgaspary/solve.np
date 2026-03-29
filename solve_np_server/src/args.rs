@@ -1,5 +1,6 @@
 use crate::auth::gauth::GoogleAuthClientId;
 use crate::auth::gauth::GoogleAuthClientSecret;
+use crate::auth::gauth::GooglePublicKeys;
 use crate::auth::github_auth::GithubAuthClientId;
 use crate::auth::github_auth::GithubAuthClientSecret;
 use crate::auth::session_registry::SessionRegistry;
@@ -141,6 +142,7 @@ impl TryFrom<&Args> for State {
             session_registry,
             google_auth_client_id,
             google_auth_client_secret,
+            google_public_keys: GooglePublicKeys::new(),
             github_auth_client_id,
             github_auth_client_secret,
             mail_client,
