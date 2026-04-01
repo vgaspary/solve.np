@@ -42,6 +42,7 @@ struct Solution {
     user_name: String,
     title: String,
     description: Option<String>,
+    bg_color: String,
 }
 
 struct Submission {
@@ -49,6 +50,7 @@ struct Submission {
     score: Score,
     solution_title: String,
     solution_description: Option<String>,
+    bg_color: String,
 }
 
 struct Input {
@@ -100,6 +102,7 @@ pub async fn leaderboard(
                 user_name: row.get(0)?,
                 title: row.get(2)?,
                 description: row.get::<_, Option<_>>(3)?.map(md_to_html),
+                bg_color: background_color_for_rank(rank),
             };
             Ok((problem_id, Ranked(rank, solution)))
         })
@@ -137,6 +140,7 @@ pub async fn leaderboard(
                 score: row.get(3)?,
                 solution_title: row.get(5)?,
                 solution_description: row.get::<_, Option<_>>(6)?.map(md_to_html),
+                bg_color: background_color_for_rank(rank),
             };
             Ok(((problem_id, input_id), Ranked(rank, submission)))
         })
@@ -210,4 +214,21 @@ pub async fn leaderboard(
     Ok(HttpResponse::Ok()
         .content_type(ContentType::html())
         .body(body))
+}
+
+fn background_color_for_rank(rank: usize) -> String {
+    match rank {
+        1 => "#2e344e", // Slightly brighter than background
+        2 => "#2a2f45",
+        3 => "#272c3f",
+        4 => "#24283b", // Matches .data-display-card background
+        5 => "#222637",
+        6 => "#202433",
+        7 => "#1e222f",
+        8 => "#1c202b",
+        9 => "#1a1e27",
+        10 => "#181c23",
+        _ => "#1a1b26", // Main background
+    }
+    .to_string()
 }

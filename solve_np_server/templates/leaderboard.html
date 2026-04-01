@@ -15,7 +15,7 @@
             <th>Description</th>
           </tr>
           {% for Ranked(rank, solution) in problem.overall_ranking %}
-          <tr>
+          <tr style="background: {{ solution.bg_color }}">
             <td>{{ rank }}</td>
             <td>{{ solution.user_name }}</td>
             <td>{{ solution.title }}</td>
@@ -39,7 +39,7 @@
                   <th>Description</th>
                 </tr>
                 {% for Ranked(rank, submission) in input.ranking %}
-                <tr>
+                <tr style="background: {{ submission.bg_color }}">
                   <td>{{ rank }}</td>
                   <td>{{ submission.user_name }}</td>
                   <td>{{ submission.score }}</td>
