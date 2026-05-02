@@ -354,9 +354,7 @@ export function submit_solution(problem_id: string, solution_id: string, input_i
         return;
       }
       if (response.status !== 200) {
-        status_paragraph.innerHTML = "Malformed solution, failed parsing.";
-        solution_textarea.classList = "error";
-        return;
+        throw new Error("Malformed solution, failed parsing.");
       }
       const validation_result = await response.json();
       if (validation_result.Valid) {
@@ -367,6 +365,13 @@ export function submit_solution(problem_id: string, solution_id: string, input_i
         solution_textarea.classList = "error";
       }
       await maybe_update_status(solution_id, input_id);
+    } catch (err) {
+      solution_textarea.classList = "error";
+      if (err instanceof Error) {
+        status_paragraph.innerHTML = err.message;
+      } else {
+        status_paragraph.innerHTML = "Malformed solution, failed parsing.";
+      }
     } finally {
       cancellation_token.stop = true;
     }
