@@ -26,7 +26,7 @@ pub enum Error {
 pub fn pre_validate(solution: &[Color], num_vertices: usize) -> Result<(), Error> {
     if num_vertices != solution.len() {
         return Err(Error::UnexpectedLength {
-            num_vertices: num_vertices,
+            num_vertices,
             num_colors: solution.len(),
         });
     }

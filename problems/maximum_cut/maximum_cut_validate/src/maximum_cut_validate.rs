@@ -48,7 +48,7 @@ pub fn pre_validate(solution: &[Vertex], num_vertices: usize) -> Result<HashSet<
 pub fn validate(input: &Graph<Weight>, solution: &HashSet<Vertex>) -> Result<Score, Error> {
     let score = input
         .edges_with_metadata()
-        .filter(|((u, v), _)| solution.contains(&u) ^ solution.contains(&v))
+        .filter(|((u, v), _)| solution.contains(u) ^ solution.contains(v))
         .map(|(_, w)| w)
         .sum::<Score>();
     Ok(score)

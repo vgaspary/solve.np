@@ -53,8 +53,7 @@ pub fn pre_validate(solution: &[Edge], num_vertices: usize) -> Result<(), Error>
         })?;
     let vertices = solution
         .iter()
-        .map(|&(u, v)| [u, v].into_iter())
-        .flatten()
+        .flat_map(|&(u, v)| [u, v].into_iter())
         .collect::<HashSet<_>>();
     let Some(start) = vertices.iter().next() else {
         return Err(Error::EmptySolution);
@@ -83,7 +82,7 @@ pub fn pre_validate(solution: &[Edge], num_vertices: usize) -> Result<(), Error>
 /// Assumes `solution` has been pre-validated.
 pub fn validate(input: &Input, solution: &[Edge]) -> Result<Score, Error> {
     let (terminals, graph) = input;
-    let mut terminals: HashSet<Vertex> = HashSet::from_iter(terminals.into_iter().cloned());
+    let mut terminals: HashSet<Vertex> = HashSet::from_iter(terminals.iter().cloned());
     let score = solution.iter().try_fold(0, |score, &edge| {
         let (u, v) = edge;
         terminals.remove(&u);

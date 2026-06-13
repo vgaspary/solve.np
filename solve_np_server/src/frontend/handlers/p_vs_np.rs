@@ -81,11 +81,11 @@ pub async fn p_vs_np(
     let head = HeadTemplate::with_title("P vs NP - solveNP");
     let header = HeaderTemplate::try_from(&session, state.clone())?.with_active(Page::PvsNP);
     let eq_neq_text = if header.logged_in {
-        get_vote_data(&session, &state)?.and_then(|(vote, num_eq, num_neq)| {
-            Some((
+        get_vote_data(&session, &state)?.map(|(vote, num_eq, num_neq)| {
+            (
                 format_eq_neq_row(num_eq, vote, PEqualsNP(true)),
                 format_eq_neq_row(num_neq, vote, PEqualsNP(false)),
-            ))
+            )
         })
     } else {
         None

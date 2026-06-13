@@ -23,7 +23,7 @@ struct Ranked<T>(pub usize, pub T);
 
 impl<T> PartialOrd for Ranked<T> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.0.partial_cmp(&other.0)
+        Some(self.cmp(other))
     }
 }
 impl<T> Ord for Ranked<T> {
@@ -147,17 +147,12 @@ pub async fn leaderboard(
         .map_err(|_| ErrorInternalServerError("Error code: 31"))?
         .filter_map(Result::ok)
         .into_group_map::<(ProblemId, InputId), Ranked<Submission>>();
-    let problem_input_iter = state
-        .static_data
-        .problems
-        .iter()
-        .map(|problem| {
-            problem
-                .inputs
-                .iter()
-                .map(|input| (problem.id.clone(), input.id.clone(), input.filename.clone()))
-        })
-        .flatten();
+    let problem_input_iter = state.static_data.problems.iter().flat_map(|problem| {
+        problem
+            .inputs
+            .iter()
+            .map(|input| (problem.id, input.id.clone(), input.filename.clone()))
+    });
     let problems = state
         .static_data
         .problems
@@ -197,7 +192,7 @@ pub async fn leaderboard(
                 })
                 .collect();
             Problem {
-                id: problem.id.clone(),
+                id: problem.id,
                 name: problem.name.clone(),
                 overall_ranking,
                 inputs,

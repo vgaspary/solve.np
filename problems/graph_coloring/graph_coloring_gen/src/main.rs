@@ -42,7 +42,7 @@ fn main() {
     let target_extra_edges = (extra_edges.len() as f64 * graph_density) as usize;
     extra_edges.shuffle(&mut rng);
     extra_edges.truncate(target_extra_edges);
-    extra_edges.extend(base_edges.into_iter());
+    extra_edges.extend(base_edges);
     let mut edges = extra_edges;
     edges.shuffle(&mut rng);
 

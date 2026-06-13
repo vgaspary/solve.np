@@ -90,7 +90,7 @@ pub async fn solutions(
             None => true,
         })
         .map(|problem| Problem {
-            id: problem.id.clone(),
+            id: problem.id,
             name: problem.name.clone(),
             solution_table: SolutionTable {
                 solutions: solutions
@@ -104,7 +104,7 @@ pub async fn solutions(
                     })
                     .cloned()
                     .collect(),
-                problem_id: problem.id.clone(),
+                problem_id: problem.id,
                 input_id: input_id.clone(),
             },
         })

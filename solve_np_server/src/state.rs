@@ -61,7 +61,7 @@ impl From<LazyInput> for Input {
             path,
             pre_validate_metadata,
         } = input;
-        let filename = (&path)
+        let filename = path
             .file_name()
             .expect("Path must have a filename.")
             .to_owned()
@@ -69,7 +69,7 @@ impl From<LazyInput> for Input {
             .expect("Failed to convert OsString to String.");
         let preview = BufReader::new(File::open(&path).expect("Input file presence"))
             .lines()
-            .filter_map(Result::ok)
+            .map_while(Result::ok)
             .take(20)
             .join("\n");
         Self {

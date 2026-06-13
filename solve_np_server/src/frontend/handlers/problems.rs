@@ -35,7 +35,7 @@ pub async fn problems(
         .problems
         .iter()
         .map(|problem| Problem {
-            id: problem.id.clone(),
+            id: problem.id,
             name: problem.name.clone(),
             description: problem.description.clone(),
         })

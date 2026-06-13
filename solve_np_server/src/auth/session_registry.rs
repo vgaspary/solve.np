@@ -65,7 +65,7 @@ impl SessionRegistry {
             .unwrap()
             .iter()
             .filter(|(_, (_, exp))| *exp > now)
-            .map(|(k, v)| (k.clone(), v.clone()))
+            .map(|(k, v)| (*k, v.clone()))
             .collect()
     }
 }

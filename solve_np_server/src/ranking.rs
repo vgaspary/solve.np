@@ -45,7 +45,7 @@ fn rank_submissions(submissions: Vec<Submission>) -> Vec<(Rank, Submission)> {
         .into_iter()
         .into_group_map_by(|submission| (submission.problem_id, submission.input_id.clone()))
         .into_values()
-        .map(|submissions| {
+        .flat_map(|submissions| {
             submissions
                 .into_iter()
                 .rank_by(|submission| match submission.problem_id {
@@ -58,7 +58,6 @@ fn rank_submissions(submissions: Vec<Submission>) -> Vec<(Rank, Submission)> {
                     ProblemId::Knapsack => submission.score.wrapping_neg(),
                 })
         })
-        .flatten()
         .collect()
 }
 
@@ -96,12 +95,11 @@ fn rank_solutions(
         })
         .into_group_map_by(|(solution, _)| solution.problem_id)
         .into_values()
-        .map(|solutions| {
+        .flat_map(|solutions| {
             solutions
                 .into_iter()
                 .rank_by(|(_, aggregate_rank)| *aggregate_rank)
         })
-        .flatten()
         .map(|(rank, (solution, _))| (rank, solution))
         .collect()
 }

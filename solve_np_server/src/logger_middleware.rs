@@ -86,14 +86,14 @@ where
             .headers()
             .get("Referer")
             .and_then(|h| h.to_str().ok())
-            .unwrap_or_else(|| "-")
+            .unwrap_or("-")
             .to_string();
 
         let user_agent = req
             .headers()
             .get("User-Agent")
             .and_then(|h| h.to_str().ok())
-            .unwrap_or_else(|| "-")
+            .unwrap_or("-")
             .to_string();
 
         Box::pin(async move {

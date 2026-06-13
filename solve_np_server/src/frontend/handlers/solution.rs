@@ -92,7 +92,7 @@ pub async fn solution(
         .map(|problem| {
             (
                 Problem {
-                    id: problem.id.clone(),
+                    id: problem.id,
                     name: problem.name.clone(),
                 },
                 problem

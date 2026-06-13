@@ -13,13 +13,13 @@ pub type Score = usize;
 
 #[derive(Deserialize)]
 pub enum SampleSolution {
-    TspSolution(Vec<usize>),
-    GraphColoringSolution(Vec<usize>),
-    VertexCoverSolution(Vec<usize>),
-    MaximumCliqueSolution(Vec<usize>),
-    MaximumCutSolution(Vec<usize>),
-    SteinerTreeSolution(Vec<(usize, usize)>),
-    KnapsackSolution(Vec<usize>),
+    Tsp(Vec<usize>),
+    GraphColoring(Vec<usize>),
+    VertexCover(Vec<usize>),
+    MaximumClique(Vec<usize>),
+    MaximumCut(Vec<usize>),
+    SteinerTree(Vec<(usize, usize)>),
+    Knapsack(Vec<usize>),
 }
 
 #[derive(Serialize)]
@@ -33,7 +33,7 @@ pub async fn validate_sample(
     state: web::Data<State>,
 ) -> Result<impl Responder, HttpError> {
     match solution.0 {
-        SampleSolution::TspSolution(path) => {
+        SampleSolution::Tsp(path) => {
             use tsp_validate::SAMPLE_GRAPH_SIZE;
             use tsp_validate::parse_sample_input;
             use tsp_validate::pre_validate;
@@ -58,7 +58,7 @@ pub async fn validate_sample(
                         .json(ValidateSampleSolutionResult::Invalid(err.to_string())))
                 })
         }
-        SampleSolution::GraphColoringSolution(coloring) => {
+        SampleSolution::GraphColoring(coloring) => {
             use graph_coloring_validate::SAMPLE_GRAPH_SIZE;
             use graph_coloring_validate::parse_sample_input;
             use graph_coloring_validate::pre_validate;
@@ -83,7 +83,7 @@ pub async fn validate_sample(
                         .json(ValidateSampleSolutionResult::Invalid(err.to_string())))
                 })
         }
-        SampleSolution::VertexCoverSolution(vertex_cover) => {
+        SampleSolution::VertexCover(vertex_cover) => {
             use vertex_cover_validate::SAMPLE_GRAPH_SIZE;
             use vertex_cover_validate::parse_sample_input;
             use vertex_cover_validate::pre_validate;
@@ -108,7 +108,7 @@ pub async fn validate_sample(
                         .json(ValidateSampleSolutionResult::Invalid(err.to_string())))
                 })
         }
-        SampleSolution::MaximumCliqueSolution(clique) => {
+        SampleSolution::MaximumClique(clique) => {
             use maximum_clique_validate::SAMPLE_GRAPH_SIZE;
             use maximum_clique_validate::parse_sample_input;
             use maximum_clique_validate::pre_validate;
@@ -133,7 +133,7 @@ pub async fn validate_sample(
                         .json(ValidateSampleSolutionResult::Invalid(err.to_string())))
                 })
         }
-        SampleSolution::MaximumCutSolution(vertices) => {
+        SampleSolution::MaximumCut(vertices) => {
             use maximum_cut_validate::SAMPLE_GRAPH_SIZE;
             use maximum_cut_validate::parse_sample_input;
             use maximum_cut_validate::pre_validate;
@@ -158,7 +158,7 @@ pub async fn validate_sample(
                         .json(ValidateSampleSolutionResult::Invalid(err.to_string())))
                 })
         }
-        SampleSolution::SteinerTreeSolution(edges) => {
+        SampleSolution::SteinerTree(edges) => {
             use steiner_tree_validate::SAMPLE_GRAPH_SIZE;
             use steiner_tree_validate::parse_sample_input;
             use steiner_tree_validate::pre_validate;
@@ -183,7 +183,7 @@ pub async fn validate_sample(
                         .json(ValidateSampleSolutionResult::Invalid(err.to_string())))
                 })
         }
-        SampleSolution::KnapsackSolution(items) => {
+        SampleSolution::Knapsack(items) => {
             use knapsack_validate::SAMPLE_NUM_ITEMS;
             use knapsack_validate::parse_sample_input;
             use knapsack_validate::pre_validate;

@@ -130,7 +130,7 @@ impl TryFrom<&Args> for State {
             .clone()
             .map(GithubAuthClientSecret);
         let mail_client = args.smtp_pass.as_ref().and_then(|smtp_pass| {
-            create_mailer(&smtp_pass)
+            create_mailer(smtp_pass)
                 .inspect_err(|err| error!("{err}"))
                 .ok()
         });

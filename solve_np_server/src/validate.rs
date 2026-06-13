@@ -9,6 +9,7 @@ use itertools::Itertools;
 use rusqlite::params;
 use serde::Deserialize;
 use serde::Serialize;
+use std::fmt;
 use std::hash::DefaultHasher;
 use std::hash::Hash;
 use std::hash::Hasher;
@@ -21,27 +22,29 @@ pub type Score = usize;
 
 #[derive(Serialize, Deserialize, Hash, Eq, PartialEq)]
 pub enum Solution {
-    TspSolution(Vec<usize>),
-    GraphColoringSolution(Vec<usize>),
-    VertexCoverSolution(Vec<usize>),
-    MaximumCliqueSolution(Vec<usize>),
-    MaximumCutSolution(Vec<usize>),
-    SteinerTreeSolution(Vec<(usize, usize)>),
-    KnapsackSolution(Vec<usize>),
+    Tsp(Vec<usize>),
+    GraphColoring(Vec<usize>),
+    VertexCover(Vec<usize>),
+    MaximumClique(Vec<usize>),
+    MaximumCut(Vec<usize>),
+    SteinerTree(Vec<(usize, usize)>),
+    Knapsack(Vec<usize>),
 }
 
-impl ToString for Solution {
-    fn to_string(&self) -> String {
+impl fmt::Display for Solution {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::TspSolution(path) => path.iter().join(" "),
-            Self::GraphColoringSolution(colors) => colors.iter().join(" "),
-            Self::VertexCoverSolution(vertices) => vertices.iter().join(" "),
-            Self::MaximumCliqueSolution(clique) => clique.iter().join(" "),
-            Self::MaximumCutSolution(vertices) => vertices.iter().join(" "),
-            Self::SteinerTreeSolution(edges) => {
+            Self::Tsp(path) => write!(f, "{}", path.iter().join(" ")),
+            Self::GraphColoring(colors) => write!(f, "{}", colors.iter().join(" ")),
+            Self::VertexCover(vertices) => write!(f, "{}", vertices.iter().join(" ")),
+            Self::MaximumClique(clique) => write!(f, "{}", clique.iter().join(" ")),
+            Self::MaximumCut(vertices) => write!(f, "{}", vertices.iter().join(" ")),
+            Self::SteinerTree(edges) => write!(
+                f,
+                "{}",
                 edges.iter().map(|(u, v)| format!("{u} {v}")).join("\n")
-            }
-            Self::KnapsackSolution(items) => items.iter().join(" "),
+            ),
+            Self::Knapsack(items) => write!(f, "{}", items.iter().join(" ")),
         }
     }
 }
@@ -114,7 +117,7 @@ pub fn validate(
                     let graph = parse_binary_input(&input_path).expect("TSP input");
                     validate(&graph, &path)
                 })
-                .map(|score| ValidateSolutionResult::Valid(score))
+                .map(ValidateSolutionResult::Valid)
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
         ProblemId::GraphColoring => {
@@ -129,7 +132,7 @@ pub fn validate(
                     let graph = parse_binary_input(input_path).expect("Graph Coloring input");
                     validate(&graph, &coloring)
                 })
-                .map(|score| ValidateSolutionResult::Valid(score))
+                .map(ValidateSolutionResult::Valid)
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
         ProblemId::VertexCover => {
@@ -144,7 +147,7 @@ pub fn validate(
                     let graph = parse_binary_input(&input_path).expect("Vertex Cover input");
                     validate(&graph, &vertex_cover)
                 })
-                .map(|score| ValidateSolutionResult::Valid(score))
+                .map(ValidateSolutionResult::Valid)
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
         ProblemId::MaximumClique => {
@@ -159,7 +162,7 @@ pub fn validate(
                     let graph = parse_binary_input(&input_path).expect("Maximum Clique input");
                     validate(&graph, &clique)
                 })
-                .map(|score| ValidateSolutionResult::Valid(score))
+                .map(ValidateSolutionResult::Valid)
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
         ProblemId::MaximumCut => {
@@ -174,7 +177,7 @@ pub fn validate(
                     let graph = parse_binary_input(&input_path).expect("Maximum Cut input");
                     validate(&graph, &vertices)
                 })
-                .map(|score| ValidateSolutionResult::Valid(score))
+                .map(ValidateSolutionResult::Valid)
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
         ProblemId::SteinerTree => {
@@ -189,7 +192,7 @@ pub fn validate(
                     let graph = parse_binary_input(&input_path).expect("Steiner Tree input");
                     validate(&graph, &edges)
                 })
-                .map(|score| ValidateSolutionResult::Valid(score))
+                .map(ValidateSolutionResult::Valid)
                 .unwrap_or_else(|err| ValidateSolutionResult::Invalid(err.to_string()))
         }
         ProblemId::Knapsack => {

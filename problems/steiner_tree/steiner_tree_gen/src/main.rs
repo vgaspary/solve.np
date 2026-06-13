@@ -88,7 +88,7 @@ fn main() {
         .map(|t| t.to_string())
         .collect::<Vec<_>>();
     writeln!(&mut input_file, "{}", terminals.join(" ")).unwrap();
-    writeln!(&mut input_file, "").unwrap();
+    writeln!(&mut input_file).unwrap();
     let mst_edges = Graph::minimum_spanning_tree(num_vertices, &mut rng)
         .edges()
         .collect::<HashSet<_>>();
@@ -101,7 +101,7 @@ fn main() {
     extra_edges.truncate(target_extra_edges);
     let mut edges: Vec<_> = mst_edges
         .into_iter()
-        .chain(extra_edges.into_iter())
+        .chain(extra_edges)
         .map(|(u, v)| {
             let w = random_weight(&weight_dist, &mut rng);
             (u, v, w)

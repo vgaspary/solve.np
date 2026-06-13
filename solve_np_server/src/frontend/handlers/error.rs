@@ -37,7 +37,7 @@ pub fn handle_internal_error<B>(
     let body = ErrorTemplate {
         head,
         header,
-        report_link: report_link,
+        report_link,
     }
     .render()
     .unwrap();
