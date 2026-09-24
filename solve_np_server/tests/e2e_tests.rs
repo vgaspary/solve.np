@@ -174,6 +174,7 @@ async fn spawn_app(extra_args: &[&str]) -> TestApp {
 
     let mut command = Command::new(&server_binary_path);
     command
+        .env("RUST_LOG", "debug")
         .arg("--db-path")
         .arg(&db_path)
         .arg("--key")
@@ -433,48 +434,42 @@ async fn validate_sample_works() {
         (
             "travelling_salesman",
             (
-                json!({ "TspSolution": [0, 1, 4, 2, 6, 5, 3, 7, 0] }),
+                json!({"Tsp": [0, 1, 4, 2, 6, 5, 3, 7, 0] }),
                 json!({"Valid": 69}),
             ),
         ),
         (
             "graph_coloring",
             (
-                json!({"GraphColoringSolution": [0, 1, 2, 3, 4, 5, 6, 7]}),
+                json!({"GraphColoring": [0, 1, 2, 3, 4, 5, 6, 7]}),
                 json!({"Valid": 8}),
             ),
         ),
         (
             "vertex_cover",
             (
-                json!({"VertexCoverSolution": [0, 1, 2, 3, 4, 5, 6, 7]}),
+                json!({"VertexCover": [0, 1, 2, 3, 4, 5, 6, 7]}),
                 json!({"Valid": 8}),
             ),
         ),
         (
             "maximum_clique",
-            (
-                json!({"MaximumCliqueSolution": [0, 2, 5]}),
-                json!({"Valid": 3}),
-            ),
+            (json!({"MaximumClique": [0, 2, 5]}), json!({"Valid": 3})),
         ),
         (
             "maximum_cut",
-            (
-                json!({"MaximumCutSolution": [0, 2, 5]}),
-                json!({"Valid": 47}),
-            ),
+            (json!({"MaximumCut": [0, 2, 5]}), json!({"Valid": 47})),
         ),
         (
             "steiner_tree",
             (
-                json!({"SteinerTreeSolution": [(0, 1), (1, 5), (5, 7), (6, 7)]}),
+                json!({"SteinerTree": [(0, 1), (1, 5), (5, 7), (6, 7)]}),
                 json!({"Valid": 12}),
             ),
         ),
         (
             "knapsack",
-            (json!({"KnapsackSolution": [0, 1, 2]}), json!({"Valid": 28})),
+            (json!({"Knapsack": [0, 1, 2]}), json!({"Valid": 28})),
         ),
     ]);
     let client = test.client.clone();
@@ -648,7 +643,7 @@ async fn all_solutions_api_work() {
     let solution = {
         let mut path: Vec<usize> = (0..input.pre_validate_metadata).collect();
         path.push(0);
-        json!({"TspSolution": path})
+        json!({"Tsp": path})
     };
     solutions_api_works_for_problem(problem.id, input.id, solution).await;
 }

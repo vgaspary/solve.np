@@ -1,11 +1,11 @@
 type SampleSolution =
-  { TspSolution: number[] }
-  | { GraphColoringSolution: number[] }
-  | { VertexCoverSolution: number[] }
-  | { MaximumCliqueSolution: number[] }
-  | { MaximumCutSolution: number[] }
-  | { SteinerTreeSolution: [number, number][] }
-  | { KnapsackSolution: number[] }
+  { Tsp: number[] }
+  | { GraphColoring: number[] }
+  | { VertexCover: number[] }
+  | { MaximumClique: number[] }
+  | { MaximumCut: number[] }
+  | { SteinerTree: [number, number][] }
+  | { Knapsack: number[] }
   ;
 
 function parseNumberList(input: string): number[] {
@@ -23,18 +23,18 @@ function parseNumberList(input: string): number[] {
 export function parse_solution(problem_id: string, input: string): SampleSolution | null {
   switch (problem_id) {
     case 'travelling_salesman':
-      return { TspSolution: parseNumberList(input) };
+      return { Tsp: parseNumberList(input) };
     case 'graph_coloring':
-      return { GraphColoringSolution: parseNumberList(input) };
+      return { GraphColoring: parseNumberList(input) };
     case 'vertex_cover':
-      return { VertexCoverSolution: parseNumberList(input) };
+      return { VertexCover: parseNumberList(input) };
     case 'maximum_clique':
-      return { MaximumCliqueSolution: parseNumberList(input) };
+      return { MaximumClique: parseNumberList(input) };
     case 'maximum_cut':
-      return { MaximumCutSolution: parseNumberList(input) };
+      return { MaximumCut: parseNumberList(input) };
     case 'steiner_tree':
       return {
-        SteinerTreeSolution: input.trim().split('\n').map(line => {
+        SteinerTree: input.trim().split('\n').map(line => {
           const vertices = parseNumberList(line);
           if (vertices.length !== 2) {
             throw new Error("Malformed solution: Each line must contain exactly two numbers.");
@@ -43,7 +43,7 @@ export function parse_solution(problem_id: string, input: string): SampleSolutio
         })
       };
     case 'knapsack':
-      return { KnapsackSolution: parseNumberList(input) };
+      return { Knapsack: parseNumberList(input) };
     default:
       return null;
   }
